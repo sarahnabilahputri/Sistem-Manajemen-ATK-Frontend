@@ -1,0 +1,74 @@
+/* src/components/Log.module.css */
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+/* Wrapper utama */
+.wrapper-login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh; /* Agar tetap di tengah vertikal */
+  width: 100%;
+}
+
+/* Judul */
+.page-title {
+  color: #214C5E;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+/* Logo */
+.logo-login {
+  width: 300px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  margin-bottom: 1.5rem;
+}
+
+/* Container utama */
+.login-container {
+  margin: 0 auto;
+  max-width: 500px;
+  padding: 2rem 1.5rem;
+  border-radius: 0.5rem;
+  background: #fff;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Style tombol login */
+.social-login {
+  display: flex;
+  justify-content: center;
+}
+
+.social-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.81rem;
+  width: 400px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.75rem 0;
+  border-radius: 0.31rem;
+  background: #F1FAFF;
+  border: 1px solid #F1FAFF;
+  transition: 0.3s ease;
+  color: #109CF1;
+}
+
+.social-button:hover {
+  background: #109CF1;
+  color: #000;
+}
+
+.social-icon {
+  width: 23px;
+}
