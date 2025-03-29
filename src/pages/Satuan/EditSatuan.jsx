@@ -3,20 +3,20 @@ import { Typography, Box, Grid, TextField, Button } from "@mui/material";
 import Swal from "sweetalert2";
 import axios from "axios";
 
-export default function EditKategori({ fid, CloseEvent, onSuccess }) {
-    const [Kategori, setKategori] = useState("");
+export default function EditSatuan({ fid, CloseEvent, onSuccess }) {
+    const [Unit, setUnit] = useState("");
 
     useEffect(() => {
         if (fid && fid.id) {
-            setKategori(fid.Kategori); 
-            fetchKategoriById(fid.id); 
+            setUnit(fid.Unit); 
+            fetchUnitById(fid.id); 
         }
     }, [fid]);
 
-    const fetchKategoriById = async (id) => {
+    const fetchUnitById = async (id) => {
         try {
             const response = await axios.get(
-                `https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/categories/${id}`,
+                `https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/units/${id}`,
                 {
                     headers: {
                         "ngrok-skip-browser-warning": "true",
@@ -25,25 +25,25 @@ export default function EditKategori({ fid, CloseEvent, onSuccess }) {
                 }
             );
     
-            const kategoriData = response.data.data;  
-            setKategori(kategoriData.name);  
+            const unitData = response.data.data;  
+            setUnit(unitData.name);  
         } catch (error) {
-            console.error("Error fetching category:", error);
-            Swal.fire("Error!", "Gagal mengambil data kategori.", "error");
+            console.error("Error fetching unit:", error);
+            Swal.fire("Error!", "Gagal mengambil data satuan.", "error");
         }
     };
     
-    const updateKategori = async () => {
-        if (!Kategori.trim()) {
+    const updateUnit = async () => {
+        if (!Unit.trim()) {
             CloseEvent(); 
-            Swal.fire("Error!", "Kategori tidak boleh kosong.", "error");
+            Swal.fire("Error!", "Unit tidak boleh kosong.", "error");
             return;
         }
     
         try {
             const response = await axios.put(
-                `https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/categories/${fid.id}`, 
-                { name: Kategori },
+                `https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/units/${fid.id}`, 
+                { name: Unit },
                 {
                     headers: {
                         "Content-Type": "application/json",
@@ -57,38 +57,38 @@ export default function EditKategori({ fid, CloseEvent, onSuccess }) {
                 if (onSuccess) { 
                     onSuccess();
                 }
-                Swal.fire("Berhasil!", "Kategori telah diperbarui.", "success");
+                Swal.fire("Berhasil!", "Satuan telah diperbarui.", "success");
             }
         } catch (error) {
             CloseEvent(); 
-            console.error("Error updating category:", error);
-            Swal.fire("Error!", "Gagal memperbarui kategori.", "error");
+            console.error("Error updating unit:", error);
+            Swal.fire("Error!", "Gagal memperbarui satuan.", "error");
         }
     };    
 
     return (
         <>
             <Box sx={{ width: "100%", textAlign: "center" }}> 
-                <Typography variant="h6">Form Edit Kategori</Typography>
+                <Typography variant="h6">Form Edit Satuan</Typography>
             </Box>
             <Box height={20} />
             <Grid container spacing={2}>
                 <Grid item xs={12}>
                     <Typography variant="body1" sx={{ mb: 1 }}>
-                        Kategori
+                        Satuan
                     </Typography>
                     <TextField 
                         variant="outlined" 
                         size="small" 
-                        onChange={(e) => setKategori(e.target.value)} 
-                        value={Kategori} 
+                        onChange={(e) => setUnit(e.target.value)} 
+                        value={Unit} 
                         sx={{ minWidth: "100%" }} 
                         InputLabelProps={{ shrink: false }} 
                     />
                 </Grid>
                 <Grid item xs={12} sx={{ mt: 1 }}>
                     <Typography variant="h5" align="center">
-                        <Button variant="contained" onClick={updateKategori}>
+                        <Button variant="contained" onClick={updateUnit}>
                             Simpan
                         </Button>
                         <Button 

@@ -104,11 +104,24 @@ export default function Sidenav() {
                   <Box
                     component="img"
                     src="/Icon/blogs.png" // Sesuaikan dengan path gambar
-                    alt="dashboard"
+                    alt="kategori"
                     sx={{ width: 20, height: 20 }} // Sesuaikan ukuran ikon
                   />  
                   </ListItemIcon>
                   <ListItemText primary="Master Data Kategori" sx={{ "& .MuiTypography-root": { fontSize: "0.875rem", fontWeight: "semibold" } }} />
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding onClick={()=>{navigate("/satuan")}}>
+                <ListItemButton>
+                  <ListItemIcon>
+                  <Box
+                    component="img"
+                    src="/Icon/letter.png" // Sesuaikan dengan path gambar
+                    alt="satuan"
+                    sx={{ width: 20, height: 20 }} // Sesuaikan ukuran ikon
+                  />  
+                  </ListItemIcon>
+                  <ListItemText primary="Kelola Data Satuan" sx={{ "& .MuiTypography-root": { fontSize: "0.875rem", fontWeight: "semibold" } }} />
                 </ListItemButton>
               </ListItem>
               <ListItem disablePadding onClick={()=>{navigate("/pesan")}}>

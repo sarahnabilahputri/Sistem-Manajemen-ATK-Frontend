@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Typography, Box, Grid, TextField, Button, MenuItem } from "@mui/material";
 import Swal from "sweetalert2";
 import axios from "axios";
+import InputAdornment from "@mui/material/InputAdornment";
 
 export default function EditProduct({ fid, CloseEvent, onSuccess }) {
     const [product, setProduct] = useState({
@@ -10,7 +11,8 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
         price: "",
         unit: "",
         category_id: "",
-        image: null, // Tambahkan state untuk gambar
+        image: null, 
+        imageName: "No File Choosen",
     });
 
     const [categories, setCategories] = useState([]);
@@ -19,6 +21,8 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
     const [imagePreview, setImagePreview] = useState(null);
 
     useEffect(() => {
+        console.log("fid yang diterima:", fid);
+
         if (fid && fid.id) {
             fetchProductById(fid.id);
         }
@@ -27,34 +31,42 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
     const fetchProductById = async (id) => {
         try {
             const response = await axios.get(
-                `https://c47e-125-165-104-99.ngrok-free.app/api/products/${id}`,
+                `https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/products/${id}`,
                 { headers: { "ngrok-skip-browser-warning": "true", "Accept": "application/json" } }
             );
-
+    
             const data = response.data.data;
+            console.log("Data produk:", data);
+    
+            let fullImageUrl = null;
+            if (data.image) {
+                fullImageUrl = `https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/storage/${data.image}`;
+            }
+    
             setProduct({
                 name: data.name,
                 stock: data.stock.toString(),
                 price: data.price.toString(),
                 unit: data.unit_id,
                 category_id: data.category_id,
-                image: null, // Tidak langsung menampilkan file, hanya preview
+                image: null, // Untuk upload baru
+                imageName: data.image || "No File Choosen", // ✅ Menampilkan nama file gambar
             });
-
-            // Set preview jika ada gambar sebelumnya
-            if (data.image_url) {
-                setImagePreview(data.image_url);
-            }
+                      
+    
+            setImagePreview(fullImageUrl);
+            console.log("✅ Image Preview URL:", fullImageUrl);
+    
         } catch (error) {
-            console.error("Error fetching product:", error);
+            console.error("❌ Error fetching product:", error);
             Swal.fire("Error!", "Gagal mengambil data produk.", "error");
         }
-    };
-
+    };    
+    
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await axios.get("https://c47e-125-165-104-99.ngrok-free.app/api/categories", {
+                const response = await axios.get("https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/categories", {
                     headers: { "ngrok-skip-browser-warning": "true", "Accept": "application/json" },
                 });
                 setCategories(response.data?.data?.data || []);
@@ -65,7 +77,7 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
 
         const fetchUnits = async () => {
             try {
-                const response = await axios.get("https://c47e-125-165-104-99.ngrok-free.app/api/units", {
+                const response = await axios.get("https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/units", {
                     headers: { "ngrok-skip-browser-warning": "true", "Accept": "application/json" },
                 });
                 setUnits(response.data?.data?.data || []);
@@ -90,41 +102,63 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
     const handleImageChange = (event) => {
         const file = event.target.files[0];
         if (file) {
-            setProduct({ ...product, image: file });
+            setProduct({
+                ...product,
+                image: file,
+                imageName: file.name, // ✅ Perbarui nama file yang ditampilkan di TextField
+            });
             setImagePreview(URL.createObjectURL(file)); // Menampilkan preview gambar
         }
     };
+    
 
     const updateProduct = async () => {
         if (!product.name.trim() || !product.stock.trim() || !product.price.trim() || !product.category_id.trim() || !product.unit.trim()) {
             Swal.fire("Error!", "Semua kolom harus diisi.", "error");
             return;
         }
-
+    
         try {
             const formData = new FormData();
             formData.append("name", product.name);
             formData.append("stock", product.stock);
             formData.append("price", product.price);
-            formData.append("unit", product.unit);
+            formData.append("unit_id", product.unit); // Pastikan ini adalah ID unit yang benar
             formData.append("category_id", product.category_id);
+            
             if (product.image) {
                 formData.append("image", product.image);
             }
-
-            const response = await axios.post(
-                `https://c47e-125-165-104-99.ngrok-free.app/api/products/${fid.id}?_method=PUT`,
+    
+            console.log("Data yang akan dikirim:", {
+                name: product.name,
+                stock: product.stock,
+                price: product.price,
+                unit_id: product.unit,
+                category_id: product.category_id,
+                image: product.image,
+            });
+    
+            const response = await axios.put(
+                `https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/products/${fid.id}`,
                 formData,
                 { headers: { "Content-Type": "multipart/form-data", "ngrok-skip-browser-warning": "true" } }
             );
-
+    
+            console.log("📥 Server response:", response.data);
+            
             if (response.status === 200) {
-                if (onSuccess) onSuccess();
-                Swal.fire("Berhasil!", "Produk telah diperbarui.", "success");
-                CloseEvent();
+                Swal.fire("Berhasil!", "Produk telah diperbarui.", "success").then(() => {
+                    window.location.reload();
+                    CloseEvent();
+                });
             }
+            
         } catch (error) {
             console.error("Error updating product:", error);
+            if (error.response) {
+                console.error("Server responded with:", error.response.data);
+            }
             Swal.fire("Error!", "Gagal memperbarui produk.", "error");
         }
     };
@@ -171,16 +205,45 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
                         </TextField>
                     </Grid>
 
-                    {/* Field Upload Gambar */}
                     <Grid item xs={12}>
                         <Typography variant="body1" sx={{ mb: 1 }}>Gambar Produk</Typography>
-                        <input type="file" accept="image/*" onChange={handleImageChange} />
-                        {imagePreview && (
-                            <Box sx={{ mt: 2, textAlign: "center" }}>
-                                <img src={imagePreview} alt="Preview" style={{ maxWidth: "100%", height: "150px", objectFit: "cover", borderRadius: "8px" }} />
-                            </Box>
-                        )}
+                        <TextField
+                            variant="outlined"
+                            size="small"
+                            value={product.imageName || ""} // ✅ Menampilkan nama file gambar
+                            placeholder="No File Choosen"
+                            sx={{ 
+                                width: "100%",
+                                "& .MuiOutlinedInput-root": {
+                                    display: "flex",
+                                    alignItems: "center",
+                                    paddingLeft: 0,
+                                }, 
+                            }}
+                            InputProps={{
+                                readOnly: true,
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <Button variant="contained" component="label"  
+                                            sx={{
+                                                bgcolor: "#E4E6EF",
+                                                color: "black",
+                                                borderRadius: "4px 0 0 4px",
+                                                height: "38px",
+                                                boxShadow: "none",
+                                                textTransform: "none", 
+                                                "&:hover": { bgcolor: "#d1d3db" }
+                                            }}>
+                                            Choose File
+                                            <input type="file" hidden accept="image/*" onChange={handleImageChange} />
+                                        </Button>
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
                     </Grid>
+
+
                 </Grid>
             </Box>
 

@@ -3,24 +3,24 @@ import { Typography, Box, Grid, TextField, Button } from "@mui/material";
 import Swal from "sweetalert2";
 import axios from "axios";
 
-export default function AddKategori({ CloseEvent, onSuccess }) {
-    const [Kategori, setKategori] = useState("");
+export default function AddSatuan({ CloseEvent, onSuccess }) {
+    const [Unit, setUnit] = useState("");
 
-    const handleKategoriChange = (event) => {
-        setKategori(event.target.value);
+    const handleUnitChange = (event) => {
+        setUnit(event.target.value);
     };
 
     const createUser = async () => {
-        if (!Kategori.trim()) {
+        if (!Unit.trim()) {
             CloseEvent(); 
-            Swal.fire("Error!", "Kategori tidak boleh kosong.", "error");
+            Swal.fire("Error!", "Satuan tidak boleh kosong.", "error");
             return;
         }
 
         try {
             const response = await axios.post(
-                "https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/categories",
-                { name: Kategori }, 
+                "https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/units",
+                { name: Unit }, 
                 {
                     headers: {
                         "Content-Type": "application/json",
@@ -34,31 +34,31 @@ export default function AddKategori({ CloseEvent, onSuccess }) {
                 if (onSuccess) { 
                     onSuccess();
                 }
-                Swal.fire("Berhasil!", "Kategori telah ditambahkan.", "success");
+                Swal.fire("Berhasil!", "Satuan telah ditambahkan.", "success");
             }
         } catch (error) {
             CloseEvent(); 
-            console.error("Error adding category:", error);
-            Swal.fire("Error!", "Gagal menambahkan kategori.", "error");
+            console.error("Error adding unit:", error);
+            Swal.fire("Error!", "Gagal menambahkan satuan.", "error");
         }
     };
 
     return (
         <>
             <Box sx={{ width: "100%", textAlign: "center" }}> 
-                <Typography variant="h6">Form Tambah Kategori</Typography>
+                <Typography variant="h6">Form Tambah Satuan</Typography>
             </Box>
             <Box height={20} />
             <Grid container spacing={2}>
                 <Grid item xs={12}>
                     <Typography variant="body1" sx={{ mb: 1 }}>
-                        Kategori
+                        Satuan
                     </Typography>
                     <TextField 
                         variant="outlined" 
                         size="small" 
-                        onChange={handleKategoriChange} 
-                        value={Kategori} 
+                        onChange={handleUnitChange} 
+                        value={Unit} 
                         sx={{ minWidth: "100%" }} 
                         InputLabelProps={{ shrink: false }} 
                     />

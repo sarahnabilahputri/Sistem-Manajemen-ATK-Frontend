@@ -53,7 +53,7 @@ export default function KategoriList() {
   const handleEditClose = () => setEditOpen(false);
 
   const fetchCategories = () => {
-    axios.get('https://c47e-125-165-104-99.ngrok-free.app/api/categories', {
+    axios.get('https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/categories', {
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json'
@@ -97,7 +97,7 @@ export default function KategoriList() {
 
   const deleteApi = async (id) => {
     try {
-      await axios.delete(`https://c47e-125-165-104-99.ngrok-free.app/api/categories/${id}`);
+      await axios.delete(`https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/categories/${id}`);
       Swal.fire("Deleted!", "Your category has been deleted.", "success");
       setRows(rows.filter((row) => row.id !== id));
     } catch (error) {

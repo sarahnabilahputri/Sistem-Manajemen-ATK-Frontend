@@ -21,7 +21,7 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await axios.get("https://c47e-125-165-104-99.ngrok-free.app/api/categories", {
+                const response = await axios.get("https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/categories", {
                     headers: { "ngrok-skip-browser-warning": "true", "Accept": "application/json" },
                 });
 
@@ -44,7 +44,7 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
     useEffect(() => {
         const fetchUnits = async () => {
             try {
-                const response = await axios.get("https://c47e-125-165-104-99.ngrok-free.app/api/units", {
+                const response = await axios.get("https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/units", {
                     headers: { "ngrok-skip-browser-warning": "true", "Accept": "application/json" },
                 });
     
@@ -90,7 +90,7 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
 
         try {
             const response = await axios.post(
-                "https://c47e-125-165-104-99.ngrok-free.app/api/products",
+                "https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/products",
                 formData,
                 { headers: { "Content-Type": "multipart/form-data", "ngrok-skip-browser-warning": "true" } }
             );
