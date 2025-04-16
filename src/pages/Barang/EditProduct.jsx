@@ -9,10 +9,10 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
         name: "",
         stock: "",
         price: "",
-        unit: "",
+        unit_id: "",
         category_id: "",
-        image: null, 
-        imageName: "No File Choosen",
+        image: null,
+        imageName: "No File Chosen",
     });
 
     const [categories, setCategories] = useState([]);
@@ -20,53 +20,39 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
     const [loading, setLoading] = useState(true);
     const [imagePreview, setImagePreview] = useState(null);
 
-    useEffect(() => {
-        console.log("fid yang diterima:", fid);
-
-        if (fid && fid.id) {
-            fetchProductById(fid.id);
-        }
-    }, [fid]);
-
     const fetchProductById = async (id) => {
         try {
             const response = await axios.get(
-                `https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/products/${id}`,
+                `https://f389-125-165-106-98.ngrok-free.app/api/products/${id}`,
                 { headers: { "ngrok-skip-browser-warning": "true", "Accept": "application/json" } }
             );
-    
+
             const data = response.data.data;
-            console.log("Data produk:", data);
-    
-            let fullImageUrl = null;
-            if (data.image) {
-                fullImageUrl = `https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/storage/${data.image}`;
-            }
-    
+            let fullImageUrl = data.image
+                ? `https://f389-125-165-106-98.ngrok-free.app/storage/${data.image}`
+                : null;
+
             setProduct({
                 name: data.name,
                 stock: data.stock.toString(),
                 price: data.price.toString(),
-                unit: data.unit_id,
+                unit_id: data.unit_id,
                 category_id: data.category_id,
-                image: null, // Untuk upload baru
-                imageName: data.image || "No File Choosen", // ✅ Menampilkan nama file gambar
+                image: null,
+                imageName: data.image ? data.image.split("/").pop() : "No File Chosen",
             });
-                      
-    
+
             setImagePreview(fullImageUrl);
-            console.log("✅ Image Preview URL:", fullImageUrl);
-    
         } catch (error) {
             console.error("❌ Error fetching product:", error);
             Swal.fire("Error!", "Gagal mengambil data produk.", "error");
         }
-    };    
-    
+    };
+
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await axios.get("https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/categories", {
+                const response = await axios.get("https://f389-125-165-106-98.ngrok-free.app/api/categories", {
                     headers: { "ngrok-skip-browser-warning": "true", "Accept": "application/json" },
                 });
                 setCategories(response.data?.data?.data || []);
@@ -77,7 +63,7 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
 
         const fetchUnits = async () => {
             try {
-                const response = await axios.get("https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/units", {
+                const response = await axios.get("https://f389-125-165-106-98.ngrok-free.app/api/units", {
                     headers: { "ngrok-skip-browser-warning": "true", "Accept": "application/json" },
                 });
                 setUnits(response.data?.data?.data || []);
@@ -90,13 +76,14 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
     }, []);
 
     useEffect(() => {
-        if (!loading && fid && fid.id) {
+        if (!loading && fid?.id) {
             fetchProductById(fid.id);
         }
-    }, [loading]);
+    }, [fid, loading]);
 
     const handleChange = (event) => {
-        setProduct({ ...product, [event.target.name]: event.target.value });
+        const { name, value } = event.target;
+        setProduct({ ...product, [name]: value });
     };
 
     const handleImageChange = (event) => {
@@ -105,152 +92,147 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
             setProduct({
                 ...product,
                 image: file,
-                imageName: file.name, // ✅ Perbarui nama file yang ditampilkan di TextField
+                imageName: file.name,
             });
-            setImagePreview(URL.createObjectURL(file)); // Menampilkan preview gambar
+            setImagePreview(URL.createObjectURL(file));
         }
     };
-    
 
     const updateProduct = async () => {
-        if (!product.name.trim() || !product.stock.trim() || !product.price.trim() || !product.category_id.trim() || !product.unit.trim()) {
+        const { name, stock, price, unit_id, category_id, image } = product;
+    
+        if (!name || !stock || !price || !unit_id || !category_id) {
             Swal.fire("Error!", "Semua kolom harus diisi.", "error");
             return;
         }
     
+        if (parseInt(stock) < 0 || parseFloat(price) < 0) {
+            Swal.fire("Error!", "Stock dan harga harus lebih besar dari 0.", "error");
+            return;
+        }
+    
+        console.log("product sebelum submit:", product);
+        console.log("Update ID:", fid?.id);
+    
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("stock", parseInt(stock));
+        formData.append("price", parseFloat(price));
+        formData.append("unit_id", unit_id);
+        formData.append("category_id", category_id);
+        
+        // Tambahkan hanya jika ada file yang diunggah
+        if (image) {
+            formData.append("image", image);
+        }
+    
+        // Debug: Cek isi FormData
+        for (let pair of formData.entries()) {
+            console.log(`${pair[0]}:`, pair[1]);
+        }
+    
         try {
-            const formData = new FormData();
-            formData.append("name", product.name);
-            formData.append("stock", product.stock);
-            formData.append("price", product.price);
-            formData.append("unit_id", product.unit); // Pastikan ini adalah ID unit yang benar
-            formData.append("category_id", product.category_id);
-            
-            if (product.image) {
-                formData.append("image", product.image);
-            }
-    
-            console.log("Data yang akan dikirim:", {
-                name: product.name,
-                stock: product.stock,
-                price: product.price,
-                unit_id: product.unit,
-                category_id: product.category_id,
-                image: product.image,
-            });
-    
-            const response = await axios.put(
-                `https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/products/${fid.id}`,
+            const response = await axios.patch(
+                `https://f389-125-165-106-98.ngrok-free.app/api/products/${fid.id}`, // Pastikan fid.id valid
                 formData,
-                { headers: { "Content-Type": "multipart/form-data", "ngrok-skip-browser-warning": "true" } }
+                {
+                    headers: {
+                        "ngrok-skip-browser-warning": "true",
+                        "Accept": "application/json"
+                        // Content-Type tidak perlu diset jika menggunakan FormData
+                    }
+                }
             );
     
-            console.log("📥 Server response:", response.data);
-            
             if (response.status === 200) {
                 Swal.fire("Berhasil!", "Produk telah diperbarui.", "success").then(() => {
-                    window.location.reload();
+                    onSuccess();
                     CloseEvent();
                 });
             }
-            
         } catch (error) {
-            console.error("Error updating product:", error);
-            if (error.response) {
-                console.error("Server responded with:", error.response.data);
-            }
-            Swal.fire("Error!", "Gagal memperbarui produk.", "error");
+            console.error("❌ Error updating product:", error);
+            Swal.fire("Error!", error?.response?.data?.message || "Gagal memperbarui produk.", "error");
         }
-    };
+    };       
 
     return (
         <Box sx={{ width: "100%", display: "flex", flexDirection: "column" }}>
-            <Box sx={{ width: "100%", textAlign: "center", pb: 2 }}>
-                <Typography variant="h6">Form Edit Produk</Typography>
-            </Box>
+            <Typography variant="h6" align="center" pb={2}>Form Edit Produk</Typography>
 
-            {/* Scrollable Form Container */}
             <Box sx={{ maxHeight: "50vh", overflowY: "auto", p: 2 }}>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
-                        <Typography variant="body1" sx={{ mb: 1 }}>Nama Produk</Typography>
-                        <TextField variant="outlined" size="small" name="name" onChange={handleChange} value={product.name} sx={{ minWidth: "100%" }} />
+                        <Typography>Nama Produk</Typography>
+                        <TextField fullWidth size="small" name="name" value={product.name} onChange={handleChange} />
                     </Grid>
 
                     <Grid item xs={12}>
-                        <Typography variant="body1" sx={{ mb: 1 }}>Kategori</Typography>
-                        <TextField select variant="outlined" size="small" name="category_id" onChange={handleChange} 
-                            value={categories.some(cat => cat.id === product.category_id) ? product.category_id : ""}
-                            sx={{ minWidth: "100%" }}>
-                            {categories.map((cat) => <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>)}
+                        <Typography>Kategori</Typography>
+                        <TextField select fullWidth size="small" name="category_id" value={product.category_id} onChange={handleChange}>
+                            {categories.map((cat) => (
+                                <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>
+                            ))}
                         </TextField>
                     </Grid>
 
                     <Grid item xs={12}>
-                        <Typography variant="body1" sx={{ mb: 1 }}>Stock</Typography>
-                        <TextField type="number" variant="outlined" size="small" name="stock" onChange={handleChange} value={product.stock} sx={{ minWidth: "100%" }} />
+                        <Typography>Stock</Typography>
+                        <TextField fullWidth size="small" type="number" name="stock" value={product.stock} onChange={handleChange} />
                     </Grid>
 
                     <Grid item xs={12}>
-                        <Typography variant="body1" sx={{ mb: 1 }}>Harga</Typography>
-                        <TextField type="number" variant="outlined" size="small" name="price" onChange={handleChange} value={product.price} sx={{ minWidth: "100%" }} />
+                        <Typography>Harga</Typography>
+                        <TextField fullWidth size="small" type="number" name="price" value={product.price} onChange={handleChange} />
                     </Grid>
 
                     <Grid item xs={12}>
-                        <Typography variant="body1" sx={{ mb: 1 }}>Unit</Typography>
-                        <TextField select variant="outlined" size="small" name="unit" onChange={handleChange} 
-                            value={units.some(unit => unit.id === product.unit) ? product.unit : ""}
-                            sx={{ minWidth: "100%" }}>
-                            {units.map((unit) => <MenuItem key={unit.id} value={unit.id}>{unit.name}</MenuItem>)}
+                        <Typography>Unit</Typography>
+                        <TextField select fullWidth size="small" name="unit_id" value={product.unit_id} onChange={handleChange}>
+                            {units.map((unit) => (
+                                <MenuItem key={unit.id} value={unit.id}>{unit.name}</MenuItem>
+                            ))}
                         </TextField>
                     </Grid>
 
                     <Grid item xs={12}>
-                        <Typography variant="body1" sx={{ mb: 1 }}>Gambar Produk</Typography>
+                        <Typography>Gambar Produk</Typography>
                         <TextField
-                            variant="outlined"
+                            fullWidth
                             size="small"
-                            value={product.imageName || ""} // ✅ Menampilkan nama file gambar
-                            placeholder="No File Choosen"
-                            sx={{ 
-                                width: "100%",
-                                "& .MuiOutlinedInput-root": {
-                                    display: "flex",
-                                    alignItems: "center",
-                                    paddingLeft: 0,
-                                }, 
-                            }}
+                            value={product.imageName}
+                            placeholder="No File Chosen"
                             InputProps={{
                                 readOnly: true,
                                 startAdornment: (
                                     <InputAdornment position="start">
-                                        <Button variant="contained" component="label"  
+                                        <Button
+                                            variant="contained"
+                                            component="label"
                                             sx={{
                                                 bgcolor: "#E4E6EF",
                                                 color: "black",
                                                 borderRadius: "4px 0 0 4px",
                                                 height: "38px",
                                                 boxShadow: "none",
-                                                textTransform: "none", 
+                                                textTransform: "none",
                                                 "&:hover": { bgcolor: "#d1d3db" }
-                                            }}>
+                                            }}
+                                        >
                                             Choose File
                                             <input type="file" hidden accept="image/*" onChange={handleImageChange} />
                                         </Button>
                                     </InputAdornment>
-                                ),
+                                )
                             }}
                         />
                     </Grid>
-
-
                 </Grid>
             </Box>
 
-            {/* Footer Buttons */}
-            <Box sx={{ width: "100%", textAlign: "center", pt: 2 }}>
+            <Box sx={{ textAlign: "center", pt: 2 }}>
                 <Button variant="contained" onClick={updateProduct}>Simpan</Button>
-                <Button variant="contained" onClick={CloseEvent} sx={{ ml: 1, bgcolor: "#E4E6EF", color: "black", "&:hover": { bgcolor: "#d1d3db" } }}>Tutup</Button>
+                <Button variant="contained" sx={{ ml: 2, bgcolor: "#E4E6EF", color: "black", "&:hover": { bgcolor: "#d1d3db" } }} onClick={CloseEvent}>Tutup</Button>
             </Box>
         </Box>
     );

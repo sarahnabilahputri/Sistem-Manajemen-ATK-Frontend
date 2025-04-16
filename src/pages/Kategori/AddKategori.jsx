@@ -19,7 +19,7 @@ export default function AddKategori({ CloseEvent, onSuccess }) {
 
         try {
             const response = await axios.post(
-                "https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/categories",
+                "https://f389-125-165-106-98.ngrok-free.app/api/categories",
                 { name: Kategori }, 
                 {
                     headers: {

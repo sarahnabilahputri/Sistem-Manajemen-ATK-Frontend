@@ -21,15 +21,16 @@ import Swal from "sweetalert2";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import Modal from '@mui/material/Modal';
-import AddProduct from "./AddProduct";
-import EditProduct from './EditProduct';
+import AddUser from './AddUser';
+// import AddUser from "./AddUser";
+// import EditUser from "./EditUser";
 
 const style = {
   position: 'absolute',
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 400,
+  width: 500,
   bgcolor: 'background.paper',
   borderRadius: "12px",
   boxShadow: 24,
@@ -37,7 +38,7 @@ const style = {
   p: 4,
 };
 
-export default function ProductList() {
+export default function UserList() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [rows, setRows] = useState([]);
@@ -52,37 +53,38 @@ export default function ProductList() {
   const handleClose = () => setOpen(false);
   const handleEditClose = () => setEditOpen(false);
 
-  const fetchProducts = () => {
-    axios.get('https://f389-125-165-106-98.ngrok-free.app/api/products', {
+  const fetchUsers = () => {
+    axios.get('https://f389-125-165-106-98.ngrok-free.app/api/users', {
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json'
       }
     })
     .then((response) => {
-      const productArray = response.data.data.data || [];
-      const formattedRows = productArray.map((product) => ({
-        id: product.id,
-        NamaProduk: product.name,
-        Kategori: product.category ? product.category.name : "-",
-        Stock: product.stock,
-        ReorderPoint: product.reorder_point,
-        SafetyStock: product.safety_stock,
-        EOQ: product.economic_order_quantity
+      const usersArray = response.data.data.data || [];
+      const formattedRows = usersArray.map((user) => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        nip: user.nip,
+        position: user.position,
+        initial: user.initial,
+        role: user.role,
+        study_program_id: user.study_program_id
       }));
       setRows(formattedRows);
       setAllRows(formattedRows);
     })
     .catch((error) => {
-      console.error('Error fetching products:', error);
+      console.error('Error fetching users:', error);
       setError(error);
     });
   };
 
   useEffect(() => {
-    fetchProducts();
+    fetchUsers();
   }, []);
-  
+
   const deleteUser = (id) => {
     Swal.fire({
       title: "Are you sure?",
@@ -101,19 +103,18 @@ export default function ProductList() {
 
   const deleteApi = async (id) => {
     try {
-      await axios.delete(`https://f389-125-165-106-98.ngrok-free.app/api/products/${id}`);
-      Swal.fire("Deleted!", "Your product has been deleted.", "success");
+      await axios.delete(`https://f389-125-165-106-98.ngrok-free.app/api/users/${id}`);
+      Swal.fire("Deleted!", "User has been deleted.", "success");
       setRows(rows.filter((row) => row.id !== id));
     } catch (error) {
-      console.error("Error deleting product:", error);
+      console.error("Error deleting user:", error);
     }
   };
 
-  const editData = (id, name, category_id, stock, price, unit) => {
-    setFormid({ id, name, category_id, stock, price, unit });
+  const editData = (user) => {
+    setFormid(user);
     handleEditOpen();
   };
-
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(+event.target.value);
@@ -133,26 +134,25 @@ export default function ProductList() {
   return (
     <>
       <div>
-        <Modal open={open}>
+        <Modal open={open} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
           <Box sx={style}>
-            <AddProduct CloseEvent={handleClose} onSuccess={fetchProducts}/>
+            <AddUser CloseEvent={handleClose} onSuccess={fetchUsers} />
           </Box>
         </Modal>
-        <Modal open={editopen}>
+        <Modal open={editopen} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
           <Box sx={style}>
-            <EditProduct CloseEvent={handleEditClose} fid={formid} onSuccess={fetchProducts}/>
+            {/* <EditUser CloseEvent={handleEditClose} userData={formid} onSuccess={fetchUsers} /> */}
           </Box>
         </Modal>
       </div>
       <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, mr: 2.5 }}>
         <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpen}>
-          Tambah Produk
+          Tambah User
         </Button>
       </Box>
       <Paper sx={{ width: '100%', overflow: 'hidden' }}>
         <Divider />
         <Box height={10} />
-
         <Stack direction="row" spacing={2} className="my-2 mb-2" alignItems="center">
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, px: 2, mb: 1 }}>
             <Typography variant="body2">Show</Typography>
@@ -171,49 +171,49 @@ export default function ProductList() {
               ))}
             </TextField>
             <Typography variant="body2" sx={{ ml: 1 }}>Entries</Typography>
-          
-          <Typography variant="body1" sx={{ ml: 73 }}>Search:</Typography>
-          <Autocomplete
-            disablePortal
-            id="combo-box-demo"
-            options={allRows}
-            sx={{ width: 187, ml: 2 }}
-            onChange={(e, v) => filterData(v)}
-            getOptionLabel={(row) => row.NamaProduk || ""}
-            renderInput={(params) => (
-              <TextField {...params} size="small" />
-            )}
-          />
+
+            <Typography variant="body1" sx={{ ml: 73 }}>Search:</Typography>
+            <Autocomplete
+              disablePortal
+              id="user-search"
+              options={allRows}
+              sx={{ width: 187, ml: 2 }}
+              onChange={(e, v) => filterData(v)}
+              getOptionLabel={(row) => row.name || ""}
+              renderInput={(params) => (
+                <TextField {...params} size="small" />
+              )}
+            />
           </Box>
         </Stack>
         <Box height={10} />
         <TableContainer sx={{ maxHeight: 440 }}>
-          <Table stickyHeader aria-label="sticky table">
+          <Table stickyHeader aria-label="user table">
             <TableHead>
               <TableRow>
-                <TableCell>ID</TableCell>
-                <TableCell>Nama Produk</TableCell>
-                <TableCell>Kategori</TableCell>
-                <TableCell>Stock</TableCell>
-                <TableCell>Reorder Point</TableCell>
-                <TableCell>Safety Stock</TableCell>
-                <TableCell>EOQ</TableCell>
-                <TableCell>Aksi</TableCell>
+                <TableCell align="left">Name</TableCell>
+                <TableCell align="left">Email</TableCell>
+                <TableCell align="left">NIP</TableCell>
+                <TableCell align="left">Position</TableCell>
+                <TableCell align="left">Initial</TableCell>
+                <TableCell align="left">Role</TableCell>
+                <TableCell align="left">Study Program ID</TableCell>
+                <TableCell align="left">Aksi</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-            {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+              {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                 <TableRow hover key={row.id}>
-                  <TableCell>{row.id}</TableCell>
-                  <TableCell>{row.NamaProduk}</TableCell>
-                  <TableCell>{row.Kategori}</TableCell>
-                  <TableCell>{row.Stock}</TableCell>
-                  <TableCell>{row.ReorderPoint}</TableCell>
-                  <TableCell>{row.SafetyStock}</TableCell>
-                  <TableCell>{row.EOQ}</TableCell>
-                  <TableCell>
+                  <TableCell align="left">{row.name}</TableCell>
+                  <TableCell align="left">{row.email}</TableCell>
+                  <TableCell align="left">{row.nip}</TableCell>
+                  <TableCell align="left">{row.position}</TableCell>
+                  <TableCell align="left">{row.initial}</TableCell>
+                  <TableCell align="left">{row.role}</TableCell>
+                  <TableCell align="left">{row.study_program_id}</TableCell>
+                  <TableCell align="left">
                     <Stack direction="row" spacing={2}>
-                      <EditIcon sx={{ color: "blue", cursor: "pointer" }} onClick={() => editData(row.id, row.NamaProduk, row.Kategori, row.Stock, row.ReorderPoint, row.SafetyStock, row.EOQ)} />
+                      <EditIcon sx={{ color: "blue", cursor: "pointer" }} onClick={() => editData(row)} />
                       <DeleteIcon sx={{ color: "darkred", cursor: "pointer" }} onClick={() => deleteUser(row.id)} />
                     </Stack>
                   </TableCell>

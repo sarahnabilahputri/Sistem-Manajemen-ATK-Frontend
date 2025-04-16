@@ -3,24 +3,24 @@ import { Typography, Box, Grid, TextField, Button } from "@mui/material";
 import Swal from "sweetalert2";
 import axios from "axios";
 
-export default function AddSatuan({ CloseEvent, onSuccess }) {
-    const [Unit, setUnit] = useState("");
+export default function AddProdi({ CloseEvent, onSuccess }) {
+    const [Prodi, setProdi] = useState("");
 
-    const handleUnitChange = (event) => {
-        setUnit(event.target.value);
+    const handleProdiChange = (event) => {
+        setProdi(event.target.value);
     };
 
     const createUser = async () => {
-        if (!Unit.trim()) {
+        if (!Prodi.trim()) {
             CloseEvent(); 
-            Swal.fire("Error!", "Satuan tidak boleh kosong.", "error");
+            Swal.fire("Error!", "Prodi tidak boleh kosong.", "error");
             return;
         }
 
         try {
             const response = await axios.post(
-                "https://f389-125-165-106-98.ngrok-free.app/api/units",
-                { name: Unit }, 
+                "https://f389-125-165-106-98.ngrok-free.app/api/study-programs",
+                { name: Prodi }, 
                 {
                     headers: {
                         "Content-Type": "application/json",
@@ -34,31 +34,31 @@ export default function AddSatuan({ CloseEvent, onSuccess }) {
                 if (onSuccess) { 
                     onSuccess();
                 }
-                Swal.fire("Berhasil!", "Satuan telah ditambahkan.", "success");
+                Swal.fire("Berhasil!", "Prodi telah ditambahkan.", "success");
             }
         } catch (error) {
             CloseEvent(); 
-            console.error("Error adding unit:", error);
-            Swal.fire("Error!", "Gagal menambahkan satuan.", "error");
+            console.error("Error adding prodi:", error);
+            Swal.fire("Error!", "Gagal menambahkan prodi.", "error");
         }
     };
 
     return (
         <>
             <Box sx={{ width: "100%", textAlign: "center" }}> 
-                <Typography variant="h6">Form Tambah Satuan</Typography>
+                <Typography variant="h6">Form Tambah Prodi</Typography>
             </Box>
             <Box height={20} />
             <Grid container spacing={2}>
                 <Grid item xs={12}>
                     <Typography variant="body1" sx={{ mb: 1 }}>
-                        Satuan
+                        Prodi
                     </Typography>
                     <TextField 
                         variant="outlined" 
                         size="small" 
-                        onChange={handleUnitChange} 
-                        value={Unit} 
+                        onChange={handleProdiChange} 
+                        value={Prodi} 
                         sx={{ minWidth: "100%" }} 
                         InputLabelProps={{ shrink: false }} 
                     />

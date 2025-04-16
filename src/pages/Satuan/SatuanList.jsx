@@ -53,7 +53,7 @@ export default function SatuanList() {
   const handleEditClose = () => setEditOpen(false);
 
   const fetchUnit = () => {
-    axios.get('https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/units', {
+    axios.get('https://f389-125-165-106-98.ngrok-free.app/api/units', {
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json'
@@ -97,7 +97,7 @@ export default function SatuanList() {
 
   const deleteApi = async (id) => {
     try {
-      await axios.delete(`https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/units/${id}`);
+      await axios.delete(`https://f389-125-165-106-98.ngrok-free.app/api/units/${id}`);
       Swal.fire("Deleted!", "Your Unit has been deleted.", "success");
       setRows(rows.filter((row) => row.id !== id));
     } catch (error) {

@@ -1,104 +1,79 @@
 import { useState, useEffect } from "react";
-import { Typography, Box, Grid, TextField, Button, MenuItem, InputAdornment } from "@mui/material";
+import { Typography, Box, Grid, TextField, Button, MenuItem } from "@mui/material";
 import Swal from "sweetalert2";
 import axios from "axios";
 
 export default function AddProduct({ CloseEvent, onSuccess }) {
-    const [product, setProduct] = useState({
-        name: "",
-        stock: "",
-        price: "",
-        unit: "",
-        category_id: "",
-        image: null,
-        imageName: "",
-    });
-
+    const [name, setName] = useState("");
+    const [price, setPrice] = useState("");
+    const [stock, setStock] = useState("");
+    const [image, setImage] = useState(null);
     const [categories, setCategories] = useState([]);
-    const [units, setUnits] = useState([]); // Tambahkan state untuk units
+    const [units, setUnits] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState("");
+    const [selectedUnit, setSelectedUnit] = useState("");
 
-    // Fetch Categories
     useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const response = await axios.get("https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/categories", {
-                    headers: { "ngrok-skip-browser-warning": "true", "Accept": "application/json" },
-                });
-
-                if (response.data?.data?.data && Array.isArray(response.data.data.data)) {
-                    setCategories(response.data.data.data);
-                } else {
-                    console.error("Format data kategori tidak valid:", response.data);
-                    setCategories([]);
-                }
-            } catch (error) {
-                console.error("Error fetching categories:", error);
-                setCategories([]);
-            }
-        };
-
         fetchCategories();
-    }, []);
-
-    // Fetch Units
-    useEffect(() => {
-        const fetchUnits = async () => {
-            try {
-                const response = await axios.get("https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/units", {
-                    headers: { "ngrok-skip-browser-warning": "true", "Accept": "application/json" },
-                });
-    
-                // Pastikan format data yang diterima sesuai dengan yang diharapkan
-                if (response.data?.data?.data && Array.isArray(response.data.data.data)) {
-                    setUnits(response.data.data.data);
-                } else {
-                    console.error("Format data units tidak valid:", response.data);
-                    setUnits([]);
-                }
-            } catch (error) {
-                console.error("Error fetching units:", error);
-                setUnits([]);
-            }
-        };
-    
         fetchUnits();
     }, []);
-    
 
-    const handleChange = (event) => {
-        setProduct({ ...product, [event.target.name]: event.target.value });
+    const fetchCategories = async () => {
+        try {
+            const response = await axios.get("https://f389-125-165-106-98.ngrok-free.app/api/categories", {
+                headers: { "ngrok-skip-browser-warning": "true" },
+            });
+            setCategories(response.data.data.data);
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+        }
     };
 
-    const handleImageChange = (event) => {
-        const file = event.target.files[0];
-        setProduct({ ...product, image: file, imageName: file ? file.name : "" });
+    const fetchUnits = async () => {
+        try {
+            const response = await axios.get("https://f389-125-165-106-98.ngrok-free.app/api/units", {
+                headers: { "ngrok-skip-browser-warning": "true" },
+            });
+            setUnits(response.data.data.data);
+        } catch (error) {
+            console.error("Error fetching units:", error);
+        }
     };
 
-    const createProduct = async () => {
-        if (!product.name.trim() || !product.stock.trim() || !product.price.trim() || !product.category_id.trim() || !product.unit.trim() || !product.image) {
-            Swal.fire("Error!", "Semua kolom harus diisi.", "error");
+    const handleFileChange = (event) => {
+        setImage(event.target.files[0]);
+    };
+
+    const handleSubmit = async () => {
+        if (!name || !price || !stock || !image || !selectedCategory || !selectedUnit) {
+            Swal.fire("Error!", "Semua field wajib diisi!", "error");
             return;
         }
 
         const formData = new FormData();
-        formData.append("name", product.name);
-        formData.append("stock", product.stock);
-        formData.append("price", product.price);
-        formData.append("unit", product.unit);
-        formData.append("category_id", product.category_id);
-        formData.append("image", product.image);
+        formData.append("name", name);
+        formData.append("price", price);
+        formData.append("stock", stock);
+        formData.append("image", image);
+        formData.append("category_id", selectedCategory);
+        formData.append("unit_id", selectedUnit);
 
         try {
             const response = await axios.post(
-                "https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/products",
+                "https://f389-125-165-106-98.ngrok-free.app/api/products",
                 formData,
-                { headers: { "Content-Type": "multipart/form-data", "ngrok-skip-browser-warning": "true" } }
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                        "ngrok-skip-browser-warning": "true",
+                    },
+                }
             );
 
             if (response.status === 201) {
                 if (onSuccess) onSuccess();
-                Swal.fire("Berhasil!", "Produk telah ditambahkan.", "success");
                 CloseEvent();
+                Swal.fire("Berhasil!", "Produk berhasil ditambahkan!", "success");
             }
         } catch (error) {
             console.error("Error adding product:", error);
@@ -107,116 +82,134 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
     };
 
     return (
-        <Box sx={{ width: "100%", display: "flex", flexDirection: "column" }}>
-            <Box sx={{ width: "100%", textAlign: "center", pb: 2 }}>
+        <>
+            <Box sx={{ width: "100%", textAlign: "center" }}>
                 <Typography variant="h6">Form Tambah Produk</Typography>
             </Box>
-
-            <Box sx={{ maxHeight: "50vh", overflowY: "auto", p: 2 }}>
+            <Box height={20} />
+    
+            {/* Scrollable container */}
+            <Box sx={{ maxHeight: "60vh", overflowY: "auto", pr: 1 }}>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
                         <Typography variant="body1" sx={{ mb: 1 }}>Nama Produk</Typography>
-                        <TextField variant="outlined" size="small" name="name" onChange={handleChange} value={product.name} sx={{ minWidth: "100%" }} />
+                        <TextField fullWidth size="small" value={name} onChange={(e) => setName(e.target.value)} />
                     </Grid>
-                    
+    
+                    <Grid item xs={12}>
+                        <Typography variant="body1" sx={{ mb: 1 }}>Harga</Typography>
+                        <TextField fullWidth size="small" type="number" value={price} onChange={(e) => setPrice(e.target.value)} />
+                    </Grid>
+    
+                    <Grid item xs={12}>
+                        <Typography variant="body1" sx={{ mb: 1 }}>Stok</Typography>
+                        <TextField fullWidth size="small" type="number" value={stock} onChange={(e) => setStock(e.target.value)} />
+                    </Grid>
+    
                     <Grid item xs={12}>
                         <Typography variant="body1" sx={{ mb: 1 }}>Kategori</Typography>
                         <TextField
                             select
-                            variant="outlined"
+                            fullWidth
                             size="small"
-                            name="category_id"
-                            onChange={handleChange}
-                            value={product.category_id}
-                            sx={{ minWidth: "100%" }}
+                            value={selectedCategory}
+                            onChange={(e) => setSelectedCategory(e.target.value)}
                         >
-                            {categories.length > 0 ? (
-                                categories.map((cat) => (
-                                    <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>
-                                ))
-                            ) : (
-                                <MenuItem disabled>Data kategori belum tersedia</MenuItem>
-                            )}
+                            {categories.map((cat) => (
+                                <MenuItem key={cat.id} value={cat.id}>
+                                    {cat.name}
+                                </MenuItem>
+                            ))}
                         </TextField>
                     </Grid>
-
+    
                     <Grid item xs={12}>
-                        <Typography variant="body1" sx={{ mb: 1 }}>Stock</Typography>
-                        <TextField type="number" variant="outlined" size="small" name="stock" onChange={handleChange} value={product.stock} sx={{ minWidth: "100%" }} />
-                    </Grid>
-
-                    <Grid item xs={12}>
-                        <Typography variant="body1" sx={{ mb: 1 }}>Harga</Typography>
-                        <TextField type="number" variant="outlined" size="small" name="price" onChange={handleChange} value={product.price} sx={{ minWidth: "100%" }} />
-                    </Grid>
-
-                    {/* Dropdown Units */}
-                    <Grid item xs={12}>
-                        <Typography variant="body1" sx={{ mb: 1 }}>Unit</Typography>
+                        <Typography variant="body1" sx={{ mb: 1 }}>Satuan</Typography>
                         <TextField
                             select
-                            variant="outlined"
+                            fullWidth
                             size="small"
-                            name="unit"
-                            onChange={handleChange}
-                            value={product.unit}
-                            sx={{ minWidth: "100%" }}
+                            value={selectedUnit}
+                            onChange={(e) => setSelectedUnit(e.target.value)}
                         >
-                            {units.length > 0 ? (
-                                units.map((unit) => (
-                                    <MenuItem key={unit.id} value={unit.id}>{unit.name}</MenuItem>
-                                ))
-                            ) : (
-                                <MenuItem disabled>Data unit belum tersedia</MenuItem>
-                            )}
+                            {units.map((unit) => (
+                                <MenuItem key={unit.id} value={unit.id}>
+                                    {unit.name}
+                                </MenuItem>
+                            ))}
                         </TextField>
                     </Grid>
-
-
+    
                     <Grid item xs={12}>
-                        <Typography variant="body1" sx={{ mb: 1 }}>Gambar Produk</Typography>
-                        <TextField
+                        <Typography variant="body1" sx={{ mb: 1 }}>Gambar</Typography>
+                        <Box sx={{ display: 'flex', width: '100%' }}>
+                            <Button
+                            component="label"
                             variant="outlined"
+                            sx={{
+                                borderTopRightRadius: 0,
+                                borderBottomRightRadius: 0,
+                                borderTopLeftRadius: 4,
+                                borderBottomLeftRadius: 4,
+                                borderRight: '1px solid #c4c4c4',
+                                borderColor: '#c4c4c4', // <- ini penting buat nyamain warnanya
+                                bgcolor: '#E4E6EF',
+                                color: 'black',
+                                px: 3,
+                                whiteSpace: 'nowrap',
+                                textTransform: 'none',
+                                height: '40px',
+                                "&:hover": {
+                                bgcolor: '#d1d3db',
+                                borderColor: '#c4c4c4', // <- biar hovernya nggak berubah biru
+                                },
+                            }}
+                            >
+                            Choose file
+                            <input
+                                type="file"
+                                hidden
+                                accept="image/*"
+                                onChange={(e) => setImage(e.target.files[0])}
+                            />
+                            </Button>
+                            <TextField
+                            fullWidth
                             size="small"
-                            value={product.imageName}
-                            placeholder="No File Choosen"
-                            sx={{ 
-                                width: "100%",
+                            value={image ? image.name : ""}
+                            placeholder="No file chosen"
+                            sx={{
                                 "& .MuiOutlinedInput-root": {
-                                    display: "flex",
-                                    alignItems: "center",
-                                    paddingLeft: 0,
-                                }, 
+                                borderTopLeftRadius: 0,
+                                borderBottomLeftRadius: 0,
+                                height: '40px',
+                                }
                             }}
                             InputProps={{
                                 readOnly: true,
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <Button variant="contained" component="label"  
-                                        sx={{
-                                            bgcolor: "#E4E6EF",
-                                            color: "black",
-                                            borderRadius: "4px 0 0 4px",
-                                            height: "38px",
-                                            boxShadow: "none",
-                                            textTransform: "none", 
-                                            "&:hover": { bgcolor: "#d1d3db" }
-                                        }}>
-                                            Choose File
-                                            <input type="file" hidden accept="image/*" onChange={handleImageChange} />
-                                        </Button>
-                                    </InputAdornment>
-                                ),
                             }}
-                        />
+                            />
+                        </Box>
                     </Grid>
                 </Grid>
             </Box>
-
-            <Box sx={{ width: "100%", textAlign: "center", pt: 2 }}>
-                <Button variant="contained" onClick={createProduct}>Simpan</Button>
-                <Button variant="contained" onClick={CloseEvent} sx={{ ml: 1, bgcolor: "#E4E6EF", color: "black" }}>Tutup</Button>
-            </Box>
-        </Box>
+    
+            {/* Tombol bawah */}
+            <Grid container spacing={2} sx={{ mt: 2 }}>
+                <Grid item xs={12}>
+                    <Typography variant="h5" align="center">
+                        <Button variant="contained" onClick={handleSubmit}>Simpan</Button>
+                        <Button
+                            variant="contained"
+                            onClick={CloseEvent}
+                            sx={{ ml: 1, bgcolor: "#E4E6EF", color: "black", "&:hover": { bgcolor: "#d1d3db" } }}
+                        >
+                            Tutup
+                        </Button>
+                    </Typography>
+                </Grid>
+            </Grid>
+        </>
     );
+    
 }

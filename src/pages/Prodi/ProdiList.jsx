@@ -21,8 +21,8 @@ import Swal from "sweetalert2";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import Modal from '@mui/material/Modal';
-import AddProduct from "./AddProduct";
-import EditProduct from './EditProduct';
+import AddProdi from './AddProdi';
+import EditProdi from './EditProdi';
 
 const style = {
   position: 'absolute',
@@ -37,7 +37,7 @@ const style = {
   p: 4,
 };
 
-export default function ProductList() {
+export default function ProdiList() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [rows, setRows] = useState([]);
@@ -52,35 +52,31 @@ export default function ProductList() {
   const handleClose = () => setOpen(false);
   const handleEditClose = () => setEditOpen(false);
 
-  const fetchProducts = () => {
-    axios.get('https://f389-125-165-106-98.ngrok-free.app/api/products', {
+  const fetchProdi = () => {
+    axios.get('https://f389-125-165-106-98.ngrok-free.app/api/study-programs', {
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json'
       }
     })
     .then((response) => {
-      const productArray = response.data.data.data || [];
-      const formattedRows = productArray.map((product) => ({
-        id: product.id,
-        NamaProduk: product.name,
-        Kategori: product.category ? product.category.name : "-",
-        Stock: product.stock,
-        ReorderPoint: product.reorder_point,
-        SafetyStock: product.safety_stock,
-        EOQ: product.economic_order_quantity
+      const prodiArray = response.data.data.data || [];
+      const formattedRows = prodiArray.map((prodi) => ({
+        id: prodi.id,
+        IdProdi: prodi.id,
+        Prodi: prodi.name
       }));
       setRows(formattedRows);
       setAllRows(formattedRows);
     })
     .catch((error) => {
-      console.error('Error fetching products:', error);
+      console.error('Error fetching prodi:', error);
       setError(error);
     });
   };
 
   useEffect(() => {
-    fetchProducts();
+    fetchProdi();
   }, []);
   
   const deleteUser = (id) => {
@@ -101,19 +97,18 @@ export default function ProductList() {
 
   const deleteApi = async (id) => {
     try {
-      await axios.delete(`https://f389-125-165-106-98.ngrok-free.app/api/products/${id}`);
-      Swal.fire("Deleted!", "Your product has been deleted.", "success");
+      await axios.delete(`https://f389-125-165-106-98.ngrok-free.app/api/study-programs/${id}`);
+      Swal.fire("Deleted!", "Your prodi has been deleted.", "success");
       setRows(rows.filter((row) => row.id !== id));
     } catch (error) {
-      console.error("Error deleting product:", error);
+      console.error("Error deleting prodi:", error);
     }
   };
 
-  const editData = (id, name, category_id, stock, price, unit) => {
-    setFormid({ id, name, category_id, stock, price, unit });
+  const editData = (id, IdProdi, Prodi) => {
+    setFormid({ id, IdProdi, Prodi });
     handleEditOpen();
   };
-
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(+event.target.value);
@@ -133,20 +128,20 @@ export default function ProductList() {
   return (
     <>
       <div>
-        <Modal open={open}>
+        <Modal open={open} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
           <Box sx={style}>
-            <AddProduct CloseEvent={handleClose} onSuccess={fetchProducts}/>
+            <AddProdi CloseEvent={handleClose} onSuccess={fetchProdi}/>
           </Box>
         </Modal>
-        <Modal open={editopen}>
+        <Modal open={editopen} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
           <Box sx={style}>
-            <EditProduct CloseEvent={handleEditClose} fid={formid} onSuccess={fetchProducts}/>
+            <EditProdi CloseEvent={handleEditClose} fid={formid} onSuccess={fetchProdi}/>
           </Box>
         </Modal>
       </div>
       <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, mr: 2.5 }}>
         <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpen}>
-          Tambah Produk
+          Tambah Prodi
         </Button>
       </Box>
       <Paper sx={{ width: '100%', overflow: 'hidden' }}>
@@ -179,7 +174,7 @@ export default function ProductList() {
             options={allRows}
             sx={{ width: 187, ml: 2 }}
             onChange={(e, v) => filterData(v)}
-            getOptionLabel={(row) => row.NamaProduk || ""}
+            getOptionLabel={(row) => row.Prodi || ""}
             renderInput={(params) => (
               <TextField {...params} size="small" />
             )}
@@ -191,29 +186,19 @@ export default function ProductList() {
           <Table stickyHeader aria-label="sticky table">
             <TableHead>
               <TableRow>
-                <TableCell>ID</TableCell>
-                <TableCell>Nama Produk</TableCell>
-                <TableCell>Kategori</TableCell>
-                <TableCell>Stock</TableCell>
-                <TableCell>Reorder Point</TableCell>
-                <TableCell>Safety Stock</TableCell>
-                <TableCell>EOQ</TableCell>
-                <TableCell>Aksi</TableCell>
+                <TableCell align="left">Id Prodi</TableCell>
+                <TableCell align="Left">Prodi</TableCell>
+                <TableCell align="left">Aksi</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-            {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+              {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                 <TableRow hover key={row.id}>
-                  <TableCell>{row.id}</TableCell>
-                  <TableCell>{row.NamaProduk}</TableCell>
-                  <TableCell>{row.Kategori}</TableCell>
-                  <TableCell>{row.Stock}</TableCell>
-                  <TableCell>{row.ReorderPoint}</TableCell>
-                  <TableCell>{row.SafetyStock}</TableCell>
-                  <TableCell>{row.EOQ}</TableCell>
-                  <TableCell>
+                  <TableCell align="left">{row.IdProdi}</TableCell>
+                  <TableCell align="Left">{row.Prodi}</TableCell>
+                  <TableCell align="left">
                     <Stack direction="row" spacing={2}>
-                      <EditIcon sx={{ color: "blue", cursor: "pointer" }} onClick={() => editData(row.id, row.NamaProduk, row.Kategori, row.Stock, row.ReorderPoint, row.SafetyStock, row.EOQ)} />
+                      <EditIcon sx={{ color: "blue", cursor: "pointer" }} onClick={() => editData(row.id, row.IdProdi, row.Prodi)} />
                       <DeleteIcon sx={{ color: "darkred", cursor: "pointer" }} onClick={() => deleteUser(row.id)} />
                     </Stack>
                   </TableCell>

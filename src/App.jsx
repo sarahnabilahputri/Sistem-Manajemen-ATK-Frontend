@@ -11,6 +11,7 @@ import User from "./pages/User";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import Satuan from "./pages/Satuan";
+import Prodi from "./pages/Prodi";
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/dana" exact element={<Dana />}></Route>
         <Route path="/barang" exact element={<Barang />}></Route>
         <Route path="/kategori" exact element={<Kategori />}></Route>
+        <Route path="/prodi" exact element={<Prodi />}></Route>
         <Route path="/satuan" exact element={<Satuan />}></Route>
         <Route path="/pesan" exact element={<Pesan />}></Route>
         <Route path="/ambil" exact element={<Ambil />}></Route>

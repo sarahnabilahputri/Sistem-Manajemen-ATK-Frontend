@@ -3,20 +3,20 @@ import { Typography, Box, Grid, TextField, Button } from "@mui/material";
 import Swal from "sweetalert2";
 import axios from "axios";
 
-export default function EditKategori({ fid, CloseEvent, onSuccess }) {
-    const [Kategori, setKategori] = useState("");
+export default function EditProdi({ fid, CloseEvent, onSuccess }) {
+    const [Prodi, setProdi] = useState("");
 
     useEffect(() => {
         if (fid && fid.id) {
-            setKategori(fid.Kategori); 
-            fetchKategoriById(fid.id); 
+            setProdi(fid.Prodi); 
+            fetchProdiById(fid.id); 
         }
     }, [fid]);
 
-    const fetchKategoriById = async (id) => {
+    const fetchProdiById = async (id) => {
         try {
             const response = await axios.get(
-                `https://f389-125-165-106-98.ngrok-free.app/api/categories/${id}`,
+                `https://f389-125-165-106-98.ngrok-free.app/api/study-programs/${id}`,
                 {
                     headers: {
                         "ngrok-skip-browser-warning": "true",
@@ -25,25 +25,25 @@ export default function EditKategori({ fid, CloseEvent, onSuccess }) {
                 }
             );
     
-            const kategoriData = response.data.data;  
-            setKategori(kategoriData.name);  
+            const prodiData = response.data.data;  
+            setProdi(prodiData.name);  
         } catch (error) {
-            console.error("Error fetching category:", error);
-            Swal.fire("Error!", "Gagal mengambil data kategori.", "error");
+            console.error("Error fetching prodi:", error);
+            Swal.fire("Error!", "Gagal mengambil data prodi.", "error");
         }
     };
     
-    const updateKategori = async () => {
-        if (!Kategori.trim()) {
+    const updateProdi = async () => {
+        if (!Prodi.trim()) {
             CloseEvent(); 
-            Swal.fire("Error!", "Kategori tidak boleh kosong.", "error");
+            Swal.fire("Error!", "Prodi tidak boleh kosong.", "error");
             return;
         }
     
         try {
             const response = await axios.put(
-                `https://f389-125-165-106-98.ngrok-free.app/api/categories/${fid.id}`, 
-                { name: Kategori },
+                `https://f389-125-165-106-98.ngrok-free.app/api/study-programs/${fid.id}`, 
+                { name: Prodi },
                 {
                     headers: {
                         "Content-Type": "application/json",
@@ -57,38 +57,38 @@ export default function EditKategori({ fid, CloseEvent, onSuccess }) {
                 if (onSuccess) { 
                     onSuccess();
                 }
-                Swal.fire("Berhasil!", "Kategori telah diperbarui.", "success");
+                Swal.fire("Berhasil!", "Prodi telah diperbarui.", "success");
             }
         } catch (error) {
             CloseEvent(); 
-            console.error("Error updating category:", error);
-            Swal.fire("Error!", "Gagal memperbarui kategori.", "error");
+            console.error("Error updating prodi:", error);
+            Swal.fire("Error!", "Gagal memperbarui prodi.", "error");
         }
     };    
 
     return (
         <>
             <Box sx={{ width: "100%", textAlign: "center" }}> 
-                <Typography variant="h6">Form Edit Kategori</Typography>
+                <Typography variant="h6">Form Edit Prodi</Typography>
             </Box>
             <Box height={20} />
             <Grid container spacing={2}>
                 <Grid item xs={12}>
                     <Typography variant="body1" sx={{ mb: 1 }}>
-                        Kategori
+                        Prodi
                     </Typography>
                     <TextField 
                         variant="outlined" 
                         size="small" 
-                        onChange={(e) => setKategori(e.target.value)} 
-                        value={Kategori} 
+                        onChange={(e) => setProdi(e.target.value)} 
+                        value={Prodi} 
                         sx={{ minWidth: "100%" }} 
                         InputLabelProps={{ shrink: false }} 
                     />
                 </Grid>
                 <Grid item xs={12} sx={{ mt: 1 }}>
                     <Typography variant="h5" align="center">
-                        <Button variant="contained" onClick={updateKategori}>
+                        <Button variant="contained" onClick={updateProdi}>
                             Simpan
                         </Button>
                         <Button 

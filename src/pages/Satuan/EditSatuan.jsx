@@ -16,7 +16,7 @@ export default function EditSatuan({ fid, CloseEvent, onSuccess }) {
     const fetchUnitById = async (id) => {
         try {
             const response = await axios.get(
-                `https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/units/${id}`,
+                `https://f389-125-165-106-98.ngrok-free.app/api/units/${id}`,
                 {
                     headers: {
                         "ngrok-skip-browser-warning": "true",
@@ -42,7 +42,7 @@ export default function EditSatuan({ fid, CloseEvent, onSuccess }) {
     
         try {
             const response = await axios.put(
-                `https://09eb-2001-448a-1041-de18-ddb1-d520-4318-2c3.ngrok-free.app/api/units/${fid.id}`, 
+                `https://f389-125-165-106-98.ngrok-free.app/api/units/${fid.id}`, 
                 { name: Unit },
                 {
                     headers: {
