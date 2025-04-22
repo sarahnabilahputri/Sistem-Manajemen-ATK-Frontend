@@ -20,7 +20,7 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
 
     const fetchCategories = async () => {
         try {
-            const response = await axios.get("https://f389-125-165-106-98.ngrok-free.app/api/categories", {
+            const response = await axios.get("https://910b-125-162-60-245.ngrok-free.app/api/categories", {
                 headers: { "ngrok-skip-browser-warning": "true" },
             });
             setCategories(response.data.data.data);
@@ -31,7 +31,7 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
 
     const fetchUnits = async () => {
         try {
-            const response = await axios.get("https://f389-125-165-106-98.ngrok-free.app/api/units", {
+            const response = await axios.get("https://910b-125-162-60-245.ngrok-free.app/api/units", {
                 headers: { "ngrok-skip-browser-warning": "true" },
             });
             setUnits(response.data.data.data);
@@ -60,7 +60,7 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
 
         try {
             const response = await axios.post(
-                "https://f389-125-165-106-98.ngrok-free.app/api/products",
+                "https://910b-125-162-60-245.ngrok-free.app/api/products",
                 formData,
                 {
                     headers: {

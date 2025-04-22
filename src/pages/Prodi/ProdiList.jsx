@@ -53,7 +53,7 @@ export default function ProdiList() {
   const handleEditClose = () => setEditOpen(false);
 
   const fetchProdi = () => {
-    axios.get('https://f389-125-165-106-98.ngrok-free.app/api/study-programs', {
+    axios.get('https://910b-125-162-60-245.ngrok-free.app/api/study-programs', {
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json'
@@ -97,7 +97,7 @@ export default function ProdiList() {
 
   const deleteApi = async (id) => {
     try {
-      await axios.delete(`https://f389-125-165-106-98.ngrok-free.app/api/study-programs/${id}`);
+      await axios.delete(`https://910b-125-162-60-245.ngrok-free.app/api/study-programs/${id}`);
       Swal.fire("Deleted!", "Your prodi has been deleted.", "success");
       setRows(rows.filter((row) => row.id !== id));
     } catch (error) {

@@ -23,13 +23,13 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
     const fetchProductById = async (id) => {
         try {
             const response = await axios.get(
-                `https://f389-125-165-106-98.ngrok-free.app/api/products/${id}`,
+                `https://910b-125-162-60-245.ngrok-free.app/api/products/${id}`,
                 { headers: { "ngrok-skip-browser-warning": "true", "Accept": "application/json" } }
             );
 
             const data = response.data.data;
             let fullImageUrl = data.image
-                ? `https://f389-125-165-106-98.ngrok-free.app/storage/${data.image}`
+                ? `https://910b-125-162-60-245.ngrok-free.app/storage/${data.image}`
                 : null;
 
             setProduct({
@@ -52,7 +52,7 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await axios.get("https://f389-125-165-106-98.ngrok-free.app/api/categories", {
+                const response = await axios.get("https://910b-125-162-60-245.ngrok-free.app/api/categories", {
                     headers: { "ngrok-skip-browser-warning": "true", "Accept": "application/json" },
                 });
                 setCategories(response.data?.data?.data || []);
@@ -63,7 +63,7 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
 
         const fetchUnits = async () => {
             try {
-                const response = await axios.get("https://f389-125-165-106-98.ngrok-free.app/api/units", {
+                const response = await axios.get("https://910b-125-162-60-245.ngrok-free.app/api/units", {
                     headers: { "ngrok-skip-browser-warning": "true", "Accept": "application/json" },
                 });
                 setUnits(response.data?.data?.data || []);
@@ -80,6 +80,7 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
             fetchProductById(fid.id);
         }
     }, [fid, loading]);
+
 
     const handleChange = (event) => {
         const { name, value } = event.target;
@@ -111,50 +112,44 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
             return;
         }
     
-        console.log("product sebelum submit:", product);
-        console.log("Update ID:", fid?.id);
-    
         const formData = new FormData();
         formData.append("name", name);
         formData.append("stock", parseInt(stock));
         formData.append("price", parseFloat(price));
         formData.append("unit_id", unit_id);
         formData.append("category_id", category_id);
-        
-        // Tambahkan hanya jika ada file yang diunggah
+    
         if (image) {
             formData.append("image", image);
         }
     
-        // Debug: Cek isi FormData
-        for (let pair of formData.entries()) {
-            console.log(`${pair[0]}:`, pair[1]);
-        }
-    
         try {
-            const response = await axios.patch(
-                `https://f389-125-165-106-98.ngrok-free.app/api/products/${fid.id}`, // Pastikan fid.id valid
-                formData,
-                {
-                    headers: {
-                        "ngrok-skip-browser-warning": "true",
-                        "Accept": "application/json"
-                        // Content-Type tidak perlu diset jika menggunakan FormData
-                    }
+            const response = await axios({
+                method: "post",
+                url: `https://910b-125-162-60-245.ngrok-free.app/api/products/${fid.id}`,
+                data: formData,
+                headers: {
+                    "ngrok-skip-browser-warning": "true",
+                    "Accept": "application/json",
+                    "Content-Type": "multipart/form-data",
+                    "X-HTTP-Method-Override": "PUT"
                 }
-            );
+            });
+            
     
             if (response.status === 200) {
+                CloseEvent();
+                setTimeout(() => {
                 Swal.fire("Berhasil!", "Produk telah diperbarui.", "success").then(() => {
-                    onSuccess();
-                    CloseEvent();
+                    onSuccess(); 
                 });
+                }, 300); 
             }
         } catch (error) {
             console.error("❌ Error updating product:", error);
             Swal.fire("Error!", error?.response?.data?.message || "Gagal memperbarui produk.", "error");
         }
-    };       
+    };           
 
     return (
         <Box sx={{ width: "100%", display: "flex", flexDirection: "column" }}>

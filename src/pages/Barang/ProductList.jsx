@@ -53,7 +53,7 @@ export default function ProductList() {
   const handleEditClose = () => setEditOpen(false);
 
   const fetchProducts = () => {
-    axios.get('https://f389-125-165-106-98.ngrok-free.app/api/products', {
+    axios.get('https://910b-125-162-60-245.ngrok-free.app/api/products', {
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json'
@@ -101,7 +101,7 @@ export default function ProductList() {
 
   const deleteApi = async (id) => {
     try {
-      await axios.delete(`https://f389-125-165-106-98.ngrok-free.app/api/products/${id}`);
+      await axios.delete(`https://910b-125-162-60-245.ngrok-free.app/api/products/${id}`);
       Swal.fire("Deleted!", "Your product has been deleted.", "success");
       setRows(rows.filter((row) => row.id !== id));
     } catch (error) {

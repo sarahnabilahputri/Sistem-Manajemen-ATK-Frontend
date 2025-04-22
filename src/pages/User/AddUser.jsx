@@ -17,7 +17,7 @@ export default function AddUser({ CloseEvent, onSuccess }) {
     const [studyPrograms, setStudyPrograms] = useState([]);
 
     useEffect(() => {
-        axios.get("https://f389-125-165-106-98.ngrok-free.app/api/study-programs", {
+        axios.get("https://910b-125-162-60-245.ngrok-free.app/api/study-programs", {
             headers: {
                 'Accept': 'application/json',
                 'ngrok-skip-browser-warning': 'true'
@@ -51,7 +51,7 @@ export default function AddUser({ CloseEvent, onSuccess }) {
         console.log("Data yang dikirim:", formData);
         try {
             const response = await axios.post(
-                "https://f389-125-165-106-98.ngrok-free.app/api/users",
+                "https://910b-125-162-60-245.ngrok-free.app/api/users",
                 formData,
                 {
                     headers: {
@@ -80,6 +80,7 @@ export default function AddUser({ CloseEvent, onSuccess }) {
             </Box>
             <Box height={20} />
             <Box sx={{ maxHeight: "60vh", overflowY: "auto", pr: 1 }}>
+            <Box sx={{ maxWidth: 500, mx: "auto" }}>
             <Grid container spacing={2}>
                 <Grid item xs={12}><Typography variant="body1" sx={{ mb: 1 }}>Nama</Typography>
                     <TextField name="name" value={formData.name} onChange={handleChange} size="small" fullWidth />
@@ -141,6 +142,7 @@ export default function AddUser({ CloseEvent, onSuccess }) {
                     </TextField>
                 </Grid>
                 </Grid>
+                </Box>
             </Box>
                 
             {/* Tombol bawah */}
@@ -158,6 +160,7 @@ export default function AddUser({ CloseEvent, onSuccess }) {
                     </Typography>
                 </Grid>
             </Grid>
+            
         </>
     );
 }

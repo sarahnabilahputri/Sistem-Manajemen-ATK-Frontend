@@ -22,8 +22,7 @@ import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import Modal from '@mui/material/Modal';
 import AddUser from './AddUser';
-// import AddUser from "./AddUser";
-// import EditUser from "./EditUser";
+// import EditUser from './EditUser';
 
 const style = {
   position: 'absolute',
@@ -54,7 +53,7 @@ export default function UserList() {
   const handleEditClose = () => setEditOpen(false);
 
   const fetchUsers = () => {
-    axios.get('https://f389-125-165-106-98.ngrok-free.app/api/users', {
+    axios.get('https://910b-125-162-60-245.ngrok-free.app/api/users', {
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json'
@@ -103,7 +102,7 @@ export default function UserList() {
 
   const deleteApi = async (id) => {
     try {
-      await axios.delete(`https://f389-125-165-106-98.ngrok-free.app/api/users/${id}`);
+      await axios.delete(`https://910b-125-162-60-245.ngrok-free.app/api/users/${id}`);
       Swal.fire("Deleted!", "User has been deleted.", "success");
       setRows(rows.filter((row) => row.id !== id));
     } catch (error) {
