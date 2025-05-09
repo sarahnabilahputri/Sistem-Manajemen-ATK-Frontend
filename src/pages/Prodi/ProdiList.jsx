@@ -53,7 +53,7 @@ export default function ProdiList() {
   const handleEditClose = () => setEditOpen(false);
 
   const fetchProdi = () => {
-    axios.get('https://910b-125-162-60-245.ngrok-free.app/api/study-programs', {
+    axios.get('https://80ea-125-165-106-71.ngrok-free.app/api/study-programs', {
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json'
@@ -61,6 +61,7 @@ export default function ProdiList() {
     })
     .then((response) => {
       const prodiArray = response.data.data.data || [];
+      const sortedProdi = prodiArray.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       const formattedRows = prodiArray.map((prodi) => ({
         id: prodi.id,
         IdProdi: prodi.id,
@@ -97,7 +98,7 @@ export default function ProdiList() {
 
   const deleteApi = async (id) => {
     try {
-      await axios.delete(`https://910b-125-162-60-245.ngrok-free.app/api/study-programs/${id}`);
+      await axios.delete(`https://80ea-125-165-106-71.ngrok-free.app/api/study-programs/${id}`);
       Swal.fire("Deleted!", "Your prodi has been deleted.", "success");
       setRows(rows.filter((row) => row.id !== id));
     } catch (error) {
@@ -186,18 +187,18 @@ export default function ProdiList() {
           <Table stickyHeader aria-label="sticky table">
             <TableHead>
               <TableRow>
-                <TableCell align="left">Id Prodi</TableCell>
-                <TableCell align="Left">Prodi</TableCell>
-                <TableCell align="left">Aksi</TableCell>
+                <TableCell align="left" sx={{ width: '10%' }}>No</TableCell>
+                <TableCell align="center" sx={{ width: '10%' }}>Prodi</TableCell>
+                <TableCell align="right" sx={{ width: '10%' }}>Aksi</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+              {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                 <TableRow hover key={row.id}>
-                  <TableCell align="left">{row.IdProdi}</TableCell>
-                  <TableCell align="Left">{row.Prodi}</TableCell>
-                  <TableCell align="left">
-                    <Stack direction="row" spacing={2}>
+                  <TableCell align="left" >{page * rowsPerPage + index + 1}</TableCell>
+                  <TableCell align="center">{row.Prodi}</TableCell>
+                  <TableCell align="right">
+                    <Stack direction="row" spacing={2} justifyContent="flex-end">
                       <EditIcon sx={{ color: "blue", cursor: "pointer" }} onClick={() => editData(row.id, row.IdProdi, row.Prodi)} />
                       <DeleteIcon sx={{ color: "darkred", cursor: "pointer" }} onClick={() => deleteUser(row.id)} />
                     </Stack>

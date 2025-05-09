@@ -12,6 +12,7 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
     const [units, setUnits] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState("");
     const [selectedUnit, setSelectedUnit] = useState("");
+    const [formattedPrice, setFormattedPrice] = useState("");
 
     useEffect(() => {
         fetchCategories();
@@ -20,7 +21,7 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
 
     const fetchCategories = async () => {
         try {
-            const response = await axios.get("https://910b-125-162-60-245.ngrok-free.app/api/categories", {
+            const response = await axios.get('https://80ea-125-165-106-71.ngrok-free.app/api/categories', {
                 headers: { "ngrok-skip-browser-warning": "true" },
             });
             setCategories(response.data.data.data);
@@ -31,7 +32,7 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
 
     const fetchUnits = async () => {
         try {
-            const response = await axios.get("https://910b-125-162-60-245.ngrok-free.app/api/units", {
+            const response = await axios.get("https://80ea-125-165-106-71.ngrok-free.app/api/units", {
                 headers: { "ngrok-skip-browser-warning": "true" },
             });
             setUnits(response.data.data.data);
@@ -60,7 +61,7 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
 
         try {
             const response = await axios.post(
-                "https://910b-125-162-60-245.ngrok-free.app/api/products",
+                "https://80ea-125-165-106-71.ngrok-free.app/api/products",
                 formData,
                 {
                     headers: {
@@ -77,10 +78,32 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
             }
         } catch (error) {
             console.error("Error adding product:", error);
+            CloseEvent();
             Swal.fire("Error!", "Gagal menambahkan produk.", "error");
         }
     };
 
+    const formatRupiah = (value) => {
+        const numberString = value.replace(/[^,\d]/g, "").toString();
+        const split = numberString.split(",");
+        const sisa = split[0].length % 3;
+        let rupiah = split[0].substr(0, sisa);
+        const ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+    
+        if (ribuan) {
+            rupiah += (sisa ? "." : "") + ribuan.join(".");
+        }
+    
+        rupiah = split[1] !== undefined ? rupiah + "," + split[1] : rupiah;
+        return rupiah ? "Rp " + rupiah : "";
+    };
+
+    const handlePriceChange = (e) => {
+        const rawValue = e.target.value.replace(/\D/g, "");
+        setPrice(rawValue); // untuk dikirim ke backend
+        setFormattedPrice(formatRupiah(e.target.value)); // untuk tampil
+    };    
+    
     return (
         <>
             <Box sx={{ width: "100%", textAlign: "center" }}>
@@ -98,7 +121,7 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
     
                     <Grid item xs={12}>
                         <Typography variant="body1" sx={{ mb: 1 }}>Harga</Typography>
-                        <TextField fullWidth size="small" type="number" value={price} onChange={(e) => setPrice(e.target.value)} />
+                        <TextField fullWidth size="small" value={formattedPrice} onChange={handlePriceChange} />
                     </Grid>
     
                     <Grid item xs={12}>

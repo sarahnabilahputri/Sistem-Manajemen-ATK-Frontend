@@ -53,7 +53,7 @@ export default function SatuanList() {
   const handleEditClose = () => setEditOpen(false);
 
   const fetchUnit = () => {
-    axios.get('https://910b-125-162-60-245.ngrok-free.app/api/units', {
+    axios.get('https://80ea-125-165-106-71.ngrok-free.app/api/units', {
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json'
@@ -61,6 +61,7 @@ export default function SatuanList() {
     })
     .then((response) => {
       const unitArray = response.data.data.data || [];
+      const sortedUnit = unitArray.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       const formattedRows = unitArray.map((unit) => ({
         id: unit.id,
         IdUnit: unit.id,
@@ -97,7 +98,7 @@ export default function SatuanList() {
 
   const deleteApi = async (id) => {
     try {
-      await axios.delete(`https://910b-125-162-60-245.ngrok-free.app/api/units/${id}`);
+      await axios.delete(`https://80ea-125-165-106-71.ngrok-free.app/api/units/${id}`);
       Swal.fire("Deleted!", "Your Unit has been deleted.", "success");
       setRows(rows.filter((row) => row.id !== id));
     } catch (error) {
@@ -186,18 +187,18 @@ export default function SatuanList() {
           <Table stickyHeader aria-label="sticky table">
             <TableHead>
               <TableRow>
-                <TableCell align="left">Id Satuan</TableCell>
-                <TableCell align="Left">Satuan</TableCell>
-                <TableCell align="left">Aksi</TableCell>
+                <TableCell align="left" sx={{ width: '10%' }}>No</TableCell>
+                <TableCell align="center" sx={{ width: '10%' }}>Satuan</TableCell>
+                <TableCell align="right" sx={{ width: '10%' }}>Aksi</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+              {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                 <TableRow hover key={row.id}>
-                  <TableCell align="left">{row.IdUnit}</TableCell>
-                  <TableCell align="Left">{row.Unit}</TableCell>
-                  <TableCell align="left">
-                    <Stack direction="row" spacing={2}>
+                  <TableCell align="left" >{page * rowsPerPage + index + 1}</TableCell>
+                  <TableCell align="center">{row.Unit}</TableCell>
+                  <TableCell align="right">
+                    <Stack direction="row" spacing={2} justifyContent="flex-end">
                       <EditIcon sx={{ color: "blue", cursor: "pointer" }} onClick={() => editData(row.id, row.IdUnit, row.Unit)} />
                       <DeleteIcon sx={{ color: "darkred", cursor: "pointer" }} onClick={() => deleteUser(row.id)} />
                     </Stack>

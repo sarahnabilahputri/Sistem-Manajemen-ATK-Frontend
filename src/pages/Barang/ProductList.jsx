@@ -53,7 +53,7 @@ export default function ProductList() {
   const handleEditClose = () => setEditOpen(false);
 
   const fetchProducts = () => {
-    axios.get('https://910b-125-162-60-245.ngrok-free.app/api/products', {
+    axios.get('https://80ea-125-165-106-71.ngrok-free.app/api/products', {
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json'
@@ -61,6 +61,7 @@ export default function ProductList() {
     })
     .then((response) => {
       const productArray = response.data.data.data || [];
+      const sortedProducts = productArray.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       const formattedRows = productArray.map((product) => ({
         id: product.id,
         NamaProduk: product.name,
@@ -101,7 +102,7 @@ export default function ProductList() {
 
   const deleteApi = async (id) => {
     try {
-      await axios.delete(`https://910b-125-162-60-245.ngrok-free.app/api/products/${id}`);
+      await axios.delete(`https://80ea-125-165-106-71.ngrok-free.app/api/products/${id}`);
       Swal.fire("Deleted!", "Your product has been deleted.", "success");
       setRows(rows.filter((row) => row.id !== id));
     } catch (error) {
@@ -179,11 +180,17 @@ export default function ProductList() {
             options={allRows}
             sx={{ width: 187, ml: 2 }}
             onChange={(e, v) => filterData(v)}
-            getOptionLabel={(row) => row.NamaProduk || ""}
+            getOptionLabel={(option) => option.NamaProduk || ""}
+            renderOption={(props, option) => (
+              <li {...props} key={option.id}>
+                {option.NamaProduk}
+              </li>
+            )}
             renderInput={(params) => (
               <TextField {...params} size="small" />
             )}
           />
+
           </Box>
         </Stack>
         <Box height={10} />
@@ -191,7 +198,7 @@ export default function ProductList() {
           <Table stickyHeader aria-label="sticky table">
             <TableHead>
               <TableRow>
-                <TableCell>ID</TableCell>
+                <TableCell>No</TableCell>
                 <TableCell>Nama Produk</TableCell>
                 <TableCell>Kategori</TableCell>
                 <TableCell>Stock</TableCell>
@@ -202,15 +209,15 @@ export default function ProductList() {
               </TableRow>
             </TableHead>
             <TableBody>
-            {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+            {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                 <TableRow hover key={row.id}>
-                  <TableCell>{row.id}</TableCell>
+                  <TableCell>{page * rowsPerPage + index + 1}</TableCell>
                   <TableCell>{row.NamaProduk}</TableCell>
                   <TableCell>{row.Kategori}</TableCell>
                   <TableCell>{row.Stock}</TableCell>
-                  <TableCell>{row.ReorderPoint}</TableCell>
-                  <TableCell>{row.SafetyStock}</TableCell>
-                  <TableCell>{row.EOQ}</TableCell>
+                  <TableCell>{Math.floor(row.ReorderPoint)}</TableCell>
+                  <TableCell>{Math.floor(row.SafetyStock)}</TableCell>
+                  <TableCell>{Math.floor(row.EOQ)}</TableCell>
                   <TableCell>
                     <Stack direction="row" spacing={2}>
                       <EditIcon sx={{ color: "blue", cursor: "pointer" }} onClick={() => editData(row.id, row.NamaProduk, row.Kategori, row.Stock, row.ReorderPoint, row.SafetyStock, row.EOQ)} />

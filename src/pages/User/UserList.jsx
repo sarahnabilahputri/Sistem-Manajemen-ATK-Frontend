@@ -53,7 +53,7 @@ export default function UserList() {
   const handleEditClose = () => setEditOpen(false);
 
   const fetchUsers = () => {
-    axios.get('https://910b-125-162-60-245.ngrok-free.app/api/users', {
+    axios.get('https://80ea-125-165-106-71.ngrok-free.app/api/users', {
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json'
@@ -61,6 +61,7 @@ export default function UserList() {
     })
     .then((response) => {
       const usersArray = response.data.data.data || [];
+      const sortedUser = usersArray.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       const formattedRows = usersArray.map((user) => ({
         id: user.id,
         name: user.name,
@@ -102,7 +103,7 @@ export default function UserList() {
 
   const deleteApi = async (id) => {
     try {
-      await axios.delete(`https://910b-125-162-60-245.ngrok-free.app/api/users/${id}`);
+      await axios.delete(`https://80ea-125-165-106-71.ngrok-free.app/api/users/${id}`);
       Swal.fire("Deleted!", "User has been deleted.", "success");
       setRows(rows.filter((row) => row.id !== id));
     } catch (error) {
@@ -133,8 +134,23 @@ export default function UserList() {
   return (
     <>
       <div>
-        <Modal open={open} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
-          <Box sx={style}>
+      <Modal open={open} onClose={handleClose}>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '100%',
+              maxWidth: 400, 
+              bgcolor: 'background.paper',
+              borderRadius: 2,
+              boxShadow: 24,
+              p: 3,
+              overflowY: 'auto',
+              maxHeight: '100vh',
+            }}
+          >
             <AddUser CloseEvent={handleClose} onSuccess={fetchUsers} />
           </Box>
         </Modal>
@@ -190,26 +206,28 @@ export default function UserList() {
           <Table stickyHeader aria-label="user table">
             <TableHead>
               <TableRow>
+                <TableCell align="left">No</TableCell>
                 <TableCell align="left">Name</TableCell>
                 <TableCell align="left">Email</TableCell>
                 <TableCell align="left">NIP</TableCell>
                 <TableCell align="left">Position</TableCell>
                 <TableCell align="left">Initial</TableCell>
                 <TableCell align="left">Role</TableCell>
-                <TableCell align="left">Study Program ID</TableCell>
+                {/* <TableCell align="left">Study Program ID</TableCell> */}
                 <TableCell align="left">Aksi</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+              {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                 <TableRow hover key={row.id}>
+                  <TableCell align="left" >{page * rowsPerPage + index + 1}</TableCell>
                   <TableCell align="left">{row.name}</TableCell>
                   <TableCell align="left">{row.email}</TableCell>
                   <TableCell align="left">{row.nip}</TableCell>
                   <TableCell align="left">{row.position}</TableCell>
                   <TableCell align="left">{row.initial}</TableCell>
                   <TableCell align="left">{row.role}</TableCell>
-                  <TableCell align="left">{row.study_program_id}</TableCell>
+                  {/* <TableCell align="left">{row.study_program_id}</TableCell> */}
                   <TableCell align="left">
                     <Stack direction="row" spacing={2}>
                       <EditIcon sx={{ color: "blue", cursor: "pointer" }} onClick={() => editData(row)} />

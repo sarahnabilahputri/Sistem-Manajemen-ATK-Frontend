@@ -19,7 +19,7 @@ export default function AddProdi({ CloseEvent, onSuccess }) {
 
         try {
             const response = await axios.post(
-                "https://910b-125-162-60-245.ngrok-free.app/api/study-programs",
+                "https://80ea-125-165-106-71.ngrok-free.app/api/study-programs",
                 { name: Prodi }, 
                 {
                     headers: {

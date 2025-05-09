@@ -16,7 +16,7 @@ export default function EditProdi({ fid, CloseEvent, onSuccess }) {
     const fetchProdiById = async (id) => {
         try {
             const response = await axios.get(
-                `https://910b-125-162-60-245.ngrok-free.app/api/study-programs/${id}`,
+                `https://80ea-125-165-106-71.ngrok-free.app/api/study-programs/${id}`,
                 {
                     headers: {
                         "ngrok-skip-browser-warning": "true",
@@ -42,7 +42,7 @@ export default function EditProdi({ fid, CloseEvent, onSuccess }) {
     
         try {
             const response = await axios.put(
-                `hhttps://910b-125-162-60-245.ngrok-free.app/api/study-programs/${fid.id}`, 
+                `https://80ea-125-165-106-71.ngrok-free.app/api/study-programs/${fid.id}`, 
                 { name: Prodi },
                 {
                     headers: {

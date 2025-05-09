@@ -10,14 +10,14 @@ export default function AddUser({ CloseEvent, onSuccess }) {
         nip: "",
         position: "",
         initial: "",
-        role: "Dosen",
-        study_program_id: null,
+        role: "",
+        study_program_id: "",
     });
 
     const [studyPrograms, setStudyPrograms] = useState([]);
 
     useEffect(() => {
-        axios.get("https://910b-125-162-60-245.ngrok-free.app/api/study-programs", {
+        axios.get("https://80ea-125-165-106-71.ngrok-free.app/api/study-programs", {
             headers: {
                 'Accept': 'application/json',
                 'ngrok-skip-browser-warning': 'true'
@@ -25,7 +25,7 @@ export default function AddUser({ CloseEvent, onSuccess }) {
         })
         .then((response) => {
             console.log("Study programs response:", response.data);
-            setStudyPrograms(response.data.data.data || []); // <--- perbaikan di sini
+            setStudyPrograms(response.data.data.data || []); 
         })
         .catch((error) => {
             console.error("Error fetching study programs:", error);
@@ -35,23 +35,38 @@ export default function AddUser({ CloseEvent, onSuccess }) {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-    
-        setFormData((prev) => ({
-            ...prev,
+
+        let updatedForm = {
+            ...formData,
             [name]: value,
-        }));
+        };
+
+        if (name === "position") {
+            if (value === "Dosen") {
+                updatedForm.role = "Staff";
+                updatedForm.study_program_id = "";
+            } else if (value === "Tendik") {
+                updatedForm.role = "BAAK";
+                updatedForm.study_program_id = "";
+            } else if (value === "Rumah Tangga") {
+                updatedForm.role = "Staff";
+                updatedForm.study_program_id = "";
+            }
+        }
+
+        setFormData(updatedForm);
     };
     
 
     const createUser = async () => {
         const payload = {
             ...formData,
-            role: formData.role.toLowerCase(), // 'Dosen' -> 'dosen'
+            role: formData.role.toLowerCase(), 
         };
         console.log("Data yang dikirim:", formData);
         try {
             const response = await axios.post(
-                "https://910b-125-162-60-245.ngrok-free.app/api/users",
+                "https://80ea-125-165-106-71.ngrok-free.app/api/users",
                 formData,
                 {
                     headers: {
@@ -75,26 +90,30 @@ export default function AddUser({ CloseEvent, onSuccess }) {
 
     return (
         <>
+        <Box sx={{ maxWidth: 500, mx: "auto", bgcolor: "white", p: 2, borderRadius: 2 }}>
             <Box sx={{ width: "100%", textAlign: "center" }}>
                 <Typography variant="h6">Form Tambah Pengguna</Typography>
             </Box>
             <Box height={20} />
             <Box sx={{ maxHeight: "60vh", overflowY: "auto", pr: 1 }}>
-            <Box sx={{ maxWidth: 500, mx: "auto" }}>
-            <Grid container spacing={2}>
-                <Grid item xs={12}><Typography variant="body1" sx={{ mb: 1 }}>Nama</Typography>
+            <Grid container spacing={2} >
+                <Grid item xs={12}>
+                    <Typography variant="body1" sx={{ mb: 1 }}>Nama</Typography>
                     <TextField name="name" value={formData.name} onChange={handleChange} size="small" fullWidth />
                 </Grid>
 
-                <Grid item xs={12}><Typography variant="body1" sx={{ mb: 1 }}>Email</Typography>
+                <Grid item xs={12}>
+                    <Typography variant="body1" sx={{ mb: 1 }}>Email</Typography>
                     <TextField name="email" value={formData.email} onChange={handleChange} size="small" fullWidth />
                 </Grid>
 
-                <Grid item xs={12}><Typography variant="body1" sx={{ mb: 1 }}>NIP</Typography>
+                <Grid item xs={12}>
+                    <Typography variant="body1" sx={{ mb: 1 }}>NIP</Typography>
                     <TextField name="nip" value={formData.nip} onChange={handleChange} size="small" type="number" fullWidth />
                 </Grid>
 
-                <Grid item xs={12}><Typography variant="body1" sx={{ mb: 1 }}>Posisi</Typography>
+                <Grid item xs={12}>
+                    <Typography variant="body1" sx={{ mb: 1 }}>Posisi</Typography>
                     <TextField
                         name="position"
                         select
@@ -104,46 +123,49 @@ export default function AddUser({ CloseEvent, onSuccess }) {
                         fullWidth
                     >
                         <MenuItem value="Dosen">Dosen</MenuItem>
-                        <MenuItem value="Non Dosen">Non Dosen</MenuItem>
+                        <MenuItem value="Tendik">Tendik</MenuItem>
+                        <MenuItem value="Rumah Tangga">Rumah Tangga</MenuItem>
                     </TextField>
                 </Grid>
 
-                <Grid item xs={12}><Typography variant="body1" sx={{ mb: 1 }}>Inisial (3 huruf)</Typography>
+                <Grid item xs={12}>
+                    <Typography variant="body1" sx={{ mb: 1 }}>Inisial (3 huruf)</Typography>
                     <TextField name="initial" value={formData.initial} onChange={handleChange} size="small" inputProps={{ maxLength: 3 }} fullWidth />
                 </Grid>
 
-                <Grid item xs={12}><Typography variant="body1" sx={{ mb: 1 }}>Role</Typography>
+                <Grid item xs={12}>
+                    <Typography variant="body1" sx={{ mb: 1 }}>Role</Typography>
                     <TextField
                         name="role"
-                        select
                         value={formData.role}
-                        onChange={handleChange}
                         size="small"
                         fullWidth
-                    >
-                        <MenuItem value="Dosen">Dosen</MenuItem>
-                        <MenuItem value="BAAK">BAAK</MenuItem>
-                    </TextField>
+                        disabled
+                    />
                 </Grid>
 
-                <Grid item xs={12}><Typography variant="body1" sx={{ mb: 1 }}>Program Studi</Typography>
-                    <TextField
-                        name="study_program_id"
-                        select
-                        value={formData.study_program_id || ""}
-                        onChange={handleChange}
-                        size="small"
-                        fullWidth
-                    >
-                        <MenuItem value="">Tidak Ada</MenuItem>
-                        {studyPrograms.map((prog) => (
-                            <MenuItem key={prog.id} value={prog.id}>{prog.name}</MenuItem>
-                        ))}
-                    </TextField>
-                </Grid>
+                {formData.position === "Dosen" && (
+                    <Grid item xs={12}>
+                        <Typography variant="body1" sx={{ mb: 1 }}>Program Studi</Typography>
+                        <TextField
+                            name="study_program_id"
+                            select
+                            value={formData.study_program_id}
+                            onChange={handleChange}
+                            size="small"
+                            fullWidth
+                        >
+                            {studyPrograms.map((prog) => (
+                                <MenuItem key={prog.id} value={prog.id}>
+                                    {prog.name}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    </Grid>
+                )}
                 </Grid>
                 </Box>
-            </Box>
+            {/* </Box> */}
                 
             {/* Tombol bawah */}
             <Grid container spacing={2} sx={{ mt: 2 }}>
@@ -159,8 +181,8 @@ export default function AddUser({ CloseEvent, onSuccess }) {
                         </Button>
                     </Typography>
                 </Grid>
-            </Grid>
-            
+            </Grid> 
+        </Box>      
         </>
     );
 }

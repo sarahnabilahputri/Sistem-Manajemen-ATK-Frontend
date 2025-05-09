@@ -19,17 +19,18 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
     const [units, setUnits] = useState([]);
     const [loading, setLoading] = useState(true);
     const [imagePreview, setImagePreview] = useState(null);
+    const [formattedPrice, setFormattedPrice] = useState("");
 
     const fetchProductById = async (id) => {
         try {
             const response = await axios.get(
-                `https://910b-125-162-60-245.ngrok-free.app/api/products/${id}`,
+                `https://80ea-125-165-106-71.ngrok-free.app/api/products/${id}`,
                 { headers: { "ngrok-skip-browser-warning": "true", "Accept": "application/json" } }
             );
 
             const data = response.data.data;
             let fullImageUrl = data.image
-                ? `https://910b-125-162-60-245.ngrok-free.app/storage/${data.image}`
+                ? `https://80ea-125-165-106-71.ngrok-free.app/storage/${data.image}`
                 : null;
 
             setProduct({
@@ -42,6 +43,7 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
                 imageName: data.image ? data.image.split("/").pop() : "No File Chosen",
             });
 
+            setFormattedPrice(formatRupiah(data.price.toString()));
             setImagePreview(fullImageUrl);
         } catch (error) {
             console.error("❌ Error fetching product:", error);
@@ -52,7 +54,7 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await axios.get("https://910b-125-162-60-245.ngrok-free.app/api/categories", {
+                const response = await axios.get("https://80ea-125-165-106-71.ngrok-free.app/api/categories", {
                     headers: { "ngrok-skip-browser-warning": "true", "Accept": "application/json" },
                 });
                 setCategories(response.data?.data?.data || []);
@@ -63,7 +65,7 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
 
         const fetchUnits = async () => {
             try {
-                const response = await axios.get("https://910b-125-162-60-245.ngrok-free.app/api/units", {
+                const response = await axios.get("https://80ea-125-165-106-71.ngrok-free.app/api/units", {
                     headers: { "ngrok-skip-browser-warning": "true", "Accept": "application/json" },
                 });
                 setUnits(response.data?.data?.data || []);
@@ -126,7 +128,7 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
         try {
             const response = await axios({
                 method: "post",
-                url: `https://910b-125-162-60-245.ngrok-free.app/api/products/${fid.id}`,
+                url: `https://80ea-125-165-106-71.ngrok-free.app/api/products/${fid.id}`,
                 data: formData,
                 headers: {
                     "ngrok-skip-browser-warning": "true",
@@ -147,9 +149,31 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
             }
         } catch (error) {
             console.error("❌ Error updating product:", error);
+            CloseEvent();
             Swal.fire("Error!", error?.response?.data?.message || "Gagal memperbarui produk.", "error");
         }
-    };           
+    };  
+    
+    const formatRupiah = (value) => {
+        const numberString = value.replace(/[^,\d]/g, "").toString();
+        const split = numberString.split(",");
+        const sisa = split[0].length % 3;
+        let rupiah = split[0].substr(0, sisa);
+        const ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+    
+        if (ribuan) {
+            rupiah += (sisa ? "." : "") + ribuan.join(".");
+        }
+    
+        rupiah = split[1] !== undefined ? rupiah + "," + split[1] : rupiah;
+        return rupiah ? "Rp " + rupiah : "";
+    };
+    
+    const handlePriceChange = (e) => {
+        const rawValue = e.target.value.replace(/\D/g, "");
+        setProduct({ ...product, price: rawValue });
+        setFormattedPrice(formatRupiah(e.target.value));
+    };    
 
     return (
         <Box sx={{ width: "100%", display: "flex", flexDirection: "column" }}>
@@ -178,7 +202,7 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
 
                     <Grid item xs={12}>
                         <Typography>Harga</Typography>
-                        <TextField fullWidth size="small" type="number" name="price" value={product.price} onChange={handleChange} />
+                        <TextField fullWidth size="small" name="price" value={formattedPrice} onChange={handlePriceChange} />
                     </Grid>
 
                     <Grid item xs={12}>
@@ -200,7 +224,7 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
                             InputProps={{
                                 readOnly: true,
                                 startAdornment: (
-                                    <InputAdornment position="start">
+                                    <InputAdornment position="start" sx={{ ml: -1.7, pl: 0 }}>
                                         <Button
                                             variant="contained"
                                             component="label"
@@ -211,6 +235,8 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
                                                 height: "38px",
                                                 boxShadow: "none",
                                                 textTransform: "none",
+                                                minWidth: "110px",
+                                                padding: 0,
                                                 "&:hover": { bgcolor: "#d1d3db" }
                                             }}
                                         >
