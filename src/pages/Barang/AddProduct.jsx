@@ -3,6 +3,8 @@ import { Typography, Box, Grid, TextField, Button, MenuItem } from "@mui/materia
 import Swal from "sweetalert2";
 import axios from "axios";
 
+const API_BASE_URL = import.meta.env.VITE_BASE_URL;
+
 export default function AddProduct({ CloseEvent, onSuccess }) {
     const [name, setName] = useState("");
     const [price, setPrice] = useState("");
@@ -21,7 +23,7 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
 
     const fetchCategories = async () => {
         try {
-            const response = await axios.get('https://80ea-125-165-106-71.ngrok-free.app/api/categories', {
+            const response = await axios.get(`${API_BASE_URL}/api/categories`, {
                 headers: { "ngrok-skip-browser-warning": "true" },
             });
             setCategories(response.data.data.data);
@@ -32,7 +34,7 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
 
     const fetchUnits = async () => {
         try {
-            const response = await axios.get("https://80ea-125-165-106-71.ngrok-free.app/api/units", {
+            const response = await axios.get(`${API_BASE_URL}/api/units`, {
                 headers: { "ngrok-skip-browser-warning": "true" },
             });
             setUnits(response.data.data.data);
@@ -61,7 +63,7 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
 
         try {
             const response = await axios.post(
-                "https://80ea-125-165-106-71.ngrok-free.app/api/products",
+                `${API_BASE_URL}/api/products`,
                 formData,
                 {
                     headers: {

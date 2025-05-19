@@ -20,7 +20,7 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import Collapse from '@mui/material/Collapse';
 
 const drawerWidth = 240;
-const API_URL = "https://80ea-125-165-106-71.ngrok-free.app";
+const API_BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export default function Sidenav({ user }) {
 
@@ -41,7 +41,7 @@ export default function Sidenav({ user }) {
   const logout = () => {
     const access_token = localStorage.getItem("access_token");
   
-    fetch(`${API_URL}/api/auth/logout`, {
+    fetch(`${API_BASE_URL}/api/auth/logout`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${access_token}`,
@@ -54,6 +54,7 @@ export default function Sidenav({ user }) {
       window.location.reload();
     });
   };
+  
   if (!user) {
     return null;
   }  

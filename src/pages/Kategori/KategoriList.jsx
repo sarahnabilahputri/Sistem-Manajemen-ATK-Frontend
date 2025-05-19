@@ -37,6 +37,8 @@ const style = {
   p: 4,
 };
 
+const API_BASE_URL = import.meta.env.VITE_BASE_URL;
+
 export default function KategoriList() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -53,7 +55,7 @@ export default function KategoriList() {
   const handleEditClose = () => setEditOpen(false);
 
   const fetchCategories = () => {
-    axios.get('https://80ea-125-165-106-71.ngrok-free.app/api/categories', {
+    axios.get(`${API_BASE_URL}/api/categories`, {
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json'
@@ -98,7 +100,7 @@ export default function KategoriList() {
 
   const deleteApi = async (id) => {
     try {
-      await axios.delete(`https://80ea-125-165-106-71.ngrok-free.app/api/categories/${id}`);
+      await axios.delete(`${API_BASE_URL}/api/categories/${id}`);
       Swal.fire("Deleted!", "Your category has been deleted.", "success");
       setRows(rows.filter((row) => row.id !== id));
     } catch (error) {

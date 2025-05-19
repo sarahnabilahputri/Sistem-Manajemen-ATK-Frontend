@@ -37,6 +37,8 @@ const style = {
   p: 4,
 };
 
+const API_BASE_URL = import.meta.env.VITE_BASE_URL;
+
 export default function SatuanList() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -53,7 +55,7 @@ export default function SatuanList() {
   const handleEditClose = () => setEditOpen(false);
 
   const fetchUnit = () => {
-    axios.get('https://80ea-125-165-106-71.ngrok-free.app/api/units', {
+    axios.get(`${API_BASE_URL}/api/units`, {
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json'
@@ -98,7 +100,7 @@ export default function SatuanList() {
 
   const deleteApi = async (id) => {
     try {
-      await axios.delete(`https://80ea-125-165-106-71.ngrok-free.app/api/units/${id}`);
+      await axios.delete(`${API_BASE_URL}/api/units/${id}`);
       Swal.fire("Deleted!", "Your Unit has been deleted.", "success");
       setRows(rows.filter((row) => row.id !== id));
     } catch (error) {

@@ -4,6 +4,8 @@ import Swal from "sweetalert2";
 import axios from "axios";
 import InputAdornment from "@mui/material/InputAdornment";
 
+const API_BASE_URL = import.meta.env.VITE_BASE_URL;
+
 export default function EditProduct({ fid, CloseEvent, onSuccess }) {
     const [product, setProduct] = useState({
         name: "",
@@ -24,13 +26,13 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
     const fetchProductById = async (id) => {
         try {
             const response = await axios.get(
-                `https://80ea-125-165-106-71.ngrok-free.app/api/products/${id}`,
+                `${API_BASE_URL}/api/products/${id}`,
                 { headers: { "ngrok-skip-browser-warning": "true", "Accept": "application/json" } }
             );
 
             const data = response.data.data;
             let fullImageUrl = data.image
-                ? `https://80ea-125-165-106-71.ngrok-free.app/storage/${data.image}`
+                ? `${API_BASE_URL}/storage/${data.image}`
                 : null;
 
             setProduct({
@@ -54,7 +56,7 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await axios.get("https://80ea-125-165-106-71.ngrok-free.app/api/categories", {
+                const response = await axios.get(`${API_BASE_URL}/api/categories`, {
                     headers: { "ngrok-skip-browser-warning": "true", "Accept": "application/json" },
                 });
                 setCategories(response.data?.data?.data || []);
@@ -65,7 +67,7 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
 
         const fetchUnits = async () => {
             try {
-                const response = await axios.get("https://80ea-125-165-106-71.ngrok-free.app/api/units", {
+                const response = await axios.get(`${API_BASE_URL}/api/units`, {
                     headers: { "ngrok-skip-browser-warning": "true", "Accept": "application/json" },
                 });
                 setUnits(response.data?.data?.data || []);
@@ -128,7 +130,7 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
         try {
             const response = await axios({
                 method: "post",
-                url: `https://80ea-125-165-106-71.ngrok-free.app/api/products/${fid.id}`,
+                url: `${API_BASE_URL}/api/products/${fid.id}`,
                 data: formData,
                 headers: {
                     "ngrok-skip-browser-warning": "true",

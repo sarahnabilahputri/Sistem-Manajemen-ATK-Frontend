@@ -3,6 +3,8 @@ import { Typography, Box, Grid, TextField, Button } from "@mui/material";
 import Swal from "sweetalert2";
 import axios from "axios";
 
+const API_BASE_URL = import.meta.env.VITE_BASE_URL;
+
 export default function AddKategori({ CloseEvent, onSuccess }) {
     const [Kategori, setKategori] = useState("");
 
@@ -19,7 +21,7 @@ export default function AddKategori({ CloseEvent, onSuccess }) {
 
         try {
             const response = await axios.post(
-                "https://80ea-125-165-106-71.ngrok-free.app/api/categories",
+                `${API_BASE_URL}/api/categories`,
                 { name: Kategori }, 
                 {
                     headers: {

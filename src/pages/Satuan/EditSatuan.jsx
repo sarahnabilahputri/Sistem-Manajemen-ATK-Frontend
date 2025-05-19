@@ -3,6 +3,8 @@ import { Typography, Box, Grid, TextField, Button } from "@mui/material";
 import Swal from "sweetalert2";
 import axios from "axios";
 
+const API_BASE_URL = import.meta.env.VITE_BASE_URL;
+
 export default function EditSatuan({ fid, CloseEvent, onSuccess }) {
     const [Unit, setUnit] = useState("");
 
@@ -16,7 +18,7 @@ export default function EditSatuan({ fid, CloseEvent, onSuccess }) {
     const fetchUnitById = async (id) => {
         try {
             const response = await axios.get(
-                `https://80ea-125-165-106-71.ngrok-free.app/api/units/${id}`,
+                `${API_BASE_URL}/api/units/${id}`,
                 {
                     headers: {
                         "ngrok-skip-browser-warning": "true",
@@ -42,7 +44,7 @@ export default function EditSatuan({ fid, CloseEvent, onSuccess }) {
     
         try {
             const response = await axios.put(
-                `https://80ea-125-165-106-71.ngrok-free.app/api/units/${fid.id}`, 
+                `${API_BASE_URL}/api/units/${fid.id}`, 
                 { name: Unit },
                 {
                     headers: {

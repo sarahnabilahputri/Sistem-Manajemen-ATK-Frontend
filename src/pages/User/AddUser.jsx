@@ -3,6 +3,8 @@ import { Typography, Box, Grid, TextField, Button, MenuItem } from "@mui/materia
 import Swal from "sweetalert2";
 import axios from "axios";
 
+const API_BASE_URL = import.meta.env.VITE_BASE_URL;
+
 export default function AddUser({ CloseEvent, onSuccess }) {
     const [formData, setFormData] = useState({
         name: "",
@@ -17,7 +19,7 @@ export default function AddUser({ CloseEvent, onSuccess }) {
     const [studyPrograms, setStudyPrograms] = useState([]);
 
     useEffect(() => {
-        axios.get("https://80ea-125-165-106-71.ngrok-free.app/api/study-programs", {
+        axios.get( `${API_BASE_URL}/api/study-programs`, {
             headers: {
                 'Accept': 'application/json',
                 'ngrok-skip-browser-warning': 'true'
@@ -66,7 +68,7 @@ export default function AddUser({ CloseEvent, onSuccess }) {
         console.log("Data yang dikirim:", formData);
         try {
             const response = await axios.post(
-                "https://80ea-125-165-106-71.ngrok-free.app/api/users",
+                `${API_BASE_URL}/api/users`,
                 formData,
                 {
                     headers: {

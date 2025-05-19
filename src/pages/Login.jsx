@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "../styles/Log.module.css";
 
-const API_URL = "https://80ea-125-165-106-71.ngrok-free.app";
+const API_BASE_URL = import.meta.env.VITE_BASE_URL;
 
 const Login = ( { setUser }) => {
   const navigate = useNavigate();
@@ -11,7 +11,7 @@ const Login = ( { setUser }) => {
       const url = new URL(window.location.href);
       if (url.pathname === "/callback") {
         const googleData = url.search;
-        const callbackURL = `${API_URL}/api/auth/callback${googleData}`;
+        const callbackURL = `${API_BASE_URL}/api/auth/callback${googleData}`;
         console.log("GET ke backend:", callbackURL);
   
         fetch(callbackURL, {
@@ -37,12 +37,17 @@ const Login = ( { setUser }) => {
             console.log("DATA DARI BACKEND:", data);
           
             const { access_token, token_type } = data;
+
+            if (!access_token) {
+              console.warn("Token tidak ada dalam response!");
+              return;
+            }
           
             localStorage.setItem("access_token", access_token);
             localStorage.setItem("token_type", token_type);
           
             // 🔥 Fetch user langsung di sini
-            return fetch(`${API_URL}/api/auth/authorize`, {
+            return fetch(`${API_BASE_URL}/api/auth/authorize`, {
               method: "POST",
               headers: {
                 Authorization: `Bearer ${access_token}`,
@@ -66,12 +71,14 @@ const Login = ( { setUser }) => {
       }
     }, [navigate]);
 
+  
+
   return (
     <div className={styles["wrapper-login"]}>
       <h1 className={styles["page-title"]}>Sistem Manajemen ATK di BAAK</h1>
       <img src="/logo.png" alt="Logo" className={styles["logo-login"]} />
       <div className={styles["login-container"]}>
-        <a href={`${API_URL}/api/auth/redirect`} className={styles["social-login"]}>
+        <a href={`${API_BASE_URL}/api/auth/redirect?prompt=login`} className={styles["social-login"]}>
           <button className={styles["social-button"]}>
             <img src="google.svg" alt="Google" className={styles["social-icon"]} />
             Sign in with Google

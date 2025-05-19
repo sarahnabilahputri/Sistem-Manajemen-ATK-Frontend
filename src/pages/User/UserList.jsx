@@ -37,6 +37,8 @@ const style = {
   p: 4,
 };
 
+const API_BASE_URL = import.meta.env.VITE_BASE_URL;
+
 export default function UserList() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -53,7 +55,7 @@ export default function UserList() {
   const handleEditClose = () => setEditOpen(false);
 
   const fetchUsers = () => {
-    axios.get('https://80ea-125-165-106-71.ngrok-free.app/api/users', {
+    axios.get(`${API_BASE_URL}/api/users`, {
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json'
@@ -103,7 +105,7 @@ export default function UserList() {
 
   const deleteApi = async (id) => {
     try {
-      await axios.delete(`https://80ea-125-165-106-71.ngrok-free.app/api/users/${id}`);
+      await axios.delete(`${API_BASE_URL}/api/users/${id}`);
       Swal.fire("Deleted!", "User has been deleted.", "success");
       setRows(rows.filter((row) => row.id !== id));
     } catch (error) {

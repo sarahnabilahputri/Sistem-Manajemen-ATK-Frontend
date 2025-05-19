@@ -18,6 +18,7 @@ import { Box, Toolbar } from "@mui/material";
 import { useTheme } from '@mui/material/styles';
 
 const drawerWidth = 0; 
+const API_BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export default function App() {
   
@@ -44,7 +45,7 @@ function AppContent() {
       setUser(JSON.parse(storedUser));
       setLoading(false);
     } else if (access_token) {
-      fetch("https://80ea-125-165-106-71.ngrok-free.app/api/auth/authorize", {
+      fetch(`${API_BASE_URL}/api/auth/authorize`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${access_token}`,

@@ -21,15 +21,15 @@ import Swal from "sweetalert2";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import Modal from '@mui/material/Modal';
-import AddProdi from './AddProdi';
-import EditProdi from './EditProdi';
+import AddBaak from './AddBAAK';
+import EditBaak from './EditBAAK';
 
 const style = {
   position: 'absolute',
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 400,
+  width: 500,
   bgcolor: 'background.paper',
   borderRadius: "12px",
   boxShadow: 24,
@@ -39,7 +39,7 @@ const style = {
 
 const API_BASE_URL = import.meta.env.VITE_BASE_URL;
 
-export default function ProdiList() {
+export default function BAAKList() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [rows, setRows] = useState([]);
@@ -54,34 +54,41 @@ export default function ProdiList() {
   const handleClose = () => setOpen(false);
   const handleEditClose = () => setEditOpen(false);
 
-  const fetchProdi = () => {
-    axios.get( `${API_BASE_URL}/api/study-programs`, {
+  const fetchUsers = () => {
+    axios.get(`${API_BASE_URL}/api/users`, {
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json'
       }
     })
     .then((response) => {
-      const prodiArray = response.data.data.data || [];
-      const sortedProdi = prodiArray.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      const formattedRows = prodiArray.map((prodi) => ({
-        id: prodi.id,
-        IdProdi: prodi.id,
-        Prodi: prodi.name
+      const usersArray = response.data.data.data || [];
+      const filteredUsers = usersArray.filter((user) => user.role === 'BAAK'); // hanya ambil yang role 'baak'
+      const sortedUsers = filteredUsers.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      const formattedRows = sortedUsers.map((user) => ({
+
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        nip: user.nip,
+        position: user.position,
+        initial: user.initial,
+        role: user.role,
+        study_program_id: user.study_program_id
       }));
       setRows(formattedRows);
       setAllRows(formattedRows);
     })
     .catch((error) => {
-      console.error('Error fetching prodi:', error);
+      console.error('Error fetching users:', error);
       setError(error);
     });
   };
 
   useEffect(() => {
-    fetchProdi();
+    fetchUsers();
   }, []);
-  
+
   const deleteUser = (id) => {
     Swal.fire({
       title: "Are you sure?",
@@ -100,16 +107,16 @@ export default function ProdiList() {
 
   const deleteApi = async (id) => {
     try {
-      await axios.delete(`${API_BASE_URL}/api/study-programs/${id}`);
-      Swal.fire("Deleted!", "Your prodi has been deleted.", "success");
+      await axios.delete(`${API_BASE_URL}/api/users/${id}`);
+      Swal.fire("Deleted!", "User has been deleted.", "success");
       setRows(rows.filter((row) => row.id !== id));
     } catch (error) {
-      console.error("Error deleting prodi:", error);
+      console.error("Error deleting user:", error);
     }
   };
 
-  const editData = (id, IdProdi, Prodi) => {
-    setFormid({ id, IdProdi, Prodi });
+  const editData = (user) => {
+    setFormid(user);
     handleEditOpen();
   };
 
@@ -131,26 +138,40 @@ export default function ProdiList() {
   return (
     <>
       <div>
-        <Modal open={open} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
-          <Box sx={style}>
-            <AddProdi CloseEvent={handleClose} onSuccess={fetchProdi}/>
+      <Modal open={open} onClose={handleClose}>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '100%',
+              maxWidth: 400, 
+              bgcolor: 'background.paper',
+              borderRadius: 2,
+              boxShadow: 24,
+              p: 3,
+              overflowY: 'auto',
+              maxHeight: '100vh',
+            }}
+          >
+            <AddBaak CloseEvent={handleClose} onSuccess={fetchUsers} />
           </Box>
         </Modal>
         <Modal open={editopen} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
           <Box sx={style}>
-            <EditProdi CloseEvent={handleEditClose} fid={formid} onSuccess={fetchProdi}/>
+            <EditBaak CloseEvent={handleEditClose} fid={formid} onSuccess={fetchUsers} />
           </Box>
         </Modal>
       </div>
       <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, mr: 2.5 }}>
         <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpen}>
-          Tambah Prodi
+          Tambah User
         </Button>
       </Box>
       <Paper sx={{ width: '100%', overflow: 'hidden' }}>
         <Divider />
         <Box height={10} />
-
         <Stack direction="row" spacing={2} className="my-2 mb-2" alignItems="center">
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, px: 2, mb: 1 }}>
             <Typography variant="body2">Show</Typography>
@@ -169,39 +190,51 @@ export default function ProdiList() {
               ))}
             </TextField>
             <Typography variant="body2" sx={{ ml: 1 }}>Entries</Typography>
-          
-          <Typography variant="body1" sx={{ ml: 73 }}>Search:</Typography>
-          <Autocomplete
-            disablePortal
-            id="combo-box-demo"
-            options={allRows}
-            sx={{ width: 187, ml: 2 }}
-            onChange={(e, v) => filterData(v)}
-            getOptionLabel={(row) => row.Prodi || ""}
-            renderInput={(params) => (
-              <TextField {...params} size="small" />
-            )}
-          />
+
+            <Typography variant="body1" sx={{ ml: 73 }}>Search:</Typography>
+            <Autocomplete
+              disablePortal
+              id="user-search"
+              options={allRows}
+              sx={{ width: 187, ml: 2 }}
+              onChange={(e, v) => filterData(v)}
+              getOptionLabel={(row) => row.name || ""}
+              renderInput={(params) => (
+                <TextField {...params} size="small" />
+              )}
+            />
           </Box>
         </Stack>
         <Box height={10} />
         <TableContainer sx={{ maxHeight: 440 }}>
-          <Table stickyHeader aria-label="sticky table">
+          <Table stickyHeader aria-label="user table">
             <TableHead>
               <TableRow>
-                <TableCell align="left" sx={{ width: '10%' }}>No</TableCell>
-                <TableCell align="center" sx={{ width: '10%' }}>Prodi</TableCell>
-                <TableCell align="right" sx={{ width: '10%' }}>Aksi</TableCell>
+                <TableCell align="left">No</TableCell>
+                <TableCell align="left">Name</TableCell>
+                <TableCell align="left">Email</TableCell>
+                <TableCell align="left">NIP</TableCell>
+                <TableCell align="left">Position</TableCell>
+                <TableCell align="left">Initial</TableCell>
+                <TableCell align="left">Role</TableCell>
+                {/* <TableCell align="left">Study Program ID</TableCell> */}
+                <TableCell align="left">Aksi</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                 <TableRow hover key={row.id}>
                   <TableCell align="left" >{page * rowsPerPage + index + 1}</TableCell>
-                  <TableCell align="center">{row.Prodi}</TableCell>
-                  <TableCell align="right">
-                    <Stack direction="row" spacing={2} justifyContent="flex-end">
-                      <EditIcon sx={{ color: "blue", cursor: "pointer" }} onClick={() => editData(row.id, row.IdProdi, row.Prodi)} />
+                  <TableCell align="left">{row.name}</TableCell>
+                  <TableCell align="left">{row.email}</TableCell>
+                  <TableCell align="left">{row.nip}</TableCell>
+                  <TableCell align="left">{row.position}</TableCell>
+                  <TableCell align="left">{row.initial}</TableCell>
+                  <TableCell align="left">{row.role}</TableCell>
+                  {/* <TableCell align="left">{row.study_program_id}</TableCell> */}
+                  <TableCell align="left">
+                    <Stack direction="row" spacing={2}>
+                      <EditIcon sx={{ color: "blue", cursor: "pointer" }} onClick={() => editData(row)} />
                       <DeleteIcon sx={{ color: "darkred", cursor: "pointer" }} onClick={() => deleteUser(row.id)} />
                     </Stack>
                   </TableCell>

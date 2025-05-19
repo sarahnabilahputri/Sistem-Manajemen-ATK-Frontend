@@ -21,8 +21,8 @@ import Swal from "sweetalert2";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import Modal from '@mui/material/Modal';
-// import AddUser from './AddUser';
-// import EditUser from './EditUser';
+import AddStaff from './AddStaff';
+import EditStaff from './EditStaff';
 
 const style = {
   position: 'absolute',
@@ -36,6 +36,8 @@ const style = {
   border: "none",
   p: 4,
 };
+
+const API_BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export default function StafList() {
   const [page, setPage] = useState(0);
@@ -53,7 +55,7 @@ export default function StafList() {
   const handleEditClose = () => setEditOpen(false);
 
   const fetchUsers = () => {
-    axios.get('https://80ea-125-165-106-71.ngrok-free.app/api/users', {
+    axios.get(`${API_BASE_URL}/api/users`, {
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json'
@@ -61,8 +63,10 @@ export default function StafList() {
     })
     .then((response) => {
       const usersArray = response.data.data.data || [];
-      const sortedUser = usersArray.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      const formattedRows = usersArray.map((user) => ({
+      const filteredUsers = usersArray.filter((user) => user.role === 'Staff'); 
+      const sortedUsers = filteredUsers.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      const formattedRows = sortedUsers.map((user) => ({
+
         id: user.id,
         name: user.name,
         email: user.email,
@@ -103,7 +107,7 @@ export default function StafList() {
 
   const deleteApi = async (id) => {
     try {
-      await axios.delete(`https://80ea-125-165-106-71.ngrok-free.app/api/users/${id}`);
+      await axios.delete(`${API_BASE_URL}/api/users/${id}`);
       Swal.fire("Deleted!", "User has been deleted.", "success");
       setRows(rows.filter((row) => row.id !== id));
     } catch (error) {
@@ -151,12 +155,12 @@ export default function StafList() {
               maxHeight: '100vh',
             }}
           >
-            <AddUser CloseEvent={handleClose} onSuccess={fetchUsers} />
+            <AddStaff CloseEvent={handleClose} onSuccess={fetchUsers} />
           </Box>
         </Modal>
         <Modal open={editopen} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
           <Box sx={style}>
-            {/* <EditUser CloseEvent={handleEditClose} userData={formid} onSuccess={fetchUsers} /> */}
+            <EditStaff CloseEvent={handleEditClose} fid={formid} onSuccess={fetchUsers} />
           </Box>
         </Modal>
       </div>

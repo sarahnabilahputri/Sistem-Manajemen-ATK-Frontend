@@ -4,6 +4,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Navbar from "../components/Navbar";
 import UserList from "./User/UserList";
+import BAAKList from "./BAAK/BAAKList";
 import { Link } from "react-router-dom"; // Import React Router untuk navigasi
 
 export default function User() {
@@ -21,7 +22,7 @@ export default function User() {
           <span className="mx-2 text-gray-400">•</span>
           <span>User BAAK</span>
         </div> 
-        <UserList />
+        <BAAKList />
         </Box>
       </Box>
       </div>
