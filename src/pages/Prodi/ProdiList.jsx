@@ -48,29 +48,33 @@ export default function ProdiList() {
   const [open, setOpen] = useState(false);
   const [formid, setFormid] = useState("");
   const [editopen, setEditOpen] = useState(false);
+  const [totalItems, setTotalItems] = useState(0);
 
   const handleOpen = () => setOpen(true);
   const handleEditOpen = () => setEditOpen(true);
   const handleClose = () => setOpen(false);
   const handleEditClose = () => setEditOpen(false);
 
-  const fetchProdi = () => {
-    axios.get( `${API_BASE_URL}/api/study-programs`, {
+  const fetchProdi = (pageArg = 1, limitArg = rowsPerPage) => {
+    axios.get( `${API_BASE_URL}/api/study-programs?page=${pageArg}&limit=${limitArg}`, {
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json'
       }
     })
     .then((response) => {
-      const prodiArray = response.data.data.data || [];
-      const sortedProdi = prodiArray.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      const formattedRows = prodiArray.map((prodi) => ({
+      const data = response.data.data;
+      const items = data.data.sort((a, b) =>
+          new Date(b.created_at) - new Date(a.created_at)
+      ); 
+      const formattedRows = items.map(prodi => ({
         id: prodi.id,
         IdProdi: prodi.id,
         Prodi: prodi.name
       }));
       setRows(formattedRows);
       setAllRows(formattedRows);
+      setTotalItems(data.total);
     })
     .catch((error) => {
       console.error('Error fetching prodi:', error);
@@ -79,7 +83,7 @@ export default function ProdiList() {
   };
 
   useEffect(() => {
-    fetchProdi();
+    fetchProdi(1, rowsPerPage);
   }, []);
   
   const deleteUser = (id) => {
@@ -113,9 +117,16 @@ export default function ProdiList() {
     handleEditOpen();
   };
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+    fetchProdi(newPage + 1, rowsPerPage);
+  };
+
   const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(+event.target.value);
+    const newLimit = +event.target.value;
+    setRowsPerPage(newLimit);
     setPage(0);
+    fetchProdi(1, newLimit);
   };
 
   const filterData = (v) => {
@@ -143,7 +154,7 @@ export default function ProdiList() {
         </Modal>
       </div>
       <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, mr: 2.5 }}>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpen}>
+        <Button sx={{textTransform: 'capitalize'}} variant="contained" startIcon={<AddIcon />} onClick={handleOpen}>
           Tambah Prodi
         </Button>
       </Box>
@@ -195,7 +206,7 @@ export default function ProdiList() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+              {rows.map((row, index) => (
                 <TableRow hover key={row.id}>
                   <TableCell align="left" >{page * rowsPerPage + index + 1}</TableCell>
                   <TableCell align="center">{row.Prodi}</TableCell>
@@ -213,10 +224,10 @@ export default function ProdiList() {
         <TablePagination
           rowsPerPageOptions={[10, 25, 100]}
           component="div"
-          count={rows.length}
+          count={totalItems}
           rowsPerPage={rowsPerPage}
           page={page}
-          onPageChange={(event, newPage) => setPage(newPage)}
+          onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
           labelRowsPerPage=""
           sx={{

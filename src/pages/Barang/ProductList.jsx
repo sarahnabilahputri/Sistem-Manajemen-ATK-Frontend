@@ -48,23 +48,26 @@ export default function ProductList() {
   const [open, setOpen] = useState(false);
   const [formid, setFormid] = useState("");
   const [editopen, setEditOpen] = useState(false);
+  const [totalItems, setTotalItems] = useState(0);
 
   const handleOpen = () => setOpen(true);
   const handleEditOpen = () => setEditOpen(true);
   const handleClose = () => setOpen(false);
   const handleEditClose = () => setEditOpen(false);
 
-  const fetchProducts = () => {
-    axios.get(`${API_BASE_URL}/api/products`, {
+  const fetchProducts = (pageArg = 1, limitArg = rowsPerPage) => {
+      axios.get(`${API_BASE_URL}/api/products?page=${pageArg}&limit=${limitArg}`, {
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json'
       }
     })
     .then((response) => {
-      const productArray = response.data.data.data || [];
-      const sortedProducts = productArray.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      const formattedRows = productArray.map((product) => ({
+      const data = response.data.data;        
+      const items = data.data.sort((a, b) =>
+          new Date(b.created_at) - new Date(a.created_at)
+      );      
+      const formattedRows = items.map(product => ({
         id: product.id,
         NamaProduk: product.name,
         Kategori: product.category ? product.category.name : "-",
@@ -75,6 +78,7 @@ export default function ProductList() {
       }));
       setRows(formattedRows);
       setAllRows(formattedRows);
+      setTotalItems(data.total); 
     })
     .catch((error) => {
       console.error('Error fetching products:', error);
@@ -83,7 +87,7 @@ export default function ProductList() {
   };
 
   useEffect(() => {
-    fetchProducts();
+    fetchProducts(1, rowsPerPage);
   }, []);
   
   const deleteUser = (id) => {
@@ -117,10 +121,16 @@ export default function ProductList() {
     handleEditOpen();
   };
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+    fetchProducts(newPage + 1, rowsPerPage);
+  };
 
   const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(+event.target.value);
+    const newLimit = +event.target.value;
+    setRowsPerPage(newLimit);
     setPage(0);
+    fetchProducts(1, newLimit);
   };
 
   const filterData = (v) => {
@@ -148,7 +158,7 @@ export default function ProductList() {
         </Modal>
       </div>
       <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, mr: 2.5 }}>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpen}>
+        <Button sx={{textTransform: 'capitalize'}} variant="contained" startIcon={<AddIcon />} onClick={handleOpen}>
           Tambah Produk
         </Button>
       </Box>
@@ -211,7 +221,7 @@ export default function ProductList() {
               </TableRow>
             </TableHead>
             <TableBody>
-            {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+            {rows.map((row, index) => (
                 <TableRow hover key={row.id}>
                   <TableCell>{page * rowsPerPage + index + 1}</TableCell>
                   <TableCell>{row.NamaProduk}</TableCell>
@@ -234,10 +244,10 @@ export default function ProductList() {
         <TablePagination
           rowsPerPageOptions={[10, 25, 100]}
           component="div"
-          count={rows.length}
+          count={totalItems}                           
           rowsPerPage={rowsPerPage}
           page={page}
-          onPageChange={(event, newPage) => setPage(newPage)}
+          onPageChange={handleChangePage}               
           onRowsPerPageChange={handleChangeRowsPerPage}
           labelRowsPerPage=""
           sx={{

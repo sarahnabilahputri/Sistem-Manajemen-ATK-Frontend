@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
+import { useRef } from 'react'; 
 import axios from 'axios';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
@@ -45,27 +46,31 @@ export default function StafList() {
   const [rows, setRows] = useState([]);
   const [allRows, setAllRows] = useState([]);
   const [error, setError] = useState(null);
+  const fileInputRef = useRef(null);
+  const [importing, setImporting] = useState(false);
   const [open, setOpen] = useState(false);
   const [formid, setFormid] = useState("");
   const [editopen, setEditOpen] = useState(false);
+  const [totalItems, setTotalItems] = useState(0);
 
   const handleOpen = () => setOpen(true);
   const handleEditOpen = () => setEditOpen(true);
   const handleClose = () => setOpen(false);
   const handleEditClose = () => setEditOpen(false);
 
-  const fetchUsers = () => {
-    axios.get(`${API_BASE_URL}/api/users`, {
+  const fetchUsers = (pageArg = 1, limitArg = rowsPerPage) => {
+    axios.get(`${API_BASE_URL}/api/users?page=${pageArg}&limit=${limitArg}`, {
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json'
       }
     })
     .then((response) => {
-      const usersArray = response.data.data.data || [];
-      const filteredUsers = usersArray.filter((user) => user.role === 'Staff'); 
-      const sortedUsers = filteredUsers.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      const formattedRows = sortedUsers.map((user) => ({
+      const data = response.data.data;
+      const items = data.data
+        .filter((user) => user.role === 'Staff')
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      const formattedRows = items.map((user) => ({
 
         id: user.id,
         name: user.name,
@@ -78,6 +83,7 @@ export default function StafList() {
       }));
       setRows(formattedRows);
       setAllRows(formattedRows);
+      setTotalItems(items.length);
     })
     .catch((error) => {
       console.error('Error fetching users:', error);
@@ -85,8 +91,64 @@ export default function StafList() {
     });
   };
 
+  const handleClickImport = () => {
+    fileInputRef.current.click();                  
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.xlsx')) {
+      return Swal.fire("Error", "File harus berformat .xlsx", "error");
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);                   
+
+    try {
+      setImporting(true);
+      const token = localStorage.getItem("access_token");
+      await axios.post(
+        `${API_BASE_URL}/api/import-user`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            ...(token && { Authorization: `Bearer ${token}` })
+          }
+        }
+      );
+      Swal.fire("Success", "Import user berhasil", "success");
+      fetchUsers();                             
+    } catch (err) {
+      const errorData = err.response?.data;
+      let msg = errorData?.message || "Gagal import user";
+
+      if (Array.isArray(errorData?.errors)) {
+        msg = errorData.errors.join("\n");
+      }
+
+      else if (errorData?.errors && typeof errorData.errors === "object") {
+        msg = Object.values(errorData.errors).flat().join("\n");
+      }
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        html: `<div style="
+          color: #666;            /* abu-abu */
+          font-size: 0.85rem;     /* lebih kecil */
+          white-space: pre-line;  /* agar \n jadi baris baru */
+        ">${msg}</div>`,
+      });
+    } finally {
+      setImporting(false);
+      e.target.value = null;                       
+    }
+  };
+
   useEffect(() => {
-    fetchUsers();
+    fetchUsers(1, rowsPerPage);
   }, []);
 
   const deleteUser = (id) => {
@@ -120,9 +182,16 @@ export default function StafList() {
     handleEditOpen();
   };
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+    fetchUsers(newPage + 1, rowsPerPage);
+  };
+
   const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(+event.target.value);
+    const newLimit = +event.target.value;
+    setRowsPerPage(newLimit);
     setPage(0);
+    fetchUsers(1, newLimit);
   };
 
   const filterData = (v) => {
@@ -165,7 +234,36 @@ export default function StafList() {
         </Modal>
       </div>
       <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, mr: 2.5 }}>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpen}>
+        <Button
+          variant="contained"
+          onClick={handleClickImport}
+          disabled={importing}
+          startIcon={
+            <Box
+              component="img"
+              src="/Icon/import.png"      // dari public/icon/import.png
+              alt="Import"
+              sx={{ width: 15, height: 15 }}
+            />
+          }
+          sx={{
+            mr: 1,
+            bgcolor: "#09C690",
+            color: "white",
+            textTransform: 'capitalize',
+            "&:hover": { bgcolor: "#07a574" },
+          }}
+        >
+          {importing ? "Importing..." : "Import"}
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".xlsx"
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+        />
+        <Button sx={{textTransform: 'capitalize'}} variant="contained" startIcon={<AddIcon />} onClick={handleOpen}>
           Tambah User
         </Button>
       </Box>
@@ -222,7 +320,7 @@ export default function StafList() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+              {rows.map((row, index) => (
                 <TableRow hover key={row.id}>
                   <TableCell align="left" >{page * rowsPerPage + index + 1}</TableCell>
                   <TableCell align="left">{row.name}</TableCell>
@@ -246,10 +344,10 @@ export default function StafList() {
         <TablePagination
           rowsPerPageOptions={[10, 25, 100]}
           component="div"
-          count={rows.length}
+          count={totalItems}
           rowsPerPage={rowsPerPage}
           page={page}
-          onPageChange={(event, newPage) => setPage(newPage)}
+          onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
           labelRowsPerPage=""
           sx={{

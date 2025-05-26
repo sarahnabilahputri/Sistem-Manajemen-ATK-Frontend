@@ -309,6 +309,36 @@ export default function Sidenav({ user }) {
                       <ListItemText primary="Program Studi" sx={{ "& .MuiTypography-root": { fontSize: "0.875rem" } }} />
                     </ListItemButton>
                   </ListItem>
+                  <ListItem disablePadding onClick={() => navigate("/kebutuhan")}>
+                  <ListItemButton
+                        sx={{
+                          pl: 6.5,
+                          position: "relative",
+                          "&::before": {
+                            content: '""',
+                            position: "absolute",
+                            top: "20%",
+                            transform: "translateY(-50%)",
+                            left: 24, 
+                            width: 18,
+                            height: 35,
+                            borderLeft: "2px solid #D0D5DD", 
+                            borderBottom: "2px solid #D0D5DD",
+                            borderBottomLeftRadius: 8,
+                          },
+                        }}
+                      >
+                      <ListItemIcon sx={{ minWidth: 36 }}>
+                        <Box
+                          component="img"
+                          src="/Icon/reading.png"
+                          alt="prodi"
+                          sx={{ width: 20, height: 20 }}
+                        />
+                      </ListItemIcon>
+                      <ListItemText primary="Kebutuhan" sx={{ "& .MuiTypography-root": { fontSize: "0.875rem" } }} />
+                    </ListItemButton>
+                  </ListItem>
                 </List>
               </Collapse>
 

@@ -13,6 +13,8 @@ import Profile from "./pages/Profile";
 import Satuan from "./pages/Satuan";
 import Prodi from "./pages/Prodi";
 import Staf from "./pages/Staf";
+import Kebutuhan from "./pages/Kebutuhan";
+import CheckoutPage from "./pages/CheckoutAddItem";
 import { useState, useEffect } from 'react';
 import { Box, Toolbar } from "@mui/material";
 import { useTheme } from '@mui/material/styles';
@@ -33,8 +35,7 @@ function AppContent() {
   const theme = useTheme();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const location = useLocation(); // Pakai useLocation DI DALAM BrowserRouter
-  
+  const location = useLocation(); 
 
   useEffect(() => {
     const access_token = localStorage.getItem("access_token");
@@ -81,7 +82,7 @@ function AppContent() {
           flexGrow: 1,
           overflow: 'auto', 
           backgroundColor: '#f9f9f9',
-          paddingTop: '1px', // Untuk beri ruang bawah navbar
+          paddingTop: '1px', 
           marginLeft: !hideSidebar && user ? `${drawerWidth}px` : 0,
           width: !hideSidebar && user ? `calc(100% - ${drawerWidth}px)` : '100%',
         }}
@@ -96,11 +97,13 @@ function AppContent() {
           <Route path="/kategori" element={<Kategori />} />
           <Route path="/prodi" element={<Prodi />} />
           <Route path="/satuan" element={<Satuan />} />
+          <Route path="/kebutuhan" element={<Kebutuhan />} />
           <Route path="/pesan" element={<Pesan />} />
           <Route path="/ambil" element={<Ambil />} />
           <Route path="/user" element={<User />} />
           <Route path="/staf" element={<Staf />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
         </Routes>
       </Box>
     </Box>
