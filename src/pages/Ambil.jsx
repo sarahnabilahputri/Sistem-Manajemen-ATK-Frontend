@@ -3,6 +3,7 @@ import Sidenav from "../components/Sidenav";
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Navbar from "../components/Navbar";
+import AmbilList from "./Ambil Barang/AmbilList";
 import { Link } from "react-router-dom"; // Import React Router untuk navigasi
 
 export default function Ambil() {
@@ -19,7 +20,8 @@ export default function Ambil() {
           <Link to="/home" className="text-gray-400 ">Home</Link>
           <span className="mx-2 text-gray-400">•</span>
           <span>Ambil Barang</span>
-        </div>            
+        </div> 
+        <AmbilList/>
         </Box>
       </Box>
       </div>

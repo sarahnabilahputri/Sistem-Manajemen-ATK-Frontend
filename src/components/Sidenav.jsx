@@ -331,7 +331,7 @@ export default function Sidenav({ user }) {
                       <ListItemIcon sx={{ minWidth: 36 }}>
                         <Box
                           component="img"
-                          src="/Icon/reading.png"
+                          src="/Icon/need.png"
                           alt="prodi"
                           sx={{ width: 20, height: 20 }}
                         />
@@ -368,19 +368,6 @@ export default function Sidenav({ user }) {
                   <ListItemText primary="Ambil Barang" sx={{ "& .MuiTypography-root": { fontSize: "0.875rem", fontWeight: "semibold" } }} />
                 </ListItemButton>
               </ListItem>
-              {/* <ListItem disablePadding onClick={()=>{navigate("/user")}}>
-                <ListItemButton>
-                  <ListItemIcon sx={{ minWidth: 36 }}>
-                  <Box
-                    component="img"
-                    src="/Icon/user.png" // Sesuaikan dengan path gambar
-                    alt="user"
-                    sx={{ width: 20, height: 20 }} // Sesuaikan ukuran ikon
-                  />  
-                  </ListItemIcon>
-                  <ListItemText primary="Kelola User" sx={{ "& .MuiTypography-root": { fontSize: "0.875rem", fontWeight: "semibold" } }} />
-                </ListItemButton>
-              </ListItem> */}
 
               {/* KELOLA USER GROUP */}
               <ListItem disablePadding onClick={handleToggleKelolaUser}>
@@ -422,7 +409,7 @@ export default function Sidenav({ user }) {
                       <ListItemIcon sx={{ minWidth: 36 }}>
                         <Box
                           component="img"
-                          src="/Icon/blogs.png"
+                          src="/Icon/baak.png"
                           alt="kategori"
                           sx={{ width: 20, height: 20 }}
                         />
@@ -452,7 +439,7 @@ export default function Sidenav({ user }) {
                       <ListItemIcon sx={{ minWidth: 36 }}>
                         <Box
                           component="img"
-                          src="/Icon/blogs.png"
+                          src="/Icon/staf.png"
                           alt="kategori"
                           sx={{ width: 20, height: 20 }}
                         />
