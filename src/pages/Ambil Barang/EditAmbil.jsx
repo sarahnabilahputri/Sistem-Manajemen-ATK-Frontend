@@ -17,8 +17,8 @@ import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import AddIcon from '@mui/icons-material/Add';
 import Swal from 'sweetalert2';
 
-// gunakan import.meta.env untuk Vite
 const API_BASE_URL = import.meta.env.VITE_BASE_URL;
+const backendBase = API_BASE_URL.replace(/\/$/, '');
 
 export default function EditAmbil({
   open,
@@ -126,14 +126,30 @@ export default function EditAmbil({
 
         {/* Content: items + form */}
         <Box sx={{ flex: 1, overflowY: 'auto', p: 1, bgcolor: '#f5f5f5' }}>
-          {cartItems.map(item => (
+          {cartItems.map(item => {
+            const rawImage = item.product.image || '';
+            const cleaned  = rawImage.replace(/^\//,'');
+            let imgSrc;
+            if (/^https?:\/\//i.test(cleaned)) {
+              imgSrc = cleaned;
+            } else if (cleaned.startsWith('images/')) {
+              imgSrc = `${backendBase}/storage/${cleaned}`;
+            } else {
+              imgSrc = `${backendBase}/${cleaned}`;
+            }
+
+            return (
             <Paper key={item.id} variant="outlined" sx={{ display: 'flex', alignItems: 'center', p: 2, mb: 1 }}>
               <Box
                 component="img"
-                src={`${API_BASE_URL}/storage/${item.product.image}`} 
+                src={imgSrc}
                 alt={item.product.name}
-                sx={{ width: 45, height: 45, ml: 2, mr: 2, objectFit: 'cover' }}
-              />
+                onError={e => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = `${backendBase}/assets/images/default_product.jpg`;
+                }}
+                sx={{ width: 45, height: 45, ml: 2, mr: 2, objectFit: 'cover', borderRadius: 1 }}
+              />  
               <Box sx={{ flexGrow: 1, ml: 6 }}>
                 <Typography variant="subtitle2" fontWeight="bold">{item.product.name}</Typography>
                 <Typography variant="caption">Stok : {item.product.stock}</Typography>
@@ -141,19 +157,51 @@ export default function EditAmbil({
               <TextField
                 size="small"
                 type="number"
-                value={editingQty[item.id]}
-                onChange={e => setEditingQty(prev => ({ ...prev, [item.id]: e.target.value }))}
-                onBlur={() => handleUpdateQuantity(item.id, parseInt(editingQty[item.id], 10))}
-                sx={{ width: 60, mr: 8 }}
+                value={editingQty[item.id] ?? ''}
+                onChange={e => {
+                  const val = e.target.value;
+                  if (/^\d*$/.test(val)) {
+                    setEditingQty(prev => ({ ...prev, [item.id]: val }));
+                  }
+                }}
+                onBlur={() => {
+                  const raw = editingQty[item.id];
+                  let num = parseInt(raw, 10);
+                  if (isNaN(num) || num < 1) {
+                    num = 1;
+                  }
+                  if (item.product.stock != null && num > item.product.stock) {
+                    num = item.product.stock;
+                    Swal.fire('Info', `Maksimal stok adalah ${item.product.stock}`, 'info');
+                  }
+                  setEditingQty(prev => ({ ...prev, [item.id]: num }));
+                  handleUpdateQuantity(item.id, num);
+                }}
+                inputProps={{ min: 1 }}
+                sx={{
+                  width: 60,
+                  mr: 8,
+                  '& input[type=number]': {
+                    MozAppearance: 'textfield',
+                    appearance: 'textfield',
+                  },
+                  '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
+                    WebkitAppearance: 'inner-spin-button',
+                    opacity: 1,
+                    display: 'block',
+                  },
+                }}
                 InputProps={{
-                          sx: { '& input': { textAlign: 'right' } }
+                  sx: { '& input': { textAlign: 'center', padding: '4px' } }
                 }}
               />
+
               <IconButton onClick={() => handleRemoveItem(item.id)}>
                 <HighlightOffIcon sx={{ color: '#DC2626' }} />
               </IconButton>
             </Paper>
-          ))}
+            );
+          })}
 
           <Box sx={{ mt: 1, p: 2, bgcolor: 'white', borderRadius: 1, boxShadow: 1 }}>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>Tanggal Butuh</Typography>

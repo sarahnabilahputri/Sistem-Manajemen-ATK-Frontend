@@ -27,6 +27,7 @@ import Swal from 'sweetalert2';
 import EditAmbil from './EditAmbil';
 
 const API_BASE_URL = import.meta.env.VITE_BASE_URL;
+const backendBase = API_BASE_URL.replace(/\/$/, '');
 
 export default function AmbilList() {
   const [page, setPage] = useState(0);
@@ -41,6 +42,8 @@ export default function AmbilList() {
   const [error, setError] = useState(null);
   const [editData, setEditData] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [autoOptions, setAutoOptions] = useState([]);
   const [exportOpen, setExportOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [exportRange, setExportRange] = useState({
@@ -60,14 +63,11 @@ export default function AmbilList() {
     setTotalItems(prev => prev + 1);
   };
 
-  // 1) Pasang listener postMessage
   useEffect(() => {
     const handler = (e) => {
-      // Hanya terima dari origin yang sama
       if (e.origin !== window.location.origin) return;
       const { type, data } = e.data || {};
       if (type === 'NEW_CHECKOUT') {
-        // prepend data baru ke daftar
         setRows(prev => [data, ...prev]);
         setAllRows(prev => [data, ...prev]);
         setTotalItems(prev => prev + 1);
@@ -134,13 +134,14 @@ export default function AmbilList() {
 
   const deleteItem = (id) => {
     Swal.fire({
-      title: 'Are you sure?',
-      text: "You won't be able to revert this!",
-      icon: 'warning',
+      title: "Hapus item?",
+      text: "Yakin ingin menghapus item ini?",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, delete it!'
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Ya",
+      cancelButtonText: 'Batal',
     }).then((result) => {
       if (result.isConfirmed) {
         callDeleteApi(id);
@@ -151,7 +152,7 @@ export default function AmbilList() {
   const callDeleteApi = async (id) => {
     try {
       await axios.delete(`${API_BASE_URL}/api/checkouts/${id}`);
-      Swal.fire('Deleted!', 'Item has been deleted.', 'success');
+      Swal.fire("Berhasil!","Data Berhasil Dihapus", "success");
       setRows(rows.filter(row => row.id !== id));
     } catch (err) {
       console.error('Error deleting item:', err);
@@ -172,7 +173,7 @@ export default function AmbilList() {
     setExporting(true);
     try {
       const res = await axios.get(
-        `${API_BASE_URL}/api/export-checkout`,
+        `${API_BASE_URL}/api/checkouts/export`,
         {
           params: { start_date: startDate, end_date: endDate },
           responseType: 'blob',   
@@ -203,7 +204,6 @@ export default function AmbilList() {
   return (
     <>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, mr: 2.5 }}>
-        {/* Button Export */}
         <Button
           variant="contained"
           onClick={openExport}
@@ -441,19 +441,34 @@ export default function AmbilList() {
           </Box>
           {/* Content */}
           <Box sx={{ flex: 1, overflowY: 'auto', p: 1, bgcolor: '#f5f5f5' }}>
-            {detailData?.items.length ? detailData.items.map(item => (
+            {detailData?.items.length ? detailData.items.map(item => {
+              const rawImage = item.product.image || '';
+              const cleaned  = rawImage.replace(/^\//,'');
+              let imgSrc;
+              if (/^https?:\/\//i.test(cleaned)) {
+                imgSrc = cleaned;
+              } else if (cleaned.startsWith('images/')) {
+                imgSrc = `${backendBase}/storage/${cleaned}`;
+              } else {
+                imgSrc = `${backendBase}/${cleaned}`;
+              }
+
+              return (
               <Paper
                 key={item.id}
                 variant="outlined"
                 sx={{ display: 'flex', alignItems: 'flex-start', p: 2, mb: 1 }}
               >
-                {/* Gambar */}
                 <Box
                   component="img"
-                  src={`${API_BASE_URL}/storage/${item.product.image}`}
+                  src={imgSrc}
                   alt={item.product.name}
-                  sx={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 1, mr: 3 }}
-                />
+                  onError={e => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = `${backendBase}/assets/images/default_product.jpg`;
+                  }}
+                  sx={{ width: 45, height: 45, ml: 0.5, mr: 2.5, objectFit: 'cover', borderRadius: 1 }}
+                />  
 
                 <Box
                   sx={{
@@ -474,7 +489,8 @@ export default function AmbilList() {
                   <Typography variant="subtitle2">{item.product.stock}</Typography>
                 </Box>
               </Paper>
-            )) : (
+              );
+            }) : (
               <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Typography color="text.secondary">Tidak ada barang</Typography>
               </Box>

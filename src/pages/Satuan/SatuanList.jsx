@@ -52,14 +52,17 @@ export default function SatuanList() {
   const [formid, setFormid] = useState("");
   const [editopen, setEditOpen] = useState(false);
   const [totalItems, setTotalItems] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [autoOptions, setAutoOptions] = useState([]);
 
   const handleOpen = () => setOpen(true);
   const handleEditOpen = () => setEditOpen(true);
   const handleClose = () => setOpen(false);
   const handleEditClose = () => setEditOpen(false);
 
-  const fetchUnit = (pageArg = 1, limitArg = rowsPerPage) => {
-    axios.get(`${API_BASE_URL}/api/units?page=${pageArg}&limit=${limitArg}`, {
+  const fetchUnit = (pageArg = 1, limitArg = rowsPerPage, search = "") => {
+    axios.get(`${API_BASE_URL}/api/units`, {
+      params: { page: pageArg, limit: limitArg, search },
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json'
@@ -104,7 +107,7 @@ export default function SatuanList() {
       setImporting(true);
       const token = localStorage.getItem("access_token");
       await axios.post(
-        `${API_BASE_URL}/api/import-unit`,
+        `${API_BASE_URL}/api/units/import`,
         formData,
         {
           headers: {
@@ -143,18 +146,45 @@ export default function SatuanList() {
   };
 
   useEffect(() => {
-    fetchUnit(1, rowsPerPage);
-  }, []);
+    fetchUnit(1, rowsPerPage, searchTerm);
+  }, [searchTerm, rowsPerPage]);
+
+  useEffect(() => {
+    let active = true;
+    if (searchTerm === "") {
+      setAutoOptions([]);
+      return undefined;
+    }
+
+    (async () => {
+      try {
+        const resp = await axios.get(`${API_BASE_URL}/api/units`, {
+          params: { page: 1, limit: rowsPerPage, search: searchTerm },
+          headers: { 'Accept': 'application/json', 'ngrok-skip-browser-warning': 'true' }
+        });
+        if (!active) return;
+        const opts = resp.data.data.data.map(p => p.name);
+        setAutoOptions(opts);
+      } catch (err) {
+        console.error("Error fetching suggestions", err);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [searchTerm, rowsPerPage]);
   
   const deleteUser = (id) => {
     Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
+      title: "Hapus item?",
+      text: "Yakin ingin menghapus item ini?",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
+      confirmButtonText: "Ya",
+      cancelButtonText: 'Batal',
     }).then((result) => {
       if (result.value) {
         deleteApi(id);
@@ -165,7 +195,7 @@ export default function SatuanList() {
   const deleteApi = async (id) => {
     try {
       await axios.delete(`${API_BASE_URL}/api/units/${id}`);
-      Swal.fire("Deleted!", "Your Unit has been deleted.", "success");
+      Swal.fire("Berhasil!","Satuan Berhasil Dihapus", "success");
       setRows(rows.filter((row) => row.id !== id));
     } catch (error) {
       console.error("Error deleting unit:", error);
@@ -179,14 +209,14 @@ export default function SatuanList() {
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
-    fetchUnit(newPage + 1, rowsPerPage);
+    fetchUnit(newPage + 1, rowsPerPage, searchTerm);
   };
 
   const handleChangeRowsPerPage = (event) => {
     const newLimit = +event.target.value;
     setRowsPerPage(newLimit);
     setPage(0);
-    fetchUnit(1, newLimit);
+    fetchUnit(1, newLimit, searchTerm);
   };
 
   const filterData = (v) => {
@@ -272,14 +302,27 @@ export default function SatuanList() {
           
           <Typography variant="body1" sx={{ ml: 73 }}>Search:</Typography>
           <Autocomplete
-            disablePortal
-            id="combo-box-demo"
-            options={allRows}
-            sx={{ width: 187, ml: 2 }}
-            onChange={(e, v) => filterData(v)}
-            getOptionLabel={(row) => row.Unit || ""}
+            freeSolo
+            inputValue={searchTerm}
+            onInputChange={(_, v) => {
+              setSearchTerm(v);    
+              setPage(0);
+            }}
+            options={autoOptions}             
+            filterOptions={(opts) => opts}     
+            onChange={(_, selectedName) => {
+              
+              if (selectedName) {
+                setSearchTerm(selectedName);
+                setPage(0);
+              }
+            }}
             renderInput={(params) => (
-              <TextField {...params} size="small" />
+              <TextField
+                {...params}
+                size="small"
+                sx={{ width: 187, ml: 2 }}
+              />
             )}
           />
           </Box>

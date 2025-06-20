@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
@@ -23,6 +23,7 @@ import Autocomplete from "@mui/material/Autocomplete";
 import Modal from '@mui/material/Modal';
 import AddProduct from "./AddProduct";
 import EditProduct from './EditProduct';
+import { useCart } from '../../context/CartContext';
 
 const style = {
   position: 'absolute',
@@ -45,18 +46,44 @@ export default function ProductList() {
   const [rows, setRows] = useState([]);
   const [allRows, setAllRows] = useState([]);
   const [error, setError] = useState(null);
+  const fileInputRef = useRef(null);
+  const [importing, setImporting] = useState(false);
   const [open, setOpen] = useState(false);
   const [formid, setFormid] = useState("");
   const [editopen, setEditOpen] = useState(false);
   const [totalItems, setTotalItems] = useState(0);
+  const { items: cartItems, addToCart } = useCart();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [autoOptions, setAutoOptions] = useState([]);
+
+  const handleAddToCart = async (row) => {
+    try {
+      await addToCart({ id: row.id });
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil',
+        text: `${row.NamaProduk} berhasil ditambahkan ke keranjang`,
+        confirmButtonText: 'OK'
+      });
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Gagal menambah ke keranjang';
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: msg,
+        confirmButtonText: 'OK'
+      });
+    }
+  };
 
   const handleOpen = () => setOpen(true);
   const handleEditOpen = () => setEditOpen(true);
   const handleClose = () => setOpen(false);
   const handleEditClose = () => setEditOpen(false);
 
-  const fetchProducts = (pageArg = 1, limitArg = rowsPerPage) => {
-      axios.get(`${API_BASE_URL}/api/products?page=${pageArg}&limit=${limitArg}`, {
+  const fetchProducts = (pageArg = 1, limitArg = rowsPerPage, search = "") => {
+    axios.get(`${API_BASE_URL}/api/products`, {
+      params: { page: pageArg, limit: limitArg, search },
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json'
@@ -74,7 +101,8 @@ export default function ProductList() {
         Stock: product.stock,
         ReorderPoint: product.reorder_point,
         SafetyStock: product.safety_stock,
-        EOQ: product.economic_order_quantity
+        EOQ: product.economic_order_quantity,
+        _raw: product,
       }));
       setRows(formattedRows);
       setAllRows(formattedRows);
@@ -87,18 +115,158 @@ export default function ProductList() {
   };
 
   useEffect(() => {
-    fetchProducts(1, rowsPerPage);
-  }, []);
-  
+    fetchProducts(1, rowsPerPage, searchTerm);
+  }, [searchTerm, rowsPerPage]);
+
+  useEffect(() => {
+    let active = true;
+    if (searchTerm === "") {
+      setAutoOptions([]);
+      return undefined;
+    }
+
+    (async () => {
+      try {
+        const resp = await axios.get(`${API_BASE_URL}/api/products`, {
+          params: { page: 1, limit: rowsPerPage, search: searchTerm },
+          headers: { 'Accept': 'application/json', 'ngrok-skip-browser-warning': 'true' }
+        });
+        if (!active) return;
+        const opts = resp.data.data.data.map(p => p.name);
+        setAutoOptions(opts);
+      } catch (err) {
+        console.error("Error fetching suggestions", err);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [searchTerm, rowsPerPage]);
+
+
+  const fetchFirstPageCombined = async () => {
+    try {
+      const resp1 = await axios.get(
+        `${API_BASE_URL}/api/products?page=1&limit=${rowsPerPage}`, 
+        {
+          headers: {
+            'ngrok-skip-browser-warning': 'true',
+            'Accept': 'application/json'
+          }
+        }
+      );
+      const resp2 = await axios.get(
+        `${API_BASE_URL}/api/products?page=2&limit=${rowsPerPage}`, 
+        {
+          headers: {
+            'ngrok-skip-browser-warning': 'true',
+            'Accept': 'application/json'
+          }
+        }
+      );
+
+      const arr1 = resp1.data.data.data; 
+      const arr2 = resp2.data.data.data;
+
+      const combined = [...arr1, ...arr2];
+
+      combined.sort((a, b) => {
+        const dateA = new Date(a.created_at);
+        const dateB = new Date(b.created_at);
+        if (dateA > dateB) return -1;
+        if (dateA < dateB) return 1;
+        return b.id - a.id;
+      });
+
+      const sliced = combined.slice(0, rowsPerPage);
+
+      const formattedRows = sliced.map(product => ({
+        id: product.id,
+        NamaProduk: product.name,
+        Kategori: product.category ? product.category.name : "-",
+        Stock: product.stock,
+        ReorderPoint: product.reorder_point,
+        SafetyStock: product.safety_stock,
+        EOQ: product.economic_order_quantity
+      }));
+
+      setRows(formattedRows);
+      setAllRows(formattedRows);
+
+      setTotalItems(resp1.data.data.total);
+
+    } catch (err) {
+      console.error("Error fetchFirstPageCombined:", err);
+      setError(err);
+    }
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith('.xlsx')) {
+      return Swal.fire("Error", "File harus berformat .xlsx", "error");
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      setImporting(true);
+      const token = localStorage.getItem("access_token");
+      await axios.post(
+        `${API_BASE_URL}/api/products/import`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            ...(token && { Authorization: `Bearer ${token}` })
+          }
+        }
+      );
+
+      Swal.fire("Success", "Import product berhasil", "success");
+      setPage(0);
+      fetchFirstPageCombined();
+    } catch (err) {
+      console.log(">>> err.response.data:", err.response?.data);
+      const errorData = err.response?.data;
+      let msg = errorData?.message || "Gagal import product";
+
+      if (Array.isArray(errorData?.errors)) {
+        msg = errorData.errors.join("\n");
+      }
+      else if (errorData?.errors && typeof errorData.errors === "object") {
+        msg = Object.values(errorData.errors).flat().join("\n");
+      }
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        html: `<div style="
+          color: #666;
+          font-size: 0.85rem;
+          white-space: pre-line;
+        ">${msg}</div>`,
+      });
+    } finally {
+      setImporting(false);
+      e.target.value = null; 
+    }
+  };
+
   const deleteUser = (id) => {
     Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
+      title: "Hapus item?",
+      text: "Yakin ingin menghapus item ini?",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
+      confirmButtonText: "Ya",
+      cancelButtonText: 'Batal',
     }).then((result) => {
       if (result.value) {
         deleteApi(id);
@@ -109,7 +277,7 @@ export default function ProductList() {
   const deleteApi = async (id) => {
     try {
       await axios.delete(`${API_BASE_URL}/api/products/${id}`);
-      Swal.fire("Deleted!", "Your product has been deleted.", "success");
+      Swal.fire("Berhasil!","Produk Berhasil Dihapus", "success");
       setRows(rows.filter((row) => row.id !== id));
     } catch (error) {
       console.error("Error deleting product:", error);
@@ -123,14 +291,14 @@ export default function ProductList() {
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
-    fetchProducts(newPage + 1, rowsPerPage);
+    fetchProducts(newPage + 1, rowsPerPage, searchTerm);
   };
 
   const handleChangeRowsPerPage = (event) => {
     const newLimit = +event.target.value;
     setRowsPerPage(newLimit);
     setPage(0);
-    fetchProducts(1, newLimit);
+    fetchProducts(1, newLimit, searchTerm);
   };
 
   const filterData = (v) => {
@@ -158,6 +326,37 @@ export default function ProductList() {
         </Modal>
       </div>
       <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, mr: 2.5 }}>
+        <Button
+          variant="contained"
+          onClick={() => fileInputRef.current.click()}
+          disabled={importing}
+          startIcon={
+            <Box
+              component="img"
+              src="/Icon/import.png"    
+              alt="Import"
+              sx={{ width: 15, height: 15 }}
+            />
+          }
+          sx={{
+            mr: 1,
+            bgcolor: "#09C690",
+            color: "white",
+            textTransform: 'capitalize',
+            "&:hover": { bgcolor: "#07a574" },
+          }}
+        >
+          {importing ? "Importing..." : "Import"}
+        </Button>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".xlsx"
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+        />
+
         <Button sx={{textTransform: 'capitalize'}} variant="contained" startIcon={<AddIcon />} onClick={handleOpen}>
           Tambah Produk
         </Button>
@@ -187,19 +386,27 @@ export default function ProductList() {
           
           <Typography variant="body1" sx={{ ml: 73 }}>Search:</Typography>
           <Autocomplete
-            disablePortal
-            id="combo-box-demo"
-            options={allRows}
-            sx={{ width: 187, ml: 2 }}
-            onChange={(e, v) => filterData(v)}
-            getOptionLabel={(option) => option.NamaProduk || ""}
-            renderOption={(props, option) => (
-              <li {...props} key={option.id}>
-                {option.NamaProduk}
-              </li>
-            )}
+            freeSolo
+            inputValue={searchTerm}
+            onInputChange={(_, v) => {
+              setSearchTerm(v);   
+              setPage(0);
+            }}
+            options={autoOptions}              
+            filterOptions={(opts) => opts}     
+            onChange={(_, selectedName) => {
+              if (selectedName) {
+                setSearchTerm(selectedName);
+                setPage(0);
+              }
+            }}
             renderInput={(params) => (
-              <TextField {...params} size="small" />
+              <TextField
+                {...params}
+                size="small"
+                // placeholder="Search..."
+                sx={{ width: 187, ml: 2 }}
+              />
             )}
           />
 
@@ -217,11 +424,13 @@ export default function ProductList() {
                 <TableCell>Reorder Point</TableCell>
                 <TableCell>Safety Stock</TableCell>
                 <TableCell>EOQ</TableCell>
-                <TableCell>Aksi</TableCell>
+                <TableCell align="left" sx={{ width: 10 }}>Aksi</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-            {rows.map((row, index) => (
+            {rows.map((row, index) => {
+              const inCart = cartItems.some(item => item.product.id === row.id);
+              return (
                 <TableRow hover key={row.id}>
                   <TableCell>{page * rowsPerPage + index + 1}</TableCell>
                   <TableCell>{row.NamaProduk}</TableCell>
@@ -231,13 +440,27 @@ export default function ProductList() {
                   <TableCell>{Math.floor(row.SafetyStock)}</TableCell>
                   <TableCell>{Math.floor(row.EOQ)}</TableCell>
                   <TableCell>
-                    <Stack direction="row" spacing={2}>
+                    <Stack direction="row" spacing={2} alignItems="center">
                       <EditIcon sx={{ color: "blue", cursor: "pointer" }} onClick={() => editData(row.id, row.NamaProduk, row.Kategori, row.Stock, row.ReorderPoint, row.SafetyStock, row.EOQ)} />
                       <DeleteIcon sx={{ color: "darkred", cursor: "pointer" }} onClick={() => deleteUser(row.id)} />
+                      {inCart ? (
+                        <Button variant="outlined" size="small" disabled>
+                          Pesan
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="contained"
+                          size="small"
+                          onClick={() => handleAddToCart(row)}
+                        >
+                          Pesan
+                        </Button>
+                      )}
                     </Stack>
                   </TableCell>
                 </TableRow>
-              ))}
+              );  
+            })}
             </TableBody>
           </Table>
         </TableContainer>

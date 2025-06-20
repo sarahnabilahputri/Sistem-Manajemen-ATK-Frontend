@@ -49,14 +49,17 @@ export default function BAAKList() {
   const [formid, setFormid] = useState("");
   const [editopen, setEditOpen] = useState(false);
   const [totalItems, setTotalItems] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [autoOptions, setAutoOptions] = useState([]);
 
   const handleOpen = () => setOpen(true);
   const handleEditOpen = () => setEditOpen(true);
   const handleClose = () => setOpen(false);
   const handleEditClose = () => setEditOpen(false);
 
-  const fetchUsers = (pageArg = 1, limitArg = rowsPerPage) => {
-    axios.get(`${API_BASE_URL}/api/users?page=${pageArg}&limit=${limitArg}`, {
+  const fetchUsers = (pageArg = 1, limitArg = rowsPerPage, search = "") => {
+    axios.get(`${API_BASE_URL}/api/users`, {
+      params: { page: pageArg, limit: limitArg, search },
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json'
@@ -89,18 +92,47 @@ export default function BAAKList() {
   };
 
   useEffect(() => {
-    fetchUsers(1, rowsPerPage);
-  }, []);
+    fetchUsers(1, rowsPerPage, searchTerm);
+  }, [searchTerm, rowsPerPage]);
+
+  useEffect(() => {
+    let active = true;
+    if (searchTerm === "") {
+      setAutoOptions([]);
+      return undefined;
+    }
+
+    (async () => {
+      try {
+        const resp = await axios.get(`${API_BASE_URL}/api/users`, {
+          params: { page: 1, limit: rowsPerPage, search: searchTerm },
+          headers: { 'Accept': 'application/json', 'ngrok-skip-browser-warning': 'true' }
+        });
+        if (!active) return;
+        const opts = resp.data.data.data
+          .filter(user => user.role === 'BAAK')
+          .map(user => user.name);
+        setAutoOptions(opts);
+      } catch (err) {
+        console.error("Error fetching suggestions", err);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [searchTerm, rowsPerPage]);
 
   const deleteUser = (id) => {
     Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
+      title: "Hapus item?",
+      text: "Yakin ingin menghapus item ini?",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
+      confirmButtonText: "Ya",
+      cancelButtonText: 'Batal',
     }).then((result) => {
       if (result.value) {
         deleteApi(id);
@@ -111,7 +143,7 @@ export default function BAAKList() {
   const deleteApi = async (id) => {
     try {
       await axios.delete(`${API_BASE_URL}/api/users/${id}`);
-      Swal.fire("Deleted!", "User has been deleted.", "success");
+      Swal.fire("Berhasil!","User BAAK Berhasil Dihapus", "success");
       setRows(rows.filter((row) => row.id !== id));
     } catch (error) {
       console.error("Error deleting user:", error);
@@ -125,14 +157,14 @@ export default function BAAKList() {
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
-    fetchUsers(newPage + 1, rowsPerPage);
+    fetchUsers(newPage + 1, rowsPerPage, searchTerm);
   };
 
   const handleChangeRowsPerPage = (event) => {
     const newLimit = +event.target.value;
     setRowsPerPage(newLimit);
     setPage(0);
-    fetchUsers(1, newLimit);
+    fetchUsers(1, newLimit, searchTerm);
   };
 
   const filterData = (v) => {
@@ -217,14 +249,27 @@ export default function BAAKList() {
 
             <Typography variant="body1" sx={{ ml: 73 }}>Search:</Typography>
             <Autocomplete
-              disablePortal
-              id="user-search"
-              options={allRows}
-              sx={{ width: 187, ml: 2 }}
-              onChange={(e, v) => filterData(v)}
-              getOptionLabel={(row) => row.name || ""}
+              freeSolo
+              inputValue={searchTerm}
+              onInputChange={(_, v) => {
+                setSearchTerm(v);    
+                setPage(0);
+              }}
+              options={autoOptions}             
+              filterOptions={(opts) => opts}     
+              onChange={(_, selectedName) => {
+                
+                if (selectedName) {
+                  setSearchTerm(selectedName);
+                  setPage(0);
+                }
+              }}
               renderInput={(params) => (
-                <TextField {...params} size="small" />
+                <TextField
+                  {...params}
+                  size="small"
+                  sx={{ width: 187, ml: 2 }}
+                />
               )}
             />
           </Box>
@@ -242,7 +287,7 @@ export default function BAAKList() {
                 <TableCell align="left">Initial</TableCell>
                 <TableCell align="left">Role</TableCell>
                 {/* <TableCell align="left">Study Program ID</TableCell> */}
-                <TableCell align="left">Aksi</TableCell>
+                <TableCell align="left" sx={{ width: 10 }}>Aksi</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

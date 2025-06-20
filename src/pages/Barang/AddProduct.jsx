@@ -8,7 +8,7 @@ const API_BASE_URL = import.meta.env.VITE_BASE_URL;
 export default function AddProduct({ CloseEvent, onSuccess }) {
     const [name, setName] = useState("");
     const [price, setPrice] = useState("");
-    const [stock, setStock] = useState("");
+    // const [stock, setStock] = useState("");
     const [image, setImage] = useState(null);
     const [categories, setCategories] = useState([]);
     const [units, setUnits] = useState([]);
@@ -48,7 +48,8 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
     };
 
     const handleSubmit = async () => {
-        if (!name || !price || !stock || !image || !selectedCategory || !selectedUnit) {
+        if (!name || !price || !image || !selectedCategory || !selectedUnit) {
+            CloseEvent();
             Swal.fire("Error!", "Semua field wajib diisi!", "error");
             return;
         }
@@ -56,7 +57,7 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
         const formData = new FormData();
         formData.append("name", name);
         formData.append("price", price);
-        formData.append("stock", stock);
+        // formData.append("stock", stock);
         formData.append("image", image);
         formData.append("category_id", selectedCategory);
         formData.append("unit_id", selectedUnit);
@@ -126,10 +127,10 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
                         <TextField fullWidth size="small" value={formattedPrice} onChange={handlePriceChange} />
                     </Grid>
     
-                    <Grid item xs={12}>
+                    {/* <Grid item xs={12}>
                         <Typography variant="body1" sx={{ mb: 1 }}>Stok</Typography>
                         <TextField fullWidth size="small" type="number" value={stock} onChange={(e) => setStock(e.target.value)} />
-                    </Grid>
+                    </Grid> */}
     
                     <Grid item xs={12}>
                         <Typography variant="body1" sx={{ mb: 1 }}>Kategori</Typography>

@@ -6,6 +6,7 @@ import Kategori from "./pages/Kategori";
 import Dana from "./pages/Dana";
 import Barang from "./pages/Barang";
 import Pesan from "./pages/Pesan";
+import Terima from "./pages/Terima";
 import Ambil from "./pages/Ambil";
 import User from "./pages/User";
 import Login from "./pages/Login";
@@ -18,6 +19,9 @@ import CheckoutPage from "./pages/CheckoutAddItem";
 import { useState, useEffect } from 'react';
 import { Box, Toolbar } from "@mui/material";
 import { useTheme } from '@mui/material/styles';
+import { CartProvider } from "./context/CartContext"; 
+import CartModal from "./pages/CartModal";
+import "./pages/Api"
 
 const drawerWidth = 0; 
 const API_BASE_URL = import.meta.env.VITE_BASE_URL;
@@ -25,9 +29,11 @@ const API_BASE_URL = import.meta.env.VITE_BASE_URL;
 export default function App() {
   
   return (
-    <BrowserRouter>
-      <AppContent />
-    </BrowserRouter>
+    <CartProvider>
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
+    </CartProvider>
   );
 }
 
@@ -40,7 +46,6 @@ function AppContent() {
   useEffect(() => {
     const access_token = localStorage.getItem("access_token");
     const storedUser = localStorage.getItem("user");
-    
 
     if (access_token && storedUser) {
       setUser(JSON.parse(storedUser));
@@ -99,6 +104,7 @@ function AppContent() {
           <Route path="/satuan" element={<Satuan />} />
           <Route path="/kebutuhan" element={<Kebutuhan />} />
           <Route path="/pesan" element={<Pesan />} />
+          <Route path="/terima" element={<Terima />} />
           <Route path="/ambil" element={<Ambil />} />
           <Route path="/user" element={<User />} />
           <Route path="/staf" element={<Staf />} />
@@ -106,6 +112,7 @@ function AppContent() {
           <Route path="/checkout" element={<CheckoutPage />} />
         </Routes>
       </Box>
+      <CartModal />
     </Box>
   );   
 }

@@ -1,77 +1,49 @@
-import { useEffect } from "react";
+import { useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import styles from "../styles/Log.module.css";
+import axios from "axios"; 
 
 const API_BASE_URL = import.meta.env.VITE_BASE_URL;
 
-const Login = ( { setUser }) => {
+const Login = ({ setUser }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-      const url = new URL(window.location.href);
-      if (url.pathname === "/callback") {
-        const googleData = url.search;
-        const callbackURL = `${API_BASE_URL}/api/auth/callback${googleData}`;
-        console.log("GET ke backend:", callbackURL);
-  
-        fetch(callbackURL, {
-          method: "POST"
+    const url = new URL(window.location.href);
+    if (url.pathname === "/callback") {
+      const googleData = url.search;
+      const callbackURL = `${API_BASE_URL}/api/auth/callback${googleData}`;
+      fetch(callbackURL, {
+        method: "GET",
+        headers: {
+          "Accept": "application/json"
+        }
+      })
+        .then(async res => {
+          const text = await res.text();
+          const ct = res.headers.get("content-type");
+          if (!res.ok) throw new Error(`HTTP ${res.status}: ${text.slice(0,100)}`);
+          if (!ct || !ct.includes("application/json")) {
+            throw new Error(`Expected JSON, got: ${text.slice(0,100)}`);
+          }
+          return JSON.parse(text);
         })
-          .then(async (res) => {
-            const rawText = await res.text();
-            const contentType = res.headers.get("content-type");
-  
-            console.log("Response dari backend:", rawText);
-            
-            if (!res.ok) {
-              throw new Error(`HTTP ${res.status}: ${rawText.slice(0, 100)}...`);
-            }
-  
-            if (!contentType || !contentType.includes("application/json")) {
-              throw new Error(`Expected JSON but got: ${rawText.slice(0, 100)}...`);
-            }
-  
-            return JSON.parse(rawText);
-          })
-          .then((data) => {
-            console.log("DATA DARI BACKEND:", data);
-          
-            const { access_token, token_type } = data;
-
-            if (!access_token) {
-              console.warn("Token tidak ada dalam response!");
-              return;
-            }
-          
-            localStorage.setItem("access_token", access_token);
-            localStorage.setItem("token_type", token_type);
-          
-            // 🔥 Fetch user langsung di sini
-            return fetch(`${API_BASE_URL}/api/auth/authorize`, {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${access_token}`,
-              },
-            });
-          })
-          .then((res) => res.json())
-          .then((data) => {
-            console.log("USER FETCHED:", data.user);
-            if (data.user) {
-              localStorage.setItem("user", JSON.stringify(data.user));
-              setUser(data.user); // <-- 🔥 Tambahkan ini!
-              navigate("/home");  // Biar langsung masuk ke dashboard
-            }
-          })          
-          .catch((err) => {
-            console.error("Login error:", err);
-            alert("Login gagal: " + err.message);
-            navigate("/");
-          });
-      }
-    }, [navigate]);
-
-  
+        .then(data => {
+          const { access_token, token_type, user } = data;
+          if (!access_token) throw new Error("No access_token in response");
+          localStorage.setItem("access_token", access_token);
+          localStorage.setItem("token_type", token_type);
+          localStorage.setItem("user", JSON.stringify(user));
+          setUser(user);
+         
+          navigate("/home");
+        })
+        .catch(err => {
+          console.error("Login error:", err);
+          alert("Login gagal: " + err.message);
+          navigate("/");
+        });
+    }
+  }, [navigate, setUser]);
 
   return (
     <div className={styles["wrapper-login"]}>

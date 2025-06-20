@@ -9,7 +9,7 @@ const API_BASE_URL = import.meta.env.VITE_BASE_URL;
 export default function EditProduct({ fid, CloseEvent, onSuccess }) {
     const [product, setProduct] = useState({
         name: "",
-        stock: "",
+        // stock: "",
         price: "",
         unit_id: "",
         category_id: "",
@@ -37,7 +37,7 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
 
             setProduct({
                 name: data.name,
-                stock: data.stock.toString(),
+                // stock: data.stock.toString(),
                 price: data.price.toString(),
                 unit_id: data.unit_id,
                 category_id: data.category_id,
@@ -104,21 +104,21 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
     };
 
     const updateProduct = async () => {
-        const { name, stock, price, unit_id, category_id, image } = product;
+        const { name, price, unit_id, category_id, image } = product;
     
-        if (!name || !stock || !price || !unit_id || !category_id) {
+        if (!name || !price || !unit_id || !category_id) {
             Swal.fire("Error!", "Semua kolom harus diisi.", "error");
             return;
         }
     
-        if (parseInt(stock) < 0 || parseFloat(price) < 0) {
-            Swal.fire("Error!", "Stock dan harga harus lebih besar dari 0.", "error");
+        if ( parseFloat(price) < 0) {
+            Swal.fire("Error!", "Harga harus lebih besar dari 0.", "error");
             return;
         }
     
         const formData = new FormData();
         formData.append("name", name);
-        formData.append("stock", parseInt(stock));
+        // formData.append("stock", parseInt(stock));
         formData.append("price", parseFloat(price));
         formData.append("unit_id", unit_id);
         formData.append("category_id", category_id);
@@ -184,12 +184,12 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
             <Box sx={{ maxHeight: "50vh", overflowY: "auto", p: 2 }}>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
-                        <Typography>Nama Produk</Typography>
+                        <Typography variant="body1" sx={{ mb: 1 }}>Nama Produk</Typography>
                         <TextField fullWidth size="small" name="name" value={product.name} onChange={handleChange} />
                     </Grid>
 
                     <Grid item xs={12}>
-                        <Typography>Kategori</Typography>
+                        <Typography variant="body1" sx={{ mb: 1 }}>Kategori</Typography>
                         <TextField select fullWidth size="small" name="category_id" value={product.category_id} onChange={handleChange}>
                             {categories.map((cat) => (
                                 <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>
@@ -197,18 +197,18 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
                         </TextField>
                     </Grid>
 
-                    <Grid item xs={12}>
+                    {/* <Grid item xs={12}>
                         <Typography>Stock</Typography>
                         <TextField fullWidth size="small" type="number" name="stock" value={product.stock} onChange={handleChange} />
-                    </Grid>
+                    </Grid> */}
 
                     <Grid item xs={12}>
-                        <Typography>Harga</Typography>
+                        <Typography variant="body1" sx={{ mb: 1 }}>Harga</Typography>
                         <TextField fullWidth size="small" name="price" value={formattedPrice} onChange={handlePriceChange} />
                     </Grid>
 
                     <Grid item xs={12}>
-                        <Typography>Unit</Typography>
+                        <Typography variant="body1" sx={{ mb: 1 }}>Unit</Typography>
                         <TextField select fullWidth size="small" name="unit_id" value={product.unit_id} onChange={handleChange}>
                             {units.map((unit) => (
                                 <MenuItem key={unit.id} value={unit.id}>{unit.name}</MenuItem>
@@ -217,7 +217,7 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
                     </Grid>
 
                     <Grid item xs={12}>
-                        <Typography>Gambar Produk</Typography>
+                        <Typography variant="body1" sx={{ mb: 1 }}>Gambar Produk</Typography>
                         <TextField
                             fullWidth
                             size="small"

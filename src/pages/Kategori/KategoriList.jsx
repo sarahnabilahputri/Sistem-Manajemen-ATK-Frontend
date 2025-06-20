@@ -52,14 +52,17 @@ export default function KategoriList() {
   const [formid, setFormid] = useState("");
   const [editopen, setEditOpen] = useState(false);
   const [totalItems, setTotalItems] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [autoOptions, setAutoOptions] = useState([]);
 
   const handleOpen = () => setOpen(true);
   const handleEditOpen = () => setEditOpen(true);
   const handleClose = () => setOpen(false);
   const handleEditClose = () => setEditOpen(false);
 
-  const fetchCategories = (pageArg = 1, limitArg = rowsPerPage) => {
-    axios.get(`${API_BASE_URL}/api/categories?page=${pageArg}&limit=${limitArg}`, {
+  const fetchCategories = (pageArg = 1, limitArg = rowsPerPage, search = "") => {
+    axios.get(`${API_BASE_URL}/api/categories`, {
+      params: { page: pageArg, limit: limitArg, search },
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json'
@@ -92,19 +95,18 @@ export default function KategoriList() {
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    // validasi ekstensi .xlsx
     if (!file.name.toLowerCase().endsWith('.xlsx')) {
       return Swal.fire("Error", "File harus berformat .xlsx", "error");
     }
 
     const formData = new FormData();
-    formData.append("file", file);                   // key 'file' sesuai backend
+    formData.append("file", file);                  
 
     try {
       setImporting(true);
       const token = localStorage.getItem("access_token");
       await axios.post(
-        `${API_BASE_URL}/api/import-category`,
+        `${API_BASE_URL}/api/categories/import`,
         formData,
         {
          headers: {
@@ -114,18 +116,16 @@ export default function KategoriList() {
         }
       );
       Swal.fire("Success", "Import kategori berhasil", "success");
-      fetchCategories();                             // refresh daftar
+      fetchCategories();                             
       } catch (err) {
       const errorData = err.response?.data;
-      // Default message dari backend
+  
       let msg = errorData?.message || "Gagal import kategori";
 
-      // Jika `errors` adalah array (format backend)
       if (Array.isArray(errorData?.errors)) {
         msg = errorData.errors.join("\n");
       }
 
-      // Jika `errors` adalah objek (validasi Laravel)
       else if (errorData?.errors && typeof errorData.errors === "object") {
         msg = Object.values(errorData.errors).flat().join("\n");
       }
@@ -142,23 +142,50 @@ export default function KategoriList() {
 
     } finally {
       setImporting(false);
-      e.target.value = null;                         // reset input
+      e.target.value = null;                      
     }
   };
 
   useEffect(() => {
-    fetchCategories(1, rowsPerPage);
-  }, []);
-  
+    fetchCategories(1, rowsPerPage, searchTerm);
+  }, [searchTerm, rowsPerPage]);
+
+  useEffect(() => {
+    let active = true;
+    if (searchTerm === "") {
+      setAutoOptions([]);
+      return undefined;
+    }
+
+    (async () => {
+      try {
+        const resp = await axios.get(`${API_BASE_URL}/api/categories`, {
+          params: { page: 1, limit: rowsPerPage, search: searchTerm },
+          headers: { 'Accept': 'application/json', 'ngrok-skip-browser-warning': 'true' }
+        });
+        if (!active) return;
+        const opts = resp.data.data.data.map(p => p.name);
+        setAutoOptions(opts);
+      } catch (err) {
+        console.error("Error fetching suggestions", err);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [searchTerm, rowsPerPage]);
+
   const deleteUser = (id) => {
     Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
+      title: "Hapus item?",
+      text: "Yakin ingin menghapus item ini?",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
+      confirmButtonText: "Ya",
+      cancelButtonText: 'Batal',
     }).then((result) => {
       if (result.value) {
         deleteApi(id);
@@ -169,7 +196,7 @@ export default function KategoriList() {
   const deleteApi = async (id) => {
     try {
       await axios.delete(`${API_BASE_URL}/api/categories/${id}`);
-      Swal.fire("Deleted!", "Your category has been deleted.", "success");
+      Swal.fire("Berhasil!","Kategori Berhasil Dihapus", "success");
       setRows(rows.filter((row) => row.id !== id));
     } catch (error) {
       console.error("Error deleting category:", error);
@@ -183,14 +210,14 @@ export default function KategoriList() {
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
-    fetchCategories(newPage + 1, rowsPerPage);
+    fetchCategories(newPage + 1, rowsPerPage, searchTerm);
   };
 
   const handleChangeRowsPerPage = (event) => {
     const newLimit = +event.target.value;
     setRowsPerPage(newLimit);
     setPage(0);
-    fetchCategories(1, newLimit);
+    fetchCategories(1, newLimit, searchTerm);
   };
 
   const filterData = (v) => {
@@ -225,7 +252,7 @@ export default function KategoriList() {
           startIcon={
             <Box
               component="img"
-              src="/Icon/import.png"      // dari public/icon/import.png
+              src="/Icon/import.png"      
               alt="Import"
               sx={{ width: 15, height: 15 }}
             />
@@ -276,14 +303,27 @@ export default function KategoriList() {
           
           <Typography variant="body1" sx={{ ml: 73 }}>Search:</Typography>
           <Autocomplete
-            disablePortal
-            id="combo-box-demo"
-            options={allRows}
-            sx={{ width: 187, ml: 2 }}
-            onChange={(e, v) => filterData(v)}
-            getOptionLabel={(row) => row.Kategori || ""}
+            freeSolo
+            inputValue={searchTerm}
+            onInputChange={(_, v) => {
+              setSearchTerm(v);    
+              setPage(0);
+            }}
+            options={autoOptions}             
+            filterOptions={(opts) => opts}     
+            onChange={(_, selectedName) => {
+              
+              if (selectedName) {
+                setSearchTerm(selectedName);
+                setPage(0);
+              }
+            }}
             renderInput={(params) => (
-              <TextField {...params} size="small" />
+              <TextField
+                {...params}
+                size="small"
+                sx={{ width: 187, ml: 2 }}
+              />
             )}
           />
           </Box>

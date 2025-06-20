@@ -78,13 +78,13 @@ export default function AddStaff({ CloseEvent, onSuccess }) {
         } catch (error) {
     console.error("Error creating staff:", error);
 
-        // Menampilkan error detail jika ada error validasi dari backend
         if (error.response?.status === 422 && error.response?.data?.errors) {
             const errorMessages = Object.values(error.response.data.errors)
                 .flat()
                 .join("\n");
             Swal.fire("Validasi Gagal", errorMessages, "error");
         } else {
+            CloseEvent();
             Swal.fire("Error!", "Gagal menambahkan staff.", "error");
         }
 

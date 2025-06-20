@@ -18,6 +18,7 @@ import { useState, useEffect } from 'react';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import Collapse from '@mui/material/Collapse';
+import { useLocation } from 'react-router-dom';
 
 const drawerWidth = 240;
 const API_BASE_URL = import.meta.env.VITE_BASE_URL;
@@ -26,6 +27,7 @@ export default function Sidenav({ user }) {
 
   console.log("Sidenav user:", user); 
   const navigate = useNavigate(); 
+  const location = useLocation();
   const [openMasterData, setOpenMasterData] = useState(false);
   const [openKelolaUser, setOpenKelolaUser] = useState(false);
 
@@ -162,39 +164,39 @@ export default function Sidenav({ user }) {
         )}
           <List>
               <ListItem disablePadding onClick={()=>{navigate("/home")}}>
-                <ListItemButton>
+                <ListItemButton selected={location.pathname === "/home"}>
                   <ListItemIcon sx={{ minWidth: 36 }}>
                   <Box
                     component="img"
-                    src="/Icon/dash.png" // Sesuaikan dengan path gambar
+                    src="/Icon/dash.png" 
                     alt="dashboard"
-                    sx={{ width: 20, height: 20 }} // Sesuaikan ukuran ikon
+                    sx={{ width: 20, height: 20 }} 
                   /> 
                   </ListItemIcon >
                   <ListItemText primary="Dashboard" sx={{ "& .MuiTypography-root": { fontSize: "0.875rem", fontWeight: "semibold" } }}  />
                 </ListItemButton>
               </ListItem>
               <ListItem disablePadding onClick={()=>{navigate("/dana")}}>
-                <ListItemButton>
+                <ListItemButton selected={location.pathname === "/dana"}>
                   <ListItemIcon sx={{ minWidth: 36 }}>
                   <Box
                     component="img"
-                    src="/Icon/dollar.png" // Sesuaikan dengan path gambar
+                    src="/Icon/dollar.png" 
                     alt="dana"
-                    sx={{ width: 20, height: 20 }} // Sesuaikan ukuran ikon
+                    sx={{ width: 20, height: 20 }} 
                   /> 
                   </ListItemIcon>
                   <ListItemText primary="Kelola Dana BAAK" sx={{ "& .MuiTypography-root": { fontSize: "0.875rem", fontWeight: "semibold" } }} />
                 </ListItemButton>
               </ListItem>
               <ListItem disablePadding onClick={()=>{navigate("/barang")}}>
-                <ListItemButton>
+                <ListItemButton selected={location.pathname === "/barang"}>
                   <ListItemIcon sx={{ minWidth: 36 }}>
                   <Box
                     component="img"
-                    src="/Icon/file.png" // Sesuaikan dengan path gambar
+                    src="/Icon/file.png" 
                     alt="barang"
-                    sx={{ width: 20, height: 20 }} // Sesuaikan ukuran ikon
+                    sx={{ width: 20, height: 20 }} 
                   />  
                   </ListItemIcon>
                   <ListItemText primary="Stok Barang" sx={{ "& .MuiTypography-root": { fontSize: "0.875rem", fontWeight: "semibold" } }} />
@@ -220,7 +222,7 @@ export default function Sidenav({ user }) {
               <Collapse in={openMasterData} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
                   <ListItem disablePadding onClick={() => navigate("/kategori")}>
-                    <ListItemButton
+                    <ListItemButton selected={location.pathname === "/kategori"}
                       sx={{
                         pl: 6.5,
                         position: "relative",
@@ -229,10 +231,10 @@ export default function Sidenav({ user }) {
                           position: "absolute",
                           top: "25%",
                           transform: "translateY(-50%)",
-                          left: 24, // posisi horizontal garis
+                          left: 24, 
                           width: 18,
                           height: 30,
-                          borderLeft: "2px solid #D0D5DD", // warna garis
+                          borderLeft: "2px solid #D0D5DD", 
                           borderBottom: "2px solid #D0D5DD",
                           borderBottomLeftRadius: 8,
                         },
@@ -250,7 +252,7 @@ export default function Sidenav({ user }) {
                     </ListItemButton>
                   </ListItem>
                   <ListItem disablePadding onClick={() => navigate("/satuan")}>
-                      <ListItemButton
+                      <ListItemButton selected={location.pathname === "/satuan"}
                         sx={{
                           pl: 6.5,
                           position: "relative",
@@ -259,10 +261,10 @@ export default function Sidenav({ user }) {
                             position: "absolute",
                             top: "20%",
                             transform: "translateY(-50%)",
-                            left: 24, // posisi horizontal garis
+                            left: 24, 
                             width: 18,
                             height: 35,
-                            borderLeft: "2px solid #D0D5DD", // warna garis
+                            borderLeft: "2px solid #D0D5DD", 
                             borderBottom: "2px solid #D0D5DD",
                             borderBottomLeftRadius: 8,
                           },
@@ -280,7 +282,7 @@ export default function Sidenav({ user }) {
                     </ListItemButton>
                   </ListItem>
                   <ListItem disablePadding onClick={() => navigate("/prodi")}>
-                  <ListItemButton
+                  <ListItemButton selected={location.pathname === "/prodi"}
                         sx={{
                           pl: 6.5,
                           position: "relative",
@@ -289,10 +291,10 @@ export default function Sidenav({ user }) {
                             position: "absolute",
                             top: "20%",
                             transform: "translateY(-50%)",
-                            left: 24, // posisi horizontal garis
+                            left: 24, 
                             width: 18,
                             height: 35,
-                            borderLeft: "2px solid #D0D5DD", // warna garis
+                            borderLeft: "2px solid #D0D5DD", 
                             borderBottom: "2px solid #D0D5DD",
                             borderBottomLeftRadius: 8,
                           },
@@ -310,7 +312,7 @@ export default function Sidenav({ user }) {
                     </ListItemButton>
                   </ListItem>
                   <ListItem disablePadding onClick={() => navigate("/kebutuhan")}>
-                  <ListItemButton
+                  <ListItemButton selected={location.pathname === "/kebutuhan"}
                         sx={{
                           pl: 6.5,
                           position: "relative",
@@ -342,32 +344,101 @@ export default function Sidenav({ user }) {
                 </List>
               </Collapse>
 
-              <ListItem disablePadding onClick={()=>{navigate("/pesan")}}>
-                <ListItemButton>
-                  <ListItemIcon sx={{ minWidth: 36 }}>
-                  <Box
-                    component="img"
-                    src="/Icon/stock.png" // Sesuaikan dengan path gambar
-                    alt="pesan"
-                    sx={{ width: 20, height: 20 }} // Sesuaikan ukuran ikon
-                  />  
-                  </ListItemIcon >
-                  <ListItemText primary="Pemesanan Barang" sx={{ "& .MuiTypography-root": { fontSize: "0.875rem", fontWeight: "semibold" } }} />
-                </ListItemButton>
-              </ListItem>
               <ListItem disablePadding onClick={()=>{navigate("/ambil")}}>
-                <ListItemButton>
+                <ListItemButton selected={location.pathname === "/ambil"}>
                   <ListItemIcon sx={{ minWidth: 36 }}>
                   <Box
                     component="img"
-                    src="/Icon/box.png" // Sesuaikan dengan path gambar
+                    src="/Icon/box.png" 
                     alt="ambil"
-                    sx={{ width: 20, height: 20 }} // Sesuaikan ukuran ikon
+                    sx={{ width: 20, height: 20 }} 
                   />  
                   </ListItemIcon>
                   <ListItemText primary="Ambil Barang" sx={{ "& .MuiTypography-root": { fontSize: "0.875rem", fontWeight: "semibold" } }} />
                 </ListItemButton>
               </ListItem>
+
+              {/* KELOLA USER GROUP */}
+              <ListItem disablePadding onClick={handleToggleKelolaUser}>
+                <ListItemButton>
+                  <ListItemIcon sx={{ minWidth: 36 }}>
+                    <Box
+                      component="img"
+                      src="/Icon/stock.png"
+                      alt="Pengadaan"
+                      sx={{ width: 20, height: 20 }}
+                    />                  
+                  </ListItemIcon>
+                  <ListItemText primary="Pengadaan" sx={{ "& .MuiTypography-root": { fontSize: "0.875rem", fontWeight: "semibold" } }} />
+                  {openKelolaUser ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
+                </ListItemButton>
+              </ListItem>
+
+              <Collapse in={openKelolaUser} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding>
+                  <ListItem disablePadding onClick={() => navigate("/pesan")}>
+                    <ListItemButton selected={location.pathname === "/pesan"}
+                      sx={{
+                        pl: 6.5,
+                        position: "relative",
+                        "&::before": {
+                          content: '""',
+                          position: "absolute",
+                          top: "25%",
+                          transform: "translateY(-50%)",
+                          left: 24, 
+                          width: 18,
+                          height: 30,
+                          borderLeft: "2px solid #D0D5DD", 
+                          borderBottom: "2px solid #D0D5DD",
+                          borderBottomLeftRadius: 8,
+                        },
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 36 }}>
+                        <Box
+                          component="img"
+                          src="/Icon/shopping-cart.png"
+                          alt="pesan"
+                          sx={{ width: 20, height: 20 }}
+                        />
+                      </ListItemIcon>
+                      <ListItemText primary="Pesan Barang" sx={{ "& .MuiTypography-root": { fontSize: "0.875rem" } }} />
+                    </ListItemButton>
+                  </ListItem>
+                  <ListItem disablePadding onClick={() => navigate("/terima")}>
+                    <ListItemButton selected={location.pathname === "/terima"}
+                      sx={{
+                        pl: 6.5,
+                        position: "relative",
+                        "&::before": {
+                          content: '""',
+                          position: "absolute",
+                          top: "25%",
+                          transform: "translateY(-50%)",
+                          left: 24, 
+                          width: 18,
+                          height: 30,
+                          borderLeft: "2px solid #D0D5DD", 
+                          borderBottom: "2px solid #D0D5DD",
+                          borderBottomLeftRadius: 8,
+                        },
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 36 }}>
+                        <Box
+                          component="img"
+                          src="/Icon/package.png"
+                          alt="kategori"
+                          sx={{ width: 20, height: 20 }}
+                        />
+                      </ListItemIcon>
+                      <ListItemText primary="Terima Barang" sx={{ "& .MuiTypography-root": { fontSize: "0.875rem" } }} />
+                    </ListItemButton>
+                  </ListItem>
+    
+                </List>
+              </Collapse>
 
               {/* KELOLA USER GROUP */}
               <ListItem disablePadding onClick={handleToggleKelolaUser}>
@@ -388,7 +459,7 @@ export default function Sidenav({ user }) {
               <Collapse in={openKelolaUser} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
                   <ListItem disablePadding onClick={() => navigate("/user")}>
-                    <ListItemButton
+                    <ListItemButton selected={location.pathname === "/user"}
                       sx={{
                         pl: 6.5,
                         position: "relative",
@@ -397,10 +468,10 @@ export default function Sidenav({ user }) {
                           position: "absolute",
                           top: "25%",
                           transform: "translateY(-50%)",
-                          left: 24, // posisi horizontal garis
+                          left: 24, 
                           width: 18,
                           height: 30,
-                          borderLeft: "2px solid #D0D5DD", // warna garis
+                          borderLeft: "2px solid #D0D5DD", 
                           borderBottom: "2px solid #D0D5DD",
                           borderBottomLeftRadius: 8,
                         },
@@ -418,7 +489,7 @@ export default function Sidenav({ user }) {
                     </ListItemButton>
                   </ListItem>
                   <ListItem disablePadding onClick={() => navigate("/staf")}>
-                    <ListItemButton
+                    <ListItemButton selected={location.pathname === "/staf"}
                       sx={{
                         pl: 6.5,
                         position: "relative",
@@ -427,10 +498,10 @@ export default function Sidenav({ user }) {
                           position: "absolute",
                           top: "25%",
                           transform: "translateY(-50%)",
-                          left: 24, // posisi horizontal garis
+                          left: 24, 
                           width: 18,
                           height: 30,
-                          borderLeft: "2px solid #D0D5DD", // warna garis
+                          borderLeft: "2px solid #D0D5DD", 
                           borderBottom: "2px solid #D0D5DD",
                           borderBottomLeftRadius: 8,
                         },
@@ -459,9 +530,6 @@ export default function Sidenav({ user }) {
                   <ListItemText primary="Logout" sx={{ color: "red", fontWeight: "bold" }} />
                 </ListItemButton>
               </ListItem>
-
-
-
           </List>
         </Box>
       </Drawer>
