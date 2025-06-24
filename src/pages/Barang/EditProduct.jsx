@@ -183,12 +183,12 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
 
             <Box sx={{ maxHeight: "50vh", overflowY: "auto", p: 2 }}>
                 <Grid container spacing={2}>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Typography variant="body1" sx={{ mb: 1 }}>Nama Produk</Typography>
                         <TextField fullWidth size="small" name="name" value={product.name} onChange={handleChange} />
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Typography variant="body1" sx={{ mb: 1 }}>Kategori</Typography>
                         <TextField select fullWidth size="small" name="category_id" value={product.category_id} onChange={handleChange}>
                             {categories.map((cat) => (
@@ -197,17 +197,12 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
                         </TextField>
                     </Grid>
 
-                    {/* <Grid item xs={12}>
-                        <Typography>Stock</Typography>
-                        <TextField fullWidth size="small" type="number" name="stock" value={product.stock} onChange={handleChange} />
-                    </Grid> */}
-
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Typography variant="body1" sx={{ mb: 1 }}>Harga</Typography>
                         <TextField fullWidth size="small" name="price" value={formattedPrice} onChange={handlePriceChange} />
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Typography variant="body1" sx={{ mb: 1 }}>Unit</Typography>
                         <TextField select fullWidth size="small" name="unit_id" value={product.unit_id} onChange={handleChange}>
                             {units.map((unit) => (
@@ -216,7 +211,7 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
                         </TextField>
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Typography variant="body1" sx={{ mb: 1 }}>Gambar Produk</Typography>
                         <TextField
                             fullWidth

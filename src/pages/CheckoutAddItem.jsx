@@ -77,7 +77,7 @@ export default function CheckoutPage() {
         setProducts(res.data.data.data.map(p => ({ id: p.id, name: p.name, stock: p.stock })));
 
         axios
-          .get(`${API_BASE_URL}/api/purposes`, { headers:{ "ngrok-skip-browser-warning":"true" } })
+          .get(`${API_BASE_URL}/papi/urposes`, { headers:{ "ngrok-skip-browser-warning":"true" } })
           .then(r2 => setPurposes(r2.data.data.data))
           .catch(console.error);
       })
@@ -462,7 +462,7 @@ export default function CheckoutPage() {
             elevation={2}
           >
             <Grid container spacing={4}>
-              <Grid item xs={12} md={5}>
+              <Grid size={{ xs: 12, md: 5 }}>
                 <Box
                   sx={{
                     bgcolor: '#1976D2',
@@ -486,9 +486,9 @@ export default function CheckoutPage() {
                 </Box>
               </Grid>
 
-              <Grid item xs={12} md={6} mt={3} sx={{ ml: 4 }}>
+              <Grid size={{ xs: 12, md: 6 }} sx={{ ml: 4, mt: 3 }}>
                 <Grid container spacing={3}>
-                  <Grid item xs={12}>
+                  <Grid size={{ xs: 12}}>
                     <Typography variant="subtitle1" sx={{ mb: 1 }}>
                       Nama Barang
                     </Typography>
@@ -521,7 +521,7 @@ export default function CheckoutPage() {
                     </Box>
                   </Grid>
 
-                  <Grid item xs={12} mt={-2}>
+                  <Grid size={{ xs: 12 }} sx={{ mt:-2}} >
                     <Typography variant="subtitle1" sx={{ mb: 1 }}>
                       Jumlah
                     </Typography>
@@ -552,7 +552,7 @@ export default function CheckoutPage() {
                     />
                   </Grid>
 
-                  <Grid item xs={12} mt={-1}>
+                   <Grid size={{ xs: 12 }} sx={{ mt:-1 }}>
                     <Box sx={{ display: 'flex', justifyContent: 'right', gap: 2 }}>
                       <Button
                         variant="outlined"

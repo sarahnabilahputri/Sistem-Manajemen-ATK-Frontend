@@ -260,7 +260,22 @@ export default function StafList() {
           </Box>
         </Modal>
         <Modal open={editopen} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
-          <Box sx={style}>
+         <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '100%',
+              maxWidth: 400, 
+              bgcolor: 'background.paper',
+              borderRadius: 2,
+              boxShadow: 24,
+              p: 3,
+              overflowY: 'auto',
+              maxHeight: '100vh',
+            }}
+          >
             <EditStaff CloseEvent={handleEditClose} fid={formid} onSuccess={fetchUsers} />
           </Box>
         </Modal>

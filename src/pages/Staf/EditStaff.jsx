@@ -138,23 +138,23 @@ export default function EditStaff({ fid, CloseEvent, onSuccess }) {
 
     return (
         <Box sx={{ maxWidth: 500, mx: "auto", bgcolor: "white", p: 2, borderRadius: 2 }}>
-            <Typography variant="h6" align="center">Form Edit Staff</Typography>
+            <Typography variant="h6" align="center"  sx={{ mb:2 }}>Form Edit Staff</Typography>
             <Box sx={{ maxHeight: "60vh", overflowY: "auto", pr: 1 }}>
                 <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <Typography>Nama</Typography>
+                    <Grid size={{ xs: 12 }}>
+                        <Typography sx={{ mb:1 }}>Nama</Typography>
                         <TextField name="name" value={formData.name} onChange={handleChange} fullWidth size="small" />
                     </Grid>
-                    <Grid item xs={12}>
-                        <Typography>Email</Typography>
+                    <Grid size={{ xs: 12 }}>
+                        <Typography sx={{ mb:1 }}>Email</Typography>
                         <TextField name="email" value={formData.email} onChange={handleChange} fullWidth size="small" />
                     </Grid>
-                    <Grid item xs={12}>
-                        <Typography>NIP</Typography>
+                    <Grid size={{ xs: 12 }}>
+                        <Typography sx={{ mb:1 }}>NIP</Typography>
                         <TextField name="nip" value={formData.nip} onChange={handleChange} fullWidth size="small" />
                     </Grid>
-                    <Grid item xs={12}>
-                        <Typography>Posisi</Typography>
+                    <Grid size={{ xs: 12 }}>
+                        <Typography sx={{ mb:1 }}>Posisi</Typography>
                         <TextField name="position" value={formData.position} onChange={handleChange} select fullWidth size="small">
                             <MenuItem value="Dosen">Dosen</MenuItem>
                             <MenuItem value="Rumah Tangga">Rumah Tangga</MenuItem>
@@ -162,13 +162,13 @@ export default function EditStaff({ fid, CloseEvent, onSuccess }) {
                             
                         </TextField>
                     </Grid>
-                    <Grid item xs={12}>
-                        <Typography>Inisial</Typography>
+                    <Grid size={{ xs: 12 }}>
+                        <Typography sx={{ mb:1 }}>Inisial</Typography>
                         <TextField name="initial" value={formData.initial} onChange={handleChange} fullWidth size="small" />
                     </Grid>
                     {formData.position === "Dosen" && (
-                        <Grid item xs={12}>
-                            <Typography>Program Studi</Typography>
+                        <Grid size={{ xs: 12 }}>
+                            <Typography sx={{ mb:1 }}>Program Studi</Typography>
                             <TextField name="study_program_id" value={formData.study_program_id} onChange={handleChange} select fullWidth size="small">
                                 {studyPrograms.map((prog) => (
                                     <MenuItem key={prog.id} value={prog.id}>{prog.name}</MenuItem>
@@ -177,8 +177,8 @@ export default function EditStaff({ fid, CloseEvent, onSuccess }) {
                         </Grid>
                     )}
                     {formData.position === "Rumah Tangga" && (
-                        <Grid item xs={12}>
-                        <Typography>Phone Number</Typography>
+                        <Grid size={{ xs: 12 }}>
+                        <Typography sx={{ mb:1 }}>Phone Number</Typography>
                         <TextField
                             name="phone_number"
                             value={formData.phone_number}

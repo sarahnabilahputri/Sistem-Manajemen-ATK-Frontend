@@ -1,6 +1,7 @@
-import { useEffect, useContext } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios"; 
+import axios from '../pages/Api';
+import styles from '../styles/Log.module.css';
 
 const API_BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -10,49 +11,51 @@ const Login = ({ setUser }) => {
   useEffect(() => {
     const url = new URL(window.location.href);
     if (url.pathname === "/callback") {
-      const googleData = url.search;
+      const googleData = url.search; // e.g. '?code=...&scope=...'
       const callbackURL = `${API_BASE_URL}/api/auth/callback${googleData}`;
-      fetch(callbackURL, {
-        method: "GET",
-        headers: {
-          "Accept": "application/json"
-        }
-      })
-        .then(async res => {
-          const text = await res.text();
-          const ct = res.headers.get("content-type");
-          if (!res.ok) throw new Error(`HTTP ${res.status}: ${text.slice(0,100)}`);
-          if (!ct || !ct.includes("application/json")) {
-            throw new Error(`Expected JSON, got: ${text.slice(0,100)}`);
-          }
-          return JSON.parse(text);
-        })
-        .then(data => {
+      // Gunakan POST sesuai route backend
+      axios.post(callbackURL)
+        .then(res => {
+          const data = res.data;
           const { access_token, token_type, user } = data;
           if (!access_token) throw new Error("No access_token in response");
           localStorage.setItem("access_token", access_token);
           localStorage.setItem("token_type", token_type);
-          localStorage.setItem("user", JSON.stringify(user));
-          setUser(user);
-         
+          if (user) {
+            localStorage.setItem("user", JSON.stringify(user));
+            setUser(user);
+            return null;
+          }
+          // Jika backend tidak mengembalikan user langsung, fetch user
+          return axios.get(`${API_BASE_URL}/api/auth/authorize`)
+            .then(authRes => {
+              const u = authRes.data.user;
+              if (u) {
+                localStorage.setItem("user", JSON.stringify(u));
+                setUser(u);
+              }
+            });
+        })
+        .then(() => {
           navigate("/home");
         })
         .catch(err => {
           console.error("Login error:", err);
-          alert("Login gagal: " + err.message);
+          const msg = err.response?.data?.message || err.message || 'Unknown error';
+          alert("Login gagal: " + msg);
           navigate("/");
         });
     }
   }, [navigate, setUser]);
 
   return (
-    <div className={styles["wrapper-login"]}>
-      <h1 className={styles["page-title"]}>Sistem Manajemen ATK di BAAK</h1>
-      <img src="/logo.png" alt="Logo" className={styles["logo-login"]} />
-      <div className={styles["login-container"]}>
-        <a href={`${API_BASE_URL}/api/auth/redirect?prompt=login`} className={styles["social-login"]}>
-          <button className={styles["social-button"]}>
-            <img src="google.svg" alt="Google" className={styles["social-icon"]} />
+    <div className={styles['wrapper-login']}>
+      <h1 className={styles['page-title']}>Sistem Manajemen ATK di BAAK</h1>
+      <img src="/logo.png" alt="Logo" className={styles['logo-login']} />
+      <div className={styles['login-container']}>
+        <a href={`${API_BASE_URL}/api/auth/redirect?prompt=login`} className={styles['social-login']}>
+          <button className={styles['social-button']}>
+            <img src="google.svg" alt="Google" className={styles['social-icon']} />
             Sign in with Google
           </button>
         </a>

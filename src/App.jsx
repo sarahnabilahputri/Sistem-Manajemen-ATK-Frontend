@@ -29,11 +29,11 @@ const API_BASE_URL = import.meta.env.VITE_BASE_URL;
 export default function App() {
   
   return (
-    <CartProvider>
-      <BrowserRouter>
+    <BrowserRouter>
+      <CartProvider>
         <AppContent />
-      </BrowserRouter>
-    </CartProvider>
+      </CartProvider>
+    </BrowserRouter>
   );
 }
 

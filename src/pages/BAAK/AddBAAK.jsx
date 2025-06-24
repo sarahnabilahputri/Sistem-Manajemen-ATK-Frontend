@@ -55,17 +55,17 @@ export default function AddBaak({ CloseEvent, onSuccess }) {
             <Box height={20} />
             <Box sx={{ maxHeight: "60vh", overflowY: "auto", pr: 1 }}>
                 <Grid container spacing={2}>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Typography variant="body1" sx={{ mb: 1 }}>Nama</Typography>
                         <TextField name="name" value={formData.name} onChange={handleChange} size="small" fullWidth />
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Typography variant="body1" sx={{ mb: 1 }}>Email</Typography>
                         <TextField name="email" value={formData.email} onChange={handleChange} size="small" fullWidth />
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Typography variant="body1" sx={{ mb: 1 }}>NIP</Typography>
                         <TextField 
                             name="nip" 
@@ -80,7 +80,7 @@ export default function AddBaak({ CloseEvent, onSuccess }) {
                         />
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Typography variant="body1" sx={{ mb: 1 }}>Posisi</Typography>
                         <TextField
                             name="position"
@@ -91,7 +91,7 @@ export default function AddBaak({ CloseEvent, onSuccess }) {
                         />
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Typography variant="body1" sx={{ mb: 1 }}>Inisial</Typography>
                         <TextField
                         name="initial"
@@ -105,7 +105,7 @@ export default function AddBaak({ CloseEvent, onSuccess }) {
                         />
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Typography variant="body1" sx={{ mb: 1 }}>Role</Typography>
                         <TextField
                             name="role"
@@ -119,7 +119,7 @@ export default function AddBaak({ CloseEvent, onSuccess }) {
             </Box>
 
             <Grid container spacing={2} sx={{ mt: 2 }}>
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                     <Typography variant="h5" align="center">
                         <Button variant="contained" onClick={createUser}>Simpan</Button>
                         <Button

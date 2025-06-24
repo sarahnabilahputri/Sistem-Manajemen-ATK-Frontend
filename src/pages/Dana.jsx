@@ -3,7 +3,8 @@ import Sidenav from "../components/Sidenav";
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Navbar from "../components/Navbar";
-import { Link } from "react-router-dom"; // Import React Router untuk navigasi
+import { Link } from "react-router-dom"; 
+import DanaBAAK from './DanaBAAK';
 
 export default function Dana() {
     return (
@@ -19,7 +20,8 @@ export default function Dana() {
           <Link to="/home" className="text-gray-400 ">Home</Link>
           <span className="mx-2 text-gray-400">•</span>
           <span>Kelola Dana BAAK</span>
-        </div>            
+        </div> 
+        <DanaBAAK/>           
         </Box>
       </Box>
       </div>

@@ -29,7 +29,7 @@ export default function Home() {
           <span>Dashboard</span>
         </div>  
           <Grid container spacing={2}>
-            <Grid item xs={8}>
+            <Grid size={{ xs: 8 }}>
             <Stack spacing={2} direction="row">
               <Card sx={{ minWidth: 32 + "%", height: 180 }}>
                 <CardContent>
@@ -48,7 +48,7 @@ export default function Home() {
               </Card>
             </Stack>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
             <Stack spacing={2}>
               <Card sx={{ minWidth: 32 + "%", height: 180 }}>
                 <CardContent>
@@ -60,7 +60,7 @@ export default function Home() {
           </Grid>
           <Box height={20} />
           <Grid container spacing={2}>
-            <Grid item xs={8}>
+            <Grid size={{ xs: 8 }}>
             <Stack spacing={2}>
                <Card sx={{ height: 40 + "vh" }}>
                 <CardContent>
@@ -74,7 +74,7 @@ export default function Home() {
               </Card>
             </Stack>  
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
             <Card sx={{ height: 40 + "vh"  }}>
                 <CardContent>
                   

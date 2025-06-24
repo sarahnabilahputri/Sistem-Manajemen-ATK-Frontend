@@ -89,19 +89,20 @@ export default function EditBaak({ fid, CloseEvent, onSuccess }) {
 
     return (
         <Box sx={{ maxWidth: 500, mx: "auto", bgcolor: "white", p: 2, borderRadius: 2 }}>
-            <Typography variant="h6" align="center" >Form Edit BAAK</Typography>
+            <Typography variant="h6" align="center" sx={{ mb: 2 }}>Form Edit BAAK</Typography>
+            <Typography variant="h6" align="center" sx={{ mb: 2,  }}>Form Edit BAAK</Typography>
             <Box sx={{ maxHeight: "50vh", overflowY: "auto", pr: 1 }}>
                 <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <Typography>Nama</Typography>
+                    <Grid size={{ xs: 12 }} >
+                        <Typography sx={{ mb:1 }}>Nama</Typography>
                         <TextField name="name" value={formData.name} onChange={handleChange} fullWidth size="small" />
                     </Grid>
-                    <Grid item xs={12}>
-                        <Typography>Email</Typography>
+                    <Grid size={{ xs: 12 }}>
+                        <Typography sx={{ mb:1 }}>Email</Typography>
                         <TextField name="email" value={formData.email} onChange={handleChange} fullWidth size="small" />
                     </Grid>
-                    <Grid item xs={12}>
-                        <Typography>NIP</Typography>
+                    <Grid size={{ xs: 12 }}>
+                        <Typography sx={{ mb:1 }}>NIP</Typography>
                         <TextField 
                             name="nip" 
                             value={formData.nip} 
@@ -113,8 +114,8 @@ export default function EditBaak({ fid, CloseEvent, onSuccess }) {
                             size="small" 
                         />
                     </Grid>
-                    <Grid item xs={12}>
-                        <Typography>Posisi</Typography>
+                    <Grid size={{ xs: 12 }}>
+                        <Typography sx={{ mb:1 }}>Posisi</Typography>
                         <TextField
                             name="position"
                             value={formData.position}
@@ -123,8 +124,8 @@ export default function EditBaak({ fid, CloseEvent, onSuccess }) {
                             disabled
                         />
                     </Grid>
-                    <Grid item xs={12}>
-                        <Typography>Inisial</Typography>
+                    <Grid size={{ xs: 12 }}>
+                        <Typography sx={{ mb:1 }}>Inisial</Typography>
                         <TextField 
                             name="initial" 
                             value={formData.initial.toUpperCase()} 
@@ -136,8 +137,8 @@ export default function EditBaak({ fid, CloseEvent, onSuccess }) {
                             size="small" 
                         />
                     </Grid>
-                    <Grid item xs={12}>
-                        <Typography>Role</Typography>
+                    <Grid size={{ xs: 12 }}>
+                        <Typography sx={{ mb:1 }}>Role</Typography>
                         <TextField
                             name="role"
                             value={formData.role}

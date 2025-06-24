@@ -117,22 +117,17 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
             {/* Scrollable container */}
             <Box sx={{ maxHeight: "60vh", overflowY: "auto", pr: 1 }}>
                 <Grid container spacing={2}>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Typography variant="body1" sx={{ mb: 1 }}>Nama Produk</Typography>
                         <TextField fullWidth size="small" value={name} onChange={(e) => setName(e.target.value)} />
                     </Grid>
     
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Typography variant="body1" sx={{ mb: 1 }}>Harga</Typography>
                         <TextField fullWidth size="small" value={formattedPrice} onChange={handlePriceChange} />
                     </Grid>
     
-                    {/* <Grid item xs={12}>
-                        <Typography variant="body1" sx={{ mb: 1 }}>Stok</Typography>
-                        <TextField fullWidth size="small" type="number" value={stock} onChange={(e) => setStock(e.target.value)} />
-                    </Grid> */}
-    
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Typography variant="body1" sx={{ mb: 1 }}>Kategori</Typography>
                         <TextField
                             select
@@ -149,7 +144,7 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
                         </TextField>
                     </Grid>
     
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Typography variant="body1" sx={{ mb: 1 }}>Satuan</Typography>
                         <TextField
                             select
@@ -166,7 +161,7 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
                         </TextField>
                     </Grid>
     
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Typography variant="body1" sx={{ mb: 1 }}>Gambar</Typography>
                         <Box sx={{ display: 'flex', width: '100%' }}>
                             <Button
@@ -221,8 +216,8 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
             </Box>
     
             {/* Tombol bawah */}
-            <Grid container spacing={2} sx={{ mt: 2 }}>
-                <Grid item xs={12}>
+            <Grid container sx={{ mt: 2 }}>
+                <Grid size={{ xs: 12 }}>
                     <Typography variant="h5" align="center">
                         <Button variant="contained" onClick={handleSubmit}>Simpan</Button>
                         <Button
