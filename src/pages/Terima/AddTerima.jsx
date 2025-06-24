@@ -8,12 +8,10 @@ import {
 } from '@mui/material';
 import Swal from 'sweetalert2';
 
-// Base URL and endpoints
 const BASE_URL = 'https://boar-lenient-similarly.ngrok-free.app';
 const REORDERS_URL = `${BASE_URL}/api/reorders`;
 const RECEIVED_URL = `${BASE_URL}/api/product-received`;
 
-// Helper to get YYYY-MM-DD today
 const getToday = () => {
   const today = new Date();
   const pad = n => String(n).padStart(2, '0');
@@ -31,7 +29,6 @@ export default function AddTerima({ CloseEvent, onSuccess }) {
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
-  // Fetch reorders with status 'proses'
   useEffect(() => {
     setLoadingReorders(true);
     axios.get(REORDERS_URL, { headers: { 'ngrok-skip-browser-warning': 'true' } })
@@ -43,7 +40,6 @@ export default function AddTerima({ CloseEvent, onSuccess }) {
       .finally(() => setLoadingReorders(false));
   }, []);
 
-  // Populate items & defaults when selectedReorder changes
   useEffect(() => {
     if (!selectedReorder) {
       setItems([]);
@@ -79,7 +75,6 @@ export default function AddTerima({ CloseEvent, onSuccess }) {
     if (!selectedReorder) return;
     setSubmitting(true);
     try {
-      // Check if already exists
       const respCheck = await axios.get(RECEIVED_URL, {
         params: { reorder_id: selectedReorder.id },
         headers: { 'ngrok-skip-browser-warning': 'true' }
@@ -92,7 +87,6 @@ export default function AddTerima({ CloseEvent, onSuccess }) {
         return;
       }
     } catch (e) {
-      // Jika GET gagal, tampilkan error tapi izinkan lanjut? Atau batalkan?
       console.error('Error checking existing penerimaan:', e);
       Swal.fire('Error', 'Gagal memeriksa data penerimaan sebelumnya.', 'error');
       setSubmitting(false);

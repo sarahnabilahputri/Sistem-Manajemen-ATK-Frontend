@@ -9,7 +9,6 @@ const API_BASE_URL = import.meta.env.VITE_BASE_URL;
 export default function EditProduct({ fid, CloseEvent, onSuccess }) {
     const [product, setProduct] = useState({
         name: "",
-        // stock: "",
         price: "",
         unit_id: "",
         category_id: "",
@@ -37,7 +36,7 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
 
             setProduct({
                 name: data.name,
-                // stock: data.stock.toString(),
+
                 price: data.price.toString(),
                 unit_id: data.unit_id,
                 category_id: data.category_id,
@@ -118,7 +117,6 @@ export default function EditProduct({ fid, CloseEvent, onSuccess }) {
     
         const formData = new FormData();
         formData.append("name", name);
-        // formData.append("stock", parseInt(stock));
         formData.append("price", parseFloat(price));
         formData.append("unit_id", unit_id);
         formData.append("category_id", category_id);

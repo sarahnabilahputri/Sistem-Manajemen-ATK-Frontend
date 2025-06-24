@@ -63,7 +63,6 @@ export default function PesanList() {
   const [editOpen, setEditOpen] = useState(false);
   const [editData, setEditData] = useState(null);
 
-  // States for send WA modal
   const [sendModalOpen, setSendModalOpen] = useState(false);
   const [selectedOrderForSend, setSelectedOrderForSend] = useState(null);
   const [selectedUserForSend, setSelectedUserForSend] = useState(null);
@@ -72,7 +71,6 @@ export default function PesanList() {
   const handleChangePage = (_, newPage) => setPage(newPage);
   const handleChangeRowsPerPage = (e) => { setRowsPerPage(+e.target.value); setPage(0); };
 
-  // Utility: format date ke DD-MM-YYYY
   const formatDateOnly = (dateStr) => {
     if (!dateStr) return '-';
     const d = new Date(dateStr);
@@ -88,7 +86,6 @@ export default function PesanList() {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);
   };
 
-  // Sort helper: terbaru berdasarkan reorder_date desc
   const sortRows = arr => arr.slice().sort((a, b) => {
     const dateA = new Date(a.created_at || a.reorder_date);
     const dateB = new Date(b.created_at || b.reorder_date);
@@ -101,18 +98,15 @@ export default function PesanList() {
   const closeEdit = () => setEditOpen(false);
   const handleSaveEdit = (updated) => {
     if (!updated) return;
-    // Setelah edit, susun ulang: terbaru di atas
     const updatedAll = allRows.map(r => r.id === updated.id ? updated : r);
     const sortedAll = sortRows(updatedAll);
     setAllRows(sortedAll);
-    // apply filter
     const filtered = sortedAll.filter(r => !searchTerm || r.initial.toLowerCase().includes(searchTerm.toLowerCase()));
     setRows(filtered);
     setTotalItems(filtered.length);
     closeEdit();
   };
 
-  // Handle delete from EditPesan
   const handleDeleteFromEdit = (id) => {
     const filteredAll = allRows.filter(r => r.id !== id);
     const sortedAll = sortRows(filteredAll);
@@ -123,7 +117,6 @@ export default function PesanList() {
     closeEdit();
   };
 
-  // Fetch users
   useEffect(() => {
     axios.get(`${API_BASE_URL}/api/users?page=1&limit=1000`, { headers: { 'ngrok-skip-browser-warning': 'true' } })
       .then(res => {
@@ -133,7 +126,6 @@ export default function PesanList() {
       .catch(err => console.error('Error fetch users:', err));
   }, []);
 
-  // Fetch reorders once
   useEffect(() => {
     const fetchReorders = async () => {
       try {
@@ -164,7 +156,6 @@ export default function PesanList() {
     fetchReorders();
   }, [location.key]);
 
-  // After users and allRows ready, map initial
   useEffect(() => {
     if (!users.length || !allRows.length) return;
     const updated = allRows.map(r => {
@@ -181,7 +172,6 @@ export default function PesanList() {
     setPage(0);
   }, [users, allRows.length]);
 
-  // Search/filter by initial
   useEffect(() => {
     const filtered = allRows.filter(r => !searchTerm || r.initial.toLowerCase().includes(searchTerm.toLowerCase()));
     setRows(filtered);
@@ -191,7 +181,6 @@ export default function PesanList() {
 
   if (error) return <div>Error: {error.message}</div>;
 
-  // Helper render badge
   const renderWhatsAppStatus = (status) => {
     switch(status) {
       case 'belum_dikirim': return <Chip label="Belum Dikirim" size="small" />;
@@ -215,7 +204,6 @@ export default function PesanList() {
     }
   };
 
-  // Filter eligible users for WA
   const eligibleUsers = users.filter(u =>
     String(u.position).toLowerCase() === 'rumah tangga' && String(u.role).toLowerCase() === 'staff'
   );
@@ -320,7 +308,6 @@ export default function PesanList() {
     }
   };
 
-  // Delete logic
   const confirmAndDelete = async (id) => {
     const { isConfirmed } = await Swal.fire({
       title: 'Hapus Reorder?',
@@ -352,7 +339,6 @@ export default function PesanList() {
   const handleDelete = async (row) => {
     const ws = row.whatsapp_status;
     const rs = row.reorder_status;
-    // Direct delete conditions
     const canDeleteDirect = (ws === 'belum_dikirim' && rs === 'draft')
                         || (ws === 'dibatalkan' && rs === 'dibatalkan')
                         || (ws === 'update_sudah_dikirim' && rs === 'dibatalkan');
@@ -360,7 +346,6 @@ export default function PesanList() {
       await confirmAndDelete(row.id);
       return;
     }
-    // If update_belum_dikirim & dibatalkan: perlu kirim pembaruan WA dulu
     if (ws === 'update_belum_dikirim' && rs === 'dibatalkan') {
       const { isConfirmed } = await Swal.fire({
         title: 'Kirim Pembaruan WA Pembatalan?',
@@ -377,7 +362,6 @@ export default function PesanList() {
         await axios.post(`${API_BASE_URL}/api/reorders/${row.id}/update`, {}, { headers: { 'ngrok-skip-browser-warning': 'true' } });
         Swal.close();
         Swal.fire('Terkirim', 'Pemberitahuan pembatalan WA berhasil dikirim.', 'success');
-        // lalu delete
         await confirmAndDelete(row.id);
       } catch (err) {
         Swal.close();
@@ -385,7 +369,6 @@ export default function PesanList() {
       }
       return;
     }
-    // Other cases: not allowed directly
     Swal.fire('Tidak Dapat Dihapus', 'Data ini belum dapat dihapus langsung. Silakan lakukan pembatalan atau pembaruan WA sesuai alur.', 'info');
   };
 

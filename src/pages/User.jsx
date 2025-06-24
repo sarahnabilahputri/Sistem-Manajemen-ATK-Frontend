@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Navbar from "../components/Navbar";
 import BAAKList from "./BAAK/BAAKList";
-import { Link } from "react-router-dom"; // Import React Router untuk navigasi
+import { Link } from "react-router-dom"; 
 
 export default function User() {
     return (

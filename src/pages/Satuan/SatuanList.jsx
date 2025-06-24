@@ -95,7 +95,6 @@ export default function SatuanList() {
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    // validasi ekstensi .xlsx
     if (!file.name.toLowerCase().endsWith('.xlsx')) {
       return Swal.fire("Error", "File harus berformat .xlsx", "error");
     }
@@ -251,7 +250,7 @@ export default function SatuanList() {
           startIcon={
             <Box
               component="img"
-              src="/Icon/import.png"      // dari public/icon/import.png
+              src="/Icon/import.png"      
               alt="Import"
               sx={{ width: 15, height: 15 }}
             />

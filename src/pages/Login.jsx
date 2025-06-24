@@ -11,9 +11,8 @@ const Login = ({ setUser }) => {
   useEffect(() => {
     const url = new URL(window.location.href);
     if (url.pathname === "/callback") {
-      const googleData = url.search; // e.g. '?code=...&scope=...'
+      const googleData = url.search; 
       const callbackURL = `${API_BASE_URL}/api/auth/callback${googleData}`;
-      // Gunakan POST sesuai route backend
       axios.post(callbackURL)
         .then(res => {
           const data = res.data;
@@ -26,7 +25,6 @@ const Login = ({ setUser }) => {
             setUser(user);
             return null;
           }
-          // Jika backend tidak mengembalikan user langsung, fetch user
           return axios.get(`${API_BASE_URL}/api/auth/authorize`)
             .then(authRes => {
               const u = authRes.data.user;

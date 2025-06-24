@@ -95,7 +95,6 @@ export default function TerimaList() {
   const openEditModal = () => setOpenEdit(true);
   const closeEditModal = () => setOpenEdit(false);
 
-  // Fetch list of received items
   const fetchReceived = async (pageArg = 1, limitArg = rowsPerPage) => {
     setLoading(true);
     try {
@@ -130,7 +129,6 @@ export default function TerimaList() {
         }
       }));
       setAllRows(withCodes);
-      // Apply filter if searchTerm exists
       if (searchTerm) {
         const filtered = withCodes.filter(r => r.reorderCode.toLowerCase().includes(searchTerm.toLowerCase()));
         setRows(filtered);
@@ -160,17 +158,14 @@ export default function TerimaList() {
     setPage(0);
   }, [searchTerm, allRows]);
 
-  // Fetch suggestions for autocomplete; use allRows when term empty
   const fetchSuggestions = async term => {
     if (!term) {
-      // Use existing allRows to suggest
       const opts = allRows.map(r => r.reorderCode).filter(Boolean);
       setAutoOptions(opts);
       return;
     }
     setLoadingSuggestions(true);
     try {
-      // Try backend search; adjust endpoint as needed
       const resp = await axios.get(`${API_BASE_URL}/api/reorders`,{
         params:{ search: term, page:1, limit:10 },
         headers:{ 'Accept':'application/json','ngrok-skip-browser-warning':'true' }
@@ -180,7 +175,6 @@ export default function TerimaList() {
       setAutoOptions(opts);
     } catch(err){
       console.error('Error fetching suggestions:',err);
-      // fallback: filter allRows locally
       const opts = allRows
         .filter(r => r.reorderCode.toLowerCase().includes(term.toLowerCase()))
         .map(r => r.reorderCode);

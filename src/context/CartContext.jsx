@@ -1,4 +1,3 @@
-// src/contexts/CartContext.jsx
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -40,9 +39,8 @@ function cartReducer(state, action) {
 export function CartProvider({ children }) {
   const [state, dispatch] = useReducer(cartReducer, initialState);
   const navigate = useNavigate();
-  const API_BASE_URL = import.meta.env.VITE_BASE_URL; // pastikan ini sudah di-set di .env
+  const API_BASE_URL = import.meta.env.VITE_BASE_URL; 
 
-  // Menghasilkan config headers untuk axios
   const getHeaders = () => {
     const token = localStorage.getItem('access_token');
     const headers = {
@@ -55,14 +53,12 @@ export function CartProvider({ children }) {
     return { headers };
   };
 
-  // Jika token invalid / 401, hapus token & redirect ke login
   const handleUnauthorized = () => {
     console.warn('[CartContext] Unauthorized detected: clearing token and redirecting to login.');
     localStorage.removeItem('access_token');
     localStorage.removeItem('token_type');
     localStorage.removeItem('user');
     dispatch({ type: ActionTypes.CLEAR_CART_LOCAL });
-    // Navigate ke login (asumsi route "/" adalah login)
     navigate('/', { replace: true });
   };
 
@@ -71,7 +67,6 @@ export function CartProvider({ children }) {
     try {
       const token = localStorage.getItem('access_token');
       if (!token) {
-        // Tidak ada token: skip fetch, clear cart
         dispatch({ type: ActionTypes.CLEAR_CART_LOCAL });
         return;
       }
@@ -83,7 +78,6 @@ export function CartProvider({ children }) {
         }));
         dispatch({ type: ActionTypes.SET_CART, payload: items });
       } else {
-        // Jika response status != success: bisa clear atau set error
         console.warn('[CartContext] fetchCart: response status not success:', resp.data);
       }
     } catch (err) {
@@ -112,7 +106,6 @@ export function CartProvider({ children }) {
         getHeaders()
       );
       if (resp.data?.status === 'success') {
-        // Setelah POST berhasil, fetch ulang cart
         await fetchCart();
       } else {
         console.warn('[CartContext] addToCart: response status not success:', resp.data);
@@ -144,10 +137,6 @@ export function CartProvider({ children }) {
         getHeaders()
       );
       if (resp.data?.status === 'success') {
-        // Update local state tanpa fetch ulang penuh
-        // Namun untuk konsistensi server-client, bisa juga fetch ulang:
-        // await fetchCart();
-        // Di sini kita hanya dispatch local update:
         const updatedItems = state.items.map(item =>
           item.id === itemId
             ? { ...item, reorder_quantity: newQty }
@@ -181,7 +170,6 @@ export function CartProvider({ children }) {
         `${API_BASE_URL}/api/reorder-carts/${itemId}`,
         getHeaders()
       );
-      // Jika server merespon sukses, hapus lokal:
       if (resp.status === 200 || resp.data?.status === 'success') {
         const filtered = state.items.filter(item => item.id !== itemId);
         dispatch({ type: ActionTypes.SET_CART, payload: filtered });
@@ -208,7 +196,6 @@ export function CartProvider({ children }) {
         handleUnauthorized();
         throw new Error('Not authenticated');
       }
-      // Siapkan payload
       const itemsPayload = state.items.map(item => ({
         product_id: item.product_id,
         quantity: item.reorder_quantity,
@@ -220,7 +207,6 @@ export function CartProvider({ children }) {
         getHeaders()
       );
       if (resp.data?.status === 'success') {
-        // Clear local cart setelah checkout sukses
         dispatch({ type: ActionTypes.CLEAR_CART_LOCAL });
       } else {
         console.warn('[CartContext] checkout: response status not success:', resp.data);
@@ -247,15 +233,13 @@ export function CartProvider({ children }) {
   };
 
   useEffect(() => {
-    // Hanya panggil fetchCart sekali saat mount, jika token ada
     const token = localStorage.getItem('access_token');
     if (token) {
       fetchCart();
     } else {
       dispatch({ type: ActionTypes.CLEAR_CART_LOCAL });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // empty deps: hanya saat mount
+  }, []);
 
   return (
     <CartContext.Provider value={{

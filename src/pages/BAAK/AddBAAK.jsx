@@ -71,8 +71,8 @@ export default function AddBaak({ CloseEvent, onSuccess }) {
                             name="nip" 
                             value={formData.nip} 
                             onChange={(e) => {
-                                const val = e.target.value.replace(/[^0-9]/g, ""); // Hanya angka
-                                setFormData({ ...formData, nip: val.slice(0, 6) }); // Maksimal 6 digit
+                                const val = e.target.value.replace(/[^0-9]/g, ""); 
+                                setFormData({ ...formData, nip: val.slice(0, 6) }); 
                             }} 
                             size="small" 
                             type="text" 

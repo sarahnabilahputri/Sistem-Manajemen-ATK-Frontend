@@ -8,7 +8,6 @@ const API_BASE_URL = import.meta.env.VITE_BASE_URL;
 export default function AddProduct({ CloseEvent, onSuccess }) {
     const [name, setName] = useState("");
     const [price, setPrice] = useState("");
-    // const [stock, setStock] = useState("");
     const [image, setImage] = useState(null);
     const [categories, setCategories] = useState([]);
     const [units, setUnits] = useState([]);
@@ -57,7 +56,6 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
         const formData = new FormData();
         formData.append("name", name);
         formData.append("price", price);
-        // formData.append("stock", stock);
         formData.append("image", image);
         formData.append("category_id", selectedCategory);
         formData.append("unit_id", selectedUnit);
@@ -103,8 +101,8 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
 
     const handlePriceChange = (e) => {
         const rawValue = e.target.value.replace(/\D/g, "");
-        setPrice(rawValue); // untuk dikirim ke backend
-        setFormattedPrice(formatRupiah(e.target.value)); // untuk tampil
+        setPrice(rawValue); 
+        setFormattedPrice(formatRupiah(e.target.value)); 
     };    
     
     return (
@@ -173,7 +171,7 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
                                 borderTopLeftRadius: 4,
                                 borderBottomLeftRadius: 4,
                                 borderRight: '1px solid #c4c4c4',
-                                borderColor: '#c4c4c4', // <- ini penting buat nyamain warnanya
+                                borderColor: '#c4c4c4',
                                 bgcolor: '#E4E6EF',
                                 color: 'black',
                                 px: 3,
@@ -182,7 +180,7 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
                                 height: '40px',
                                 "&:hover": {
                                 bgcolor: '#d1d3db',
-                                borderColor: '#c4c4c4', // <- biar hovernya nggak berubah biru
+                                borderColor: '#c4c4c4', 
                                 },
                             }}
                             >

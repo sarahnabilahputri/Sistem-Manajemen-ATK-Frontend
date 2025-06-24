@@ -103,7 +103,6 @@ export default function EditPesan({ open, onClose, data, onSave, onDelete }) {
 
   const handleSubmit = async () => {
     if (!validate()) return;
-    // Prepare payload
     const [yr, mo, da] = deliveryDate.split('-');
     const formattedDelivery = `${da}-${mo}-${yr}`;
     const detailsPayload = items.map(it => ({
@@ -205,7 +204,8 @@ export default function EditPesan({ open, onClose, data, onSave, onDelete }) {
                       if (isNaN(num) || num < 1) num = 1;
                       if (item.product.stock != null && num > item.product.stock) {
                         num = item.product.stock;
-                        Swal.fire('Info', `Maksimal stok adalah ${item.product.stock}`, 'info');
+                        onClose();
+                        Swal.fire('Info', `Minimal stok adalah ${item.product.stock}`, 'info');
                       }
                       handleUpdateQuantity(item.id, num);
                     }}

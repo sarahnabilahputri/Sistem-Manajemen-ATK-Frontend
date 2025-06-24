@@ -1,4 +1,3 @@
-// src/pages/DanaBAAK.jsx
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -18,13 +17,11 @@ import Swal from "sweetalert2";
 
 const API_BASE_URL = import.meta.env.VITE_BASE_URL;
 
-// Nama bulan Indonesia
 const MONTH_NAMES = [
   "Januari", "Februari", "Maret", "April", "Mei", "Juni",
   "Juli", "Agustus", "September", "Oktober", "November", "Desember"
 ];
 
-// Helper format angka ke Rupiah tanpa desimal
 function formatRupiah(value) {
   if (value == null || value === "" || isNaN(Number(value))) return "";
   const num = Number(value);
@@ -35,7 +32,6 @@ function formatRupiah(value) {
   }).format(num);
 }
 
-// Helper default tanggal: hari pertama bulan terpilih atau hari ini jika sama bulan/tahun
 function getDefaultDate(year, monthIndex) {
   const today = new Date();
   if (today.getFullYear() === year && today.getMonth() === monthIndex) {
@@ -47,16 +43,14 @@ function getDefaultDate(year, monthIndex) {
   return `${year}-${mm}-01`;
 }
 
-// Konversi dari "YYYY-MM-DD" ke "DD-MM-YYYY"
 function convertToDDMMYYYY(isoDate) {
   const parts = isoDate.split("-");
-  if (parts.length !== 3) return isoDate; // fallback
+  if (parts.length !== 3) return isoDate; 
   const [year, month, day] = parts;
   return `${day}-${month}-${year}`;
 }
 
 export default function DanaBAAK() {
-  // Inisialisasi tahun & bulan sekarang
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonthIndex = now.getMonth();
@@ -68,13 +62,11 @@ export default function DanaBAAK() {
   const [danaSisa, setDanaSisa] = useState(null);
   const [loadingData, setLoadingData] = useState(false);
 
-  // Input baru: tanggal (YYYY-MM-DD) dan jumlah masuk
   const [selectedDate, setSelectedDate] = useState(
     getDefaultDate(currentYear, currentMonthIndex)
   );
   const [inputDanaMasukBaru, setInputDanaMasukBaru] = useState("");
 
-  // Header auth & ngrok skip warning
   const getAuthHeader = () => {
     const token = localStorage.getItem("access_token");
     const tokenType = localStorage.getItem("token_type");
@@ -86,16 +78,13 @@ export default function DanaBAAK() {
     return headers;
   };
 
-  // Fetch data ketika tahun atau bulan berubah
   useEffect(() => {
     const defDate = getDefaultDate(year, monthIndex);
     setSelectedDate(defDate);
     setInputDanaMasukBaru("");
     fetchDana();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [year, monthIndex]);
 
-  // GET data dana
   const fetchDana = async () => {
     setLoadingData(true);
     try {
@@ -130,7 +119,6 @@ export default function DanaBAAK() {
     }
   };
 
-  // Handlers
   const handleYearChange = (e) => setYear(Number(e.target.value));
   const handleMonthClick = (idx) => setMonthIndex(idx);
   const handleDateChange = (e) => setSelectedDate(e.target.value);
@@ -139,7 +127,6 @@ export default function DanaBAAK() {
     setInputDanaMasukBaru(numeric);
   };
 
-  // Submit Dana Masuk baru dengan format date dd-mm-yyyy
   const handleSubmitDanaMasukBaru = async () => {
     if (!inputDanaMasukBaru || Number(inputDanaMasukBaru) <= 0) {
       Swal.fire("Peringatan", "Masukkan Jumlah Dana Masuk yang valid.", "warning");
@@ -156,7 +143,6 @@ export default function DanaBAAK() {
       return;
     }
     try {
-      // Konversi ke dd-mm-yyyy
       const dateForApi = convertToDDMMYYYY(selectedDate);
       const payload = {
         type: "in",
@@ -176,7 +162,6 @@ export default function DanaBAAK() {
       Swal.fire("Berhasil", "Dana masuk berhasil ditambahkan.", "success");
       fetchDana();
       setInputDanaMasukBaru("");
-      // Tidak mengubah selectedDate, kecuali diinginkan reset
     } catch (err) {
       console.error("[DanaBAAK] Error POST dana masuk:", err.response ? err.response.data : err.message);
       if (err.response) {
@@ -188,22 +173,12 @@ export default function DanaBAAK() {
     }
   };
 
-  if (loadingData) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  // Dua baris bulan
   const firstRowMonths = MONTH_NAMES.slice(0, 8);
   const secondRowMonths = MONTH_NAMES.slice(8);
 
   return (
     <Box sx={{ mt: 5, display: "flex", justifyContent: "center" }}>
       <Paper elevation={1} sx={{ width: "100%", p: 3, borderRadius: 2 }}>
-        {/* Dropdown tahun dengan label di kiri */}
         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
           <Typography variant="subtitle1" sx={{ mr: 2 }}>
             Tahun

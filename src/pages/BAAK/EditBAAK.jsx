@@ -89,9 +89,8 @@ export default function EditBaak({ fid, CloseEvent, onSuccess }) {
 
     return (
         <Box sx={{ maxWidth: 500, mx: "auto", bgcolor: "white", p: 2, borderRadius: 2 }}>
-            <Typography variant="h6" align="center" sx={{ mb: 2 }}>Form Edit BAAK</Typography>
-            <Typography variant="h6" align="center" sx={{ mb: 2,  }}>Form Edit BAAK</Typography>
-            <Box sx={{ maxHeight: "50vh", overflowY: "auto", pr: 1 }}>
+            <Typography variant="h6" align="center" sx={{ mb: 2, width: '100%' }}>Form Edit BAAK</Typography>
+            <Box sx={{ maxHeight: "50vh", overflowY: "auto", pr: 1 }}> 
                 <Grid container spacing={2}>
                     <Grid size={{ xs: 12 }} >
                         <Typography sx={{ mb:1 }}>Nama</Typography>

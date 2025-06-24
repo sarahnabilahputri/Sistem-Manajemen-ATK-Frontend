@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
-import { useCart } from '../context/CartContext'; // sesuaikan path
+import { useCart } from '../context/CartContext'; 
 import Swal from 'sweetalert2';
 
 export default function CartModal() {
@@ -18,17 +18,14 @@ export default function CartModal() {
     checkout,
   } = useCart();
 
-  // State tanggal & quantity edit
   const [reorderDate, setReorderDate] = useState('');
   const [deliveryDate, setDeliveryDate] = useState('');
   const [dateErrors, setDateErrors] = useState({});
   const [editingQty, setEditingQty] = useState({});
   const [qtyErrors, setQtyErrors] = useState({});
 
-  // Ambil base URL backend dari env, tanpa trailing slash
   const backendBase = import.meta.env.VITE_BASE_URL?.replace(/\/$/, '') || '';
 
-  // Format Rupiah tanpa desimal
   const formatRp = (value) =>
     new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -37,14 +34,12 @@ export default function CartModal() {
       maximumFractionDigits: 0
     }).format(value);
 
-  // Hitung totalAll
   const totalAll = cartItems.reduce((sum, item) => {
     const qtyParsed = parseInt(editingQty[item.id], 10);
     const validQty = !isNaN(qtyParsed) && qtyParsed > 0 ? qtyParsed : item.reorder_quantity;
     return sum + item.product.price * validQty;
   }, 0);
 
-  // Inisialisasi tanggal saat modal dibuka: hari ini "YYYY-MM-DD"
   useEffect(() => {
     if (isCartOpen) {
       const today = new Date();
@@ -58,7 +53,6 @@ export default function CartModal() {
     }
   }, [isCartOpen]);
 
-  // Sync editingQty saat cartItems berubah
   useEffect(() => {
     const initial = {};
     cartItems.forEach(item => {
@@ -67,7 +61,6 @@ export default function CartModal() {
     setEditingQty(initial);
   }, [cartItems]);
 
-  // Validasi tanggal
   const validateDates = () => {
     const errors = {};
     if (!reorderDate) {
@@ -87,29 +80,23 @@ export default function CartModal() {
     return Object.keys(errors).length === 0;
   };
 
-  // Format "YYYY-MM-DD" ke "DD-MM-YYYY" untuk backend
   const formatDateForBackend = (yyyyMMdd) => {
     const [year, month, day] = yyyyMMdd.split('-');
     return `${day}-${month}-${year}`;
   };
 
-  // Handle perubahan quantity
   const handleQtyChange = async (itemId) => {
-    // 1) Bersihkan error lama
     setQtyErrors(prev => ({ ...prev, [itemId]: null }));
 
-    // 2) Ambil dan parse nilai baru
     const newQty = editingQty[itemId];
     const qtyNum = parseInt(newQty, 10);
 
-    // 3) Validasi client‐side: minimal 1
     if (isNaN(qtyNum) || qtyNum <= 0) {
       setQtyErrors(prev => ({ ...prev, [itemId]: 'Jumlah minimal 1.' }));
       setEditingQty(prev => ({ ...prev, [itemId]: 1 }));
       return;
     }
 
-    // 4) Kirim ke backend dan tangkap error validasi
     try {
       await updateCartItem(itemId, qtyNum);
     } catch (err) {
@@ -164,7 +151,6 @@ export default function CartModal() {
     }
   };
 
-  // Handle checkout
   const handleCheckout = async () => {
     if (cartItems.length === 0) {
       Swal.fire({
@@ -266,7 +252,6 @@ export default function CartModal() {
     }
   };
 
-  // Styles
   const paperStyle = {
     width: { xs: '90%', md: 750 },
     height: { xs: '80vh', md: '439px' },
@@ -337,7 +322,6 @@ export default function CartModal() {
               <Box sx={listContainerSx}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                   {cartItems.map(item => {
-                    // Logika URL gambar
                     const rawImage = item.product.image || '';
                     const cleaned = rawImage.replace(/^\//, '');
                     let imgSrc = '';

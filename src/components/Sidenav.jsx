@@ -30,6 +30,7 @@ export default function Sidenav({ user }) {
   const location = useLocation();
   const [openMasterData, setOpenMasterData] = useState(false);
   const [openKelolaUser, setOpenKelolaUser] = useState(false);
+  const [openPengadaan, setOpenPengadaan] = useState(false);
 
 
   const handleToggleMasterData = () => {
@@ -38,6 +39,10 @@ export default function Sidenav({ user }) {
 
   const handleToggleKelolaUser = () => {
     setOpenKelolaUser(!openKelolaUser);
+  };
+
+  const handleTogglePengadaan = () => {
+    setOpenPengadaan(!openPengadaan);
   };
 
   const logout = () => {
@@ -359,7 +364,7 @@ export default function Sidenav({ user }) {
               </ListItem>
 
               {/* KELOLA USER GROUP */}
-              <ListItem disablePadding onClick={handleToggleKelolaUser}>
+              <ListItem disablePadding onClick={handleTogglePengadaan}>
                 <ListItemButton>
                   <ListItemIcon sx={{ minWidth: 36 }}>
                     <Box
@@ -370,11 +375,11 @@ export default function Sidenav({ user }) {
                     />                  
                   </ListItemIcon>
                   <ListItemText primary="Pengadaan" sx={{ "& .MuiTypography-root": { fontSize: "0.875rem", fontWeight: "semibold" } }} />
-                  {openKelolaUser ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
+                  {openPengadaan ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
                 </ListItemButton>
               </ListItem>
 
-              <Collapse in={openKelolaUser} timeout="auto" unmountOnExit>
+              <Collapse in={openPengadaan} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
                   <ListItem disablePadding onClick={() => navigate("/pesan")}>
                     <ListItemButton selected={location.pathname === "/pesan"}

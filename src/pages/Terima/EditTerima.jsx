@@ -26,17 +26,14 @@ export default function EditTerima({ CloseEvent, formData, onSuccess }) {
   const [status, setStatus] = useState('');
   const [errors, setErrors] = useState({});
 
-  // Fetch detail when formData.id changes
   useEffect(() => {
     if (!formData || !formData.id) return;
     const fetchDetail = async () => {
       try {
-        // Fetch received detail
         const resp = await axios.get(`${BASE_URL}/api/product-received/${formData.id}`, {
           headers: { 'Accept': 'application/json', 'ngrok-skip-browser-warning': 'true' }
         });
         const data = resp.data.data;
-        // Convert received_date to YYYY-MM-DD for input
         const rawDate = data.received_date;
         let dateForInput = '';
         if (rawDate) {
@@ -45,13 +42,10 @@ export default function EditTerima({ CloseEvent, formData, onSuccess }) {
         }
         setReceivedDate(dateForInput);
         setStatus(data.received_status || '');
-        // Reorder info
         setReorderCode(data.reorder?.reorder_code || formData.reorderId || '');
-        // reorder_date for validation
         if (data.reorder && data.reorder.reorder_date) {
           setReorderDate(data.reorder.reorder_date);
         }
-        // Fetch reorder items to get reorder_quantity
         let reorderItems = [];
         if (data.reorder && data.reorder.id) {
           try {
@@ -64,11 +58,9 @@ export default function EditTerima({ CloseEvent, formData, onSuccess }) {
             console.error('Error fetching reorder detail:', err);
           }
         }
-        // Build items: combine reorderItems and received details
         const details = data.details || [];
         const combined = reorderItems.map(rIt => {
           const detail = details.find(d => d.product_id === rIt.product_id) || {};
-          // [PERUBAHAN] fallback price: jika detail.price ada namun <=0, pakai product.price
           const unitPrice = (typeof detail.price === 'number' && detail.price > 0)
             ? detail.price
             : rIt.product.price;
@@ -80,7 +72,6 @@ export default function EditTerima({ CloseEvent, formData, onSuccess }) {
           };
         });
         setItems(combined);
-        // Initialize quantities and prices
         const initQty = {};
         const initPrice = {};
         combined.forEach(item => {
@@ -129,7 +120,6 @@ export default function EditTerima({ CloseEvent, formData, onSuccess }) {
     }
     if (!validate()) return;
     setLoading(true);
-    // Convert date to DD-MM-YYYY
     const [yr, mo, da] = receivedDate.split('-');
     const payload = {
       reorder_id: formData.reorderId,
@@ -141,18 +131,15 @@ export default function EditTerima({ CloseEvent, formData, onSuccess }) {
       })),
     };
     try {
-      // Simpan response ke resp untuk debugging jika perlu
       const resp = await axios.patch(`${BASE_URL}/api/product-received/${formData.id}`, payload, {
         headers: { 'ngrok-skip-browser-warning': 'true' }
       });
       console.log('Response patch:', resp.data);
-      // [PERUBAHAN] Update state lokal dengan fallback agar price tidak menjadi 0 jika backend mengirim 0
       payload.products.forEach(p => {
         setReceivedQuantities(prev => ({
           ...prev,
           [p.product_id]: p.received_quantity
         }));
-        // cari default price dari items jika p.price <= 0
         const it = items.find(i => i.product.id === p.product_id);
         const unitPrice = (typeof p.price === 'number' && p.price > 0)
           ? p.price
@@ -184,10 +171,8 @@ export default function EditTerima({ CloseEvent, formData, onSuccess }) {
     }
   };
 
-  // Handlers for quantity
   const handleQtyChange = (pid, val) => {
     if (/^\d*$/.test(val)) {
-      // Bisa simpan string, onBlur akan parse; jika ingin number:
       setReceivedQuantities(prev => ({ ...prev, [pid]: val }));
     }
   };

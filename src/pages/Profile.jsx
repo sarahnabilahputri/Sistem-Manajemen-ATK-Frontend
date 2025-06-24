@@ -2,7 +2,8 @@ import React from "react";
 import Sidenav from "../components/Sidenav";
 import Box from '@mui/material/Box';
 import Navbar from "../components/Navbar";
-import { Link } from "react-router-dom"; // Import React Router untuk navigasi
+import { Link } from "react-router-dom"; 
+import ProfilePage from "./ProfilPage";
 
 export default function Profile() {
     return (
@@ -18,7 +19,8 @@ export default function Profile() {
           <Link to="/home" className="text-gray-400 ">Home</Link>
           <span className="mx-2 text-gray-400">•</span>
           <span>Profil</span>
-        </div>            
+        </div> 
+        < ProfilePage />           
         </Box>
       </Box>
       </div>

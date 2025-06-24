@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
-// import axios from 'axios';
 import axios from '../Api';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
@@ -405,7 +404,6 @@ export default function ProductList() {
               <TextField
                 {...params}
                 size="small"
-                // placeholder="Search..."
                 sx={{ width: 187, ml: 2 }}
               />
             )}

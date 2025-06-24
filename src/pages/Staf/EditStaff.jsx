@@ -48,7 +48,6 @@ export default function EditStaff({ fid, CloseEvent, onSuccess }) {
             }
             );
             console.log("Detail staff response:", response.data);
-            // deteksi struktur
             const payload = response.data.data;
             const user = payload.id
             ? payload

@@ -72,7 +72,6 @@ export default function EditAmbil({
   };
 
   const handleSubmit = async () => {
-    // validasi
     const newErrors = { date: '', purpose: '', initial: '' };
     let hasError = false;
     if (!tanggalButuh) { newErrors.date = 'Tanggal harus diisi'; hasError = true; }
@@ -124,7 +123,6 @@ export default function EditAmbil({
           </Typography>
         </Box>
 
-        {/* Content: items + form */}
         <Box sx={{ flex: 1, overflowY: 'auto', p: 1, bgcolor: '#f5f5f5' }}>
           {cartItems.map(item => {
             const rawImage = item.product.image || '';
