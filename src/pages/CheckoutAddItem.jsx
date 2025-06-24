@@ -72,12 +72,21 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     axios
-      .get(`${API_BASE_URL}/api/products?page=1&limit=1000`, { headers:{ "ngrok-skip-browser-warning": "true" } })
+      .get(`${API_BASE_URL}/api/public/products?page=1&limit=1000`, { headers:{ "ngrok-skip-browser-warning": "true" } })
       .then(res => {
-        setProducts(res.data.data.data.map(p => ({ id: p.id, name: p.name, stock: p.stock })));
+        let items = [];
+        if (Array.isArray(res.data)) {
+          items = res.data;
+        } else if (Array.isArray(res.data?.data?.data)) {
+          // fallback jika nested
+          items = res.data.data.data;
+        } else {
+          console.warn("Unexpected products response:", res.data);
+        }
+        setProducts(items.map(p => ({ id: p.id, name: p.name, stock: p.stock, image: p.image })));
 
         axios
-          .get(`${API_BASE_URL}/papi/urposes`, { headers:{ "ngrok-skip-browser-warning":"true" } })
+          .get(`${API_BASE_URL}/api/purposes`, { headers:{ "ngrok-skip-browser-warning":"true" } })
           .then(r2 => setPurposes(r2.data.data.data))
           .catch(console.error);
       })
@@ -104,15 +113,21 @@ export default function CheckoutPage() {
   }, [openCart]);
 
   useEffect(() => {
-    axios.get(`${API_BASE_URL}/api/users?page=1&limit=1000`, {
+    axios.get(`${API_BASE_URL}/api/public/users?page=1&limit=1000`, {
       headers: { "ngrok-skip-browser-warning": "true" }
     })
       .then(res => {
-        const top    = res   ?.data;
-        const pagin  = top   ?.data;
-        const users  = Array.isArray(pagin?.data) 
-                      ? pagin.data 
-                      : (Array.isArray(pagin) ? pagin : []);
+        let arr = [];
+        if (Array.isArray(res.data)) {
+          arr = res.data;
+        } else if (Array.isArray(res.data?.data?.data)) {
+          arr = res.data.data.data;
+        } else if (Array.isArray(res.data?.data)) {
+          arr = res.data.data;
+        } else {
+          console.warn("Unexpected users response:", res.data);
+        }
+        const users = arr;
         
         const staffUsers = users.filter(u => u.role === "Staff");
         const initials = [...new Set(staffUsers.map(u => u.initial).filter(Boolean))];
