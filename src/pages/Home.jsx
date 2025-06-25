@@ -245,7 +245,7 @@ export default function Home() {
           height: 220,
           px: 2,
           border: '1px solid blue',   
-          bgcolor: '#fff'
+          bgcolor: '#fff',
         }}
       >
         {[0.25, 0.5, 0.75, 1].map((frac, idx) => (

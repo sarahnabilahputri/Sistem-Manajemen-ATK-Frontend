@@ -76,11 +76,12 @@ export default function AddTerima({ CloseEvent, onSuccess }) {
     setSubmitting(true);
     try {
       const respCheck = await axios.get(RECEIVED_URL, {
-        params: { reorder_id: selectedReorder.id },
+        params: { page: 1, limit: 100 }, 
         headers: { 'ngrok-skip-browser-warning': 'true' }
       });
-      const existing = respCheck.data.data?.data || [];
-      if (existing.length > 0) {
+      const allReceived = respCheck.data.data?.data || [];
+      const matched = allReceived.filter(r => r.reorder_id === selectedReorder.id);
+      if (matched.length > 0) {
         CloseEvent();
         Swal.fire('Info', 'Pemesanan dengan kode ini sudah dimasukkan penerimaannya.', 'info');
         setSubmitting(false);
@@ -122,7 +123,6 @@ export default function AddTerima({ CloseEvent, onSuccess }) {
         <Box sx={{ p:2, borderBottom:'1px solid #ddd' }}><Typography variant='h6' align='center'>Tambah Penerimaan</Typography></Box>
         <Box sx={{ flex:1, overflowY:'auto', p:2, bgcolor:'#f5f5f5' }}>
 
-          {/* Tanggal diterima */}
           <Box sx={{ mb:2, bgcolor:'white', p:2, borderRadius:1 }}>
             <Typography variant='subtitle2' sx={{ mb:1 }}>Tanggal Diterima</Typography>
             <TextField
@@ -130,7 +130,6 @@ export default function AddTerima({ CloseEvent, onSuccess }) {
               value={receivedDate} onChange={e => setReceivedDate(e.target.value)}
               error={!!errors.date} helperText={errors.date}
             />
-          
             <Typography variant='subtitle2' sx={{ mb:1, mt:2 }}>Kode Pesanan</Typography>
             <Autocomplete
               options={reorders}
@@ -150,7 +149,6 @@ export default function AddTerima({ CloseEvent, onSuccess }) {
             />
           </Box>
 
-          {/* Items list */}
           {items.map((it, idx) => {
             const qty = parseInt(receivedQuantities[it.product_id], 10) || 0;
             const unitPrice = receivedPrices[it.product_id] || 0;
@@ -164,8 +162,6 @@ export default function AddTerima({ CloseEvent, onSuccess }) {
                   <Typography variant='subtitle2' fontWeight='bold' noWrap>{it.product.name}</Typography>
                   <Typography variant='caption'>Dipesan: {it.reorder_quantity}</Typography>
                 </Box>
-
-                {/* Quantity input */}
                 <TextField
                   size="small"
                   type="number"
@@ -186,32 +182,14 @@ export default function AddTerima({ CloseEvent, onSuccess }) {
                     setReceivedQuantities(prev => ({ ...prev, [it.product_id]: num }));
                   }}
                   inputProps={{ min: 1, max: it.reorder_quantity }}
-                  sx={{
-                    width: 60,
-                    mr: 7,
-                    '& input[type=number]': {
-                      MozAppearance: 'textfield',
-                      appearance: 'textfield',
-                    },
-                    '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
-                      WebkitAppearance: 'inner-spin-button',
-                      opacity: 1,
-                      display: 'block',
-                    },
-                  }}
+                  sx={{ width: 60, mr: 7, '& input[type=number]': { MozAppearance: 'textfield', appearance: 'textfield' }, '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': { WebkitAppearance: 'inner-spin-button', opacity: 1, display: 'block' } }}
                   InputProps={{ sx: { '& input': { textAlign: 'center', padding: '4px' } } }}
                   error={!!errors[`qty_${idx}`]}
                   helperText={errors[`qty_${idx}`]}
                 />
-
-                {/* Total label and price */}
                 <Box sx={{ textAlign: 'left', width: 100 }}>
                   <Typography variant='caption'>Total:</Typography>
-                  <Typography variant='subtitle2'>
-                    {totalPrice.toLocaleString('id-ID', {
-                      style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0
-                    })}
-                  </Typography>
+                  <Typography variant='subtitle2'>{totalPrice.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 })}</Typography>
                 </Box>
               </Paper>
             );
@@ -219,9 +197,7 @@ export default function AddTerima({ CloseEvent, onSuccess }) {
         </Box>
         <Box sx={{ p:2, borderTop:'1px solid #ddd', display:'flex', justifyContent:'flex-end', gap:2 }}>
           <Button variant='contained' color='error' onClick={CloseEvent} disabled={submitting}>Batal</Button>
-          <Button variant='contained' onClick={handleSubmit} disabled={submitting}>
-            {submitting ? <CircularProgress size={20} color="inherit" /> : 'Simpan'}
-          </Button>
+          <Button variant='contained' onClick={handleSubmit} disabled={submitting}>{submitting ? <CircularProgress size={20} color="inherit" /> : 'Simpan'}</Button>
         </Box>
       </Paper>
     </Modal>

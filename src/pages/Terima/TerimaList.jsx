@@ -322,14 +322,14 @@ export default function TerimaList() {
               </Box>
             )}
             <Box sx={{ mt:2,p:2,bgcolor:'white',borderRadius:1,boxShadow:1 }}>
+              <Typography variant="subtitle2" sx={{ mt:1,mb:1,color:'#1976D2' }}>Kode Pesanan</Typography>
+              <Typography variant="subtitle2" sx={{ mb:2 }}>{detailData?.reorderCode}</Typography>              
               <Typography variant="subtitle2" sx={{ mb:1,color:'#1976D2' }}>Tanggal Diterima</Typography>
               <Typography variant="subtitle2">{formatDateOnly(detailData?.date)}</Typography>
               <Typography variant="subtitle2" sx={{ mt:2,mb:1,color:'#1976D2' }}>Status</Typography>
               <Typography variant="subtitle2">{detailData?.status}</Typography>
               <Typography variant="subtitle2" sx={{ mt:2,mb:1,color:'#1976D2' }}>Total Harga</Typography>
               <Typography variant="subtitle2">{formatRp(detailData?.totalPrice)}</Typography>
-              <Typography variant="subtitle2" sx={{ mt:2,mb:1,color:'#1976D2' }}>Kode Pesanan</Typography>
-              <Typography variant="subtitle2">{detailData?.reorderCode}</Typography>
             </Box>
           </Box>
           <Box sx={{ p:2,borderTop:'1px solid #ddd', display:'flex', justifyContent:'flex-end' }}>
@@ -394,7 +394,7 @@ export default function TerimaList() {
               <TableHead>
                 <TableRow>
                   <TableCell>No</TableCell>
-                  <TableCell>Kode Pesanan</TableCell>
+                  <TableCell>Kode Pesan</TableCell>
                   <TableCell>Tanggal Dibuat</TableCell>
                   <TableCell>Tanggal Diterima</TableCell>
                   <TableCell>Total Harga</TableCell>

@@ -134,6 +134,7 @@ export default function PesanList() {
         const baseRows = arr.map(r => ({
           id: r.id,
           created_at: r.created_at,
+          reorder_code: r.reorder_code,
           reorder_date: r.reorder_date,
           delivery_date: r.delivery_date,
           total_reorder_price: r.total_reorder_price,
@@ -416,8 +417,9 @@ export default function PesanList() {
             <TableHead>
               <TableRow>
                 <TableCell>No</TableCell>
-                <TableCell>Tanggal Butuh</TableCell>
-                <TableCell>Tanggal Pengiriman</TableCell>
+                <TableCell>Kode Pesan</TableCell>
+                <TableCell>Tgl Butuh</TableCell>
+                <TableCell>Tgl Pengiriman</TableCell>
                 <TableCell>Total Harga</TableCell>
                 <TableCell>WhatsApp Status</TableCell>
                 <TableCell>Pesan Status</TableCell>
@@ -428,6 +430,7 @@ export default function PesanList() {
               {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, idx) => (
                 <TableRow hover key={row.id}>
                   <TableCell>{page * rowsPerPage + idx + 1}</TableCell>
+                  <TableCell>{row.reorder_code}</TableCell>
                   <TableCell>{formatDateOnly(row.reorder_date)}</TableCell>
                   <TableCell>{formatDateOnly(row.delivery_date)}</TableCell>
                   <TableCell>{formatRp(row.total_reorder_price)}</TableCell>
