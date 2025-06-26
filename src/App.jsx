@@ -75,7 +75,7 @@ function AppContent() {
     return <div>Loading...</div>;
   }
 
-  const hideSidebar = location.pathname === "/" || location.pathname === "/callback";
+  const hideSidebar = location.pathname === "/" || location.pathname === "/callback" || location.pathname === "/checkout";
 
   return (
     <Box sx={{ display: 'flex' }}>

@@ -1,428 +1,306 @@
-import React, { useEffect, useState, useMemo } from "react";
-import axios from "./Api"; 
-import { Link } from "react-router-dom";
-import Sidenav from "../components/Sidenav";
-import Navbar from "../components/Navbar";
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
-import Divider from '@mui/material/Divider';
-import Grid from '@mui/material/Grid';
-import Inventory2Icon from '@mui/icons-material/Inventory2';
-import CategoryIcon from '@mui/icons-material/Category';
-import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
-import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
+import React, { useEffect, useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import axios from 'axios';
+import Sidenav from '../components/Sidenav';
+import Navbar from '../components/Navbar';
+import {
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Stack,
+  List,
+  ListItem,
+  ListItemText,
+  Button,
+  Divider
+} from '@mui/material';
+import { BarChart, PieChart } from '@mui/x-charts';
+
+const API_BASE_URL = import.meta.env.VITE_BASE_URL;
+const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 export default function Home() {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [funds, setFunds] = useState({ balance: 0, transactions: [] });
   const [checkouts, setCheckouts] = useState([]);
-  const [fundsMonthly, setFundsMonthly] = useState([]); 
-  const [fundsThisYearBalance, setFundsThisYearBalance] = useState(0);
-  const [topProducts, setTopProducts] = useState([]); 
-
-  const makeHeaders = () => {
-    const headers = { "Accept": "application/json" };
-    const base = import.meta.env.VITE_BASE_URL || "";
-    if (base.includes("ngrok")) {
-      headers["ngrok-skip-browser-warning"] = "true";
-    }
-    return headers;
-  };
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
+    const headers = { 'ngrok-skip-browser-warning': 'true', Accept: 'application/json' };
     const now = new Date();
-    const thisYear = now.getFullYear();
-    const monthLabels = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agt","Sep","Okt","Nov","Des"];
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
 
-    const fetchAllData = async () => {
-      let arrProd = [];
-      try {
-        const respProd = await axios.get("/api/products", { headers: makeHeaders() });
-        console.log("respProd.data:", respProd.data);
-        if (respProd.data && respProd.data.data) {
-          const d0 = respProd.data.data;
-          if (Array.isArray(d0)) {
-            arrProd = d0;
-          } else if (d0.data && Array.isArray(d0.data)) {
-            arrProd = d0.data;
-          } else {
-            console.warn("Struktur data produk tidak dikenali:", d0);
-          }
-        }
-      } catch (err) {
-        console.error("Error fetch /api/products:", err);
-      }
-      console.log("products:", arrProd);
-      setProducts(arrProd);
+    axios.get(`${API_BASE_URL}/api/products`, { headers })
+      .then(res => setProducts(res.data.data.data || []))
+      .catch(() => setProducts([]));
 
-      let arrChk = [];
-      try {
-        const respChk = await axios.get("/api/checkouts", { headers: makeHeaders() });
-        console.log("respChk.data:", respChk.data);
-        if (respChk.data && Array.isArray(respChk.data.data)) {
-          arrChk = respChk.data.data;
-        } else {
-          console.warn("Struktur data checkouts tidak dikenali:", respChk.data);
-        }
-      } catch (err) {
-        console.error("Error fetch /api/checkouts:", err);
-      }
-      console.log("checkouts:", arrChk);
-      setCheckouts(arrChk);
+    axios.get(`${API_BASE_URL}/api/categories`, { headers })
+      .then(res => setCategories(res.data.data.data || []))
+      .catch(() => setCategories([]));
 
-      const promisesMonth = monthLabels.map((lbl, idx) => {
-        const month = idx + 1;
-        return axios.get("/api/funds", {
-          params: { year: thisYear, month },
-          headers: makeHeaders()
-        })
-        .then(resp => {
-          console.log(`resp /api/funds?year=${thisYear}&month=${month}:`, resp.data);
-          const data = resp.data;
-          let outVal = 0;
-          if (Array.isArray(data.transactions)) {
-            outVal = data.transactions
-              .filter(tx => tx.type === "out")
-              .reduce((s, tx) => s + Number(tx.amount), 0);
-          } else if (data.out != null) {
-            outVal = Number(data.out);
-          }
-          return { month: lbl, value: outVal };
-        })
-        .catch(err => {
-          console.warn(`Error fetch fund month ${month}:`, err);
-          return { month: lbl, value: 0 };
-        });
-      });
-      try {
-        const resultsMonth = await Promise.all(promisesMonth);
-        console.log("fundsMonthly:", resultsMonth);
-        setFundsMonthly(resultsMonth);
-      } catch(err) {
-        console.error("Error fetching fundsMonthly:", err);
-        setFundsMonthly([]);
-      }
+    axios.get(`${API_BASE_URL}/api/funds`, { headers, params: { year, month } })
+      .then(res => setFunds({ ...res.data, transactions: res.data.transactions || [] }))
+      .catch(() => setFunds({ balance: 0, transactions: [] }));
 
-      const promisesAcc = monthLabels.map((_, idx) => {
-        const month = idx + 1;
-        return axios.get("/api/funds", {
-          params: { year: thisYear, month },
-          headers: makeHeaders()
-        })
-        .then(resp => {
-          const data = resp.data;
-          let inVal = 0, outVal = 0;
-          if (Array.isArray(data.transactions)) {
-            data.transactions.forEach(tx => {
-              if (tx.type === "in") inVal += Number(tx.amount);
-              else if (tx.type === "out") outVal += Number(tx.amount);
-            });
-          } else {
-            if (data.in != null) inVal = Number(data.in);
-            if (data.out != null) outVal = Number(data.out);
-          }
-          return { inVal, outVal };
-        })
-        .catch(err => {
-          console.warn(`Error fetch fund month ${month} for acc:`, err);
-          return { inVal: 0, outVal: 0 };
-        });
-      });
-      try {
-        const arrAcc = await Promise.all(promisesAcc);
-        const totalIn = arrAcc.reduce((s, m) => s + m.inVal, 0);
-        const totalOut = arrAcc.reduce((s, m) => s + m.outVal, 0);
-        console.log("totalIn:", totalIn, "totalOut:", totalOut);
-        setFundsThisYearBalance(totalIn - totalOut);
-      } catch(err) {
-        console.error("Error menghitung total sisa dana tahun ini:", err);
-        setFundsThisYearBalance(0);
-      }
-
-      const freqProd = {};
-      arrChk.forEach(c => {
-        if (Array.isArray(c.items)) {
-          c.items.forEach(item => {
-            const name = item.product?.name || "Unknown";
-            const qty = Number(item.checkout_quantity) || 1;
-            freqProd[name] = (freqProd[name] || 0) + qty;
-          });
-        }
-      });
-      const sortedProd = Object.entries(freqProd)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 3)
-        .map(([name, cnt]) => ({ name, count: cnt }));
-      console.log("topProducts:", sortedProd);
-      setTopProducts(sortedProd);
-    };
-
-    fetchAllData();
   }, []);
 
-  const barChartPengeluaranPerBulan = (fundsMonthlyArr) => {
-    console.log("Render barChartPengeluaranPerBulan, data:", fundsMonthlyArr);
-    if (!fundsMonthlyArr || fundsMonthlyArr.length === 0) {
-      return <Typography variant="body2" color="text.secondary">Tidak ada data</Typography>;
-    }
-    const values = fundsMonthlyArr.map(d => Number(d.value) || 0);
-    const maxVal = Math.max(...values, 1);
-    return (
-      <Box
-        sx={{
-          position: 'relative',
-          height: 220,
-          px: 2,
-          border: '1px solid red',     
-          bgcolor: '#fff'
-        }}
-      >
- 
-        {[0.25, 0.5, 0.75, 1].map((frac, idx) => (
-          <Box key={idx}
-            sx={{
-              position: 'absolute',
-              bottom: `${frac * 100}%`,
-              left: 0, right: 0,
-              borderTop: '1px dashed #ccc',
-              zIndex: 1,
-            }}
-          />
-        ))}
-        {/* Baseline */}
-        <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, borderBottom: '2px solid #888', zIndex: 2 }} />
-        {/* Bars */}
-        <Box sx={{ display: 'flex', alignItems: 'flex-end', height: '100%', position: 'relative', zIndex: 3 }}>
-          {fundsMonthlyArr.map((d, idx) => {
-            const val = Number(d.value) || 0;
-            const heightPct = (val / maxVal) * 100;
-            console.log(`Bar ${d.month}: val=${val}, heightPct=${heightPct}`);
-            return (
-              <Box key={idx} sx={{ flex: 1, mx: 0.5, textAlign: 'center' }}>
-                <Box
-                  sx={{
-                    height: `${heightPct}%`,
-                    minHeight: val > 0 ? 4 : 0,  
-                    bgcolor: val > 0 ? 'red' : '#e0e0e0',
-                    borderRadius: 1,
-                  }}
-                  title={`${d.month}: ${new Intl.NumberFormat("id-ID").format(val)}`}
-                />
-                <Typography variant="caption" sx={{ mt: 0.5 }}>{d.month}</Typography>
-              </Box>
-            );
-          })}
-        </Box>
-      </Box>
-    );
-  };
+  useEffect(() => {
+    const headers = { 'ngrok-skip-browser-warning': 'true', Accept: 'application/json' };
+    axios.get(`${API_BASE_URL}/api/users`, { headers })
+      .then(res => setUsers(res.data.data.data || []))
+      .catch(() => setUsers([]));
+  }, []); 
 
-  const stokByKategori = useMemo(() => {
-    const freq = {};
-    products.forEach(p => {
-      const cat = p.category?.name || "Unknown";
-      freq[cat] = (freq[cat] || 0) + (Number(p.stock) || 0);
+  useEffect(() => {
+    if (users.length === 0) return; 
+    const headers = { 'ngrok-skip-browser-warning': 'true', Accept: 'application/json' };
+    axios.get(`${API_BASE_URL}/api/checkouts`, { headers })
+      .then(res => {
+        const data = res.data.data || [];
+        const withInitial = data.map(co => ({
+          ...co,
+          initial: users.find(u => u.id === co.user_id)?.initial || '—'
+        }));
+        setCheckouts(withInitial);
+      })
+      .catch(() => setCheckouts([]));
+
+  }, [users]);
+
+  const barDataFunds = useMemo(() => {
+    const acc = {};
+    funds.transactions.filter(tx => tx.type === 'out').forEach(tx => {
+      const m = new Date(tx.date).getMonth();
+      acc[m] = (acc[m] || 0) + tx.amount;
     });
-    const arr = Object.entries(freq).map(([name, stock]) => ({ name, stock }));
-    arr.sort((a, b) => b.stock - a.stock);
-    console.log("stokByKategori:", arr);
-    return arr;
-  }, [products]);
+    return monthNames.map((name, idx) => ({ x: name, y: acc[idx] || 0 }));
+  }, [funds.transactions]);
 
-  const barChartStokPerKategori = (arrKategori) => {
-    console.log("Render barChartStokPerKategori, data:", arrKategori);
-    if (!arrKategori || arrKategori.length === 0) {
-      return <Typography variant="body2" color="text.secondary">Tidak ada data</Typography>;
-    }
-    const stocks = arrKategori.map(d => Number(d.stock) || 0);
-    const maxVal = Math.max(...stocks, 1);
-    return (
-      <Box
-        sx={{
-          position: 'relative',
-          height: 220,
-          px: 2,
-          border: '1px solid blue',   
-          bgcolor: '#fff',
-        }}
-      >
-        {[0.25, 0.5, 0.75, 1].map((frac, idx) => (
-          <Box key={idx}
-            sx={{
-              position: 'absolute',
-              bottom: `${frac * 100}%`,
-              left: 0, right: 0,
-              borderTop: '1px dashed #ccc',
-              zIndex: 1,
-            }}
-          />
-        ))}
-        <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, borderBottom: '2px solid #888', zIndex: 2 }} />
-        <Box sx={{
-            display: 'flex',
-            alignItems: 'flex-end',
-            height: '100%',
-            position: 'relative',
-            zIndex: 3,
-            overflowX: 'auto'
-          }}
-        >
-          {arrKategori.map((d, idx) => {
-            const val = Number(d.stock) || 0;
-            const heightPct = (val / maxVal) * 100;
-            console.log(`Stok Bar ${d.name}: val=${val}, heightPct=${heightPct}`);
-            return (
-              <Box key={idx} sx={{ width: 50, mx: 0.5, textAlign: 'center', flexShrink: 0 }}>
-                <Box
-                  sx={{
-                    height: `${heightPct}%`,
-                    minHeight: val > 0 ? 10 : 0, 
-                    bgcolor: '#1976d2',
-                    borderRadius: 1,
-                  }}
-                  title={`${d.name}: ${val}`}
-                />
+  const barDataItems = useMemo(() => {
+    const acc = {};
+    checkouts.forEach(co => {
+      const m = new Date(co.checkout_date).getMonth();
+      const total = (co.items || []).reduce((s, i) => s + (i.checkout_quantity || 0), 0);
+      acc[m] = (acc[m] || 0) + total;
+    });
+    return monthNames.map((name, idx) => ({ x: name, y: acc[idx] || 0 }));
+  }, [checkouts]);
 
-                <Typography variant="caption" sx={{
-                    mt: 0.5,
-                    whiteSpace: 'normal',
-                    wordBreak: 'break-word',
-                    fontSize: '0.65rem'
-                  }}
-                >
-                  {d.name.length > 10 ? d.name.slice(0, 10) + '…' : d.name}
-                </Typography>
-              </Box>
-            );
-          })}
-        </Box>
-      </Box>
-    );
-  };
+  const today = new Date().toISOString().slice(0, 10);
+  const todayList = checkouts.filter(co => co.checkout_date.slice(0, 10) === today);
 
-  const totalStock = products.reduce((sum, p) => sum + (Number(p.stock) || 0), 0);
-  const uniqueCategoriesCount = Array.from(new Set(products.map(p => p.category?.name).filter(x => x))).length;
-  const permintaanBaruCount = checkouts.length;
+  const top3 = useMemo(() => {
+    const map = {};
+    checkouts.forEach(co => (co.items || []).forEach(i => {
+      const name = i.product?.name || 'Unknown';
+      map[name] = (map[name] || 0) + (i.checkout_quantity || 0);
+    }));
+    return Object.entries(map)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 3)
+      .map(([label, value], idx) => ({ id: idx, label, value }));
+  }, [checkouts]);
+
+  const lowStock = useMemo(() =>
+    products.filter(p => (p.stock || 0) <= (p.reorder_point || 0)),
+    [products]
+  );
 
   return (
-    <div className="bgcolor">
+    <Box className="bgcolor">
       <Navbar />
       <Box height={70} />
       <Box sx={{ display: 'flex' }}>
         <Sidenav />
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-          {/* Judul & Breadcrumb */}
-          <Typography variant="h4" gutterBottom>Dashboard</Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, color: 'text.secondary', fontSize: 14 }}>
-            <Link to="/home" style={{ color: '#888', textDecoration: 'none' }}>Home</Link>
-            <Box sx={{ mx: 1 }}>•</Box>
-            <Box>Dashboard</Box>
-          </Box>
+          <h1 className="text-3xl font-bold mb-4">Dashboard</h1>
+          <div className="flex items-center text-gray-600 text-sm mt-[-12px] mb-4">
+            <Link to="/home" className="text-gray-400">Home</Link>
+            <span className="mx-2 text-gray-400">•</span>
+            <span>Dashboard</span>
+          </div>
 
-          {/* Cards Ringkasan */}
-          <Grid container spacing={2} columns={12} sx={{ mb: 3 }}>
-            <Grid size={{ xs: 12, md: 3 }}>
-              <Card sx={{ backgroundColor: '#E3F2FD', color: '#0D47A1' }}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <Inventory2Icon sx={{ mr: 1 }} />
-                    <Typography variant="subtitle2">Total Stok Barang</Typography>
-                  </Box>
-                  <Typography variant="h5">{totalStock}</Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid size={{ xs: 12, md: 3 }}>
-              <Card sx={{ backgroundColor: '#E3F2FD', color: '#0D47A1' }}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <CategoryIcon sx={{ mr: 1 }} />
-                    <Typography variant="subtitle2">Total Kategori Barang</Typography>
-                  </Box>
-                  <Typography variant="h5">{uniqueCategoriesCount}</Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid size={{ xs: 12, md: 3 }}>
-              <Card sx={{ backgroundColor: '#E3F2FD', color: '#0D47A1' }}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <MonetizationOnIcon sx={{ mr: 1 }} />
-                    <Typography variant="subtitle2">Total Sisa Dana Tahun Ini</Typography>
-                  </Box>
-                  <Typography variant="h5">
-                    {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" })
-                      .format(fundsThisYearBalance)}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid size={{ xs: 12, md: 3 }}>
-              <Card sx={{ backgroundColor: '#E3F2FD', color: '#0D47A1' }}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <AssignmentTurnedInIcon sx={{ mr: 1 }} />
-                    <Typography variant="subtitle2">Permintaan Baru</Typography>
-                  </Box>
-                  <Typography variant="h5">{permintaanBaruCount}</Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-
-          {/* Grafik & Daftar */}
-          <Grid container spacing={2} columns={12}>
-            <Grid size={{ xs: 12, md: 8 }}>
-              <Stack spacing={2}>
-                
-                <Card>
-                  <CardContent>
-                    <Typography variant="subtitle1" gutterBottom>
-                      Grafik Pengeluaran per Bulan ({new Date().getFullYear()})
-                    </Typography>
-                    {barChartPengeluaranPerBulan(fundsMonthly)}
+          <Grid container spacing={2} sx={{ mt: 5 }}>
+            <Grid size={{ xs: 8 }}>
+              <Stack spacing={2} direction="row">
+                <Card sx={{ flex: 1, height: 160, bgcolor: '#E3F2FD', display: 'flex', alignItems: 'center', justifyContent: 'left' }} >
+                  <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'left', justifyContent: 'center', height: '100%', textAlign: 'left' }} >
+                    <Box component="img" src="/Icon/stok.png" alt="barang" sx={{ width: 30, height: 30, mb: 1, mt: 2 }} />  
+                    <Typography variant="h5" sx={{ fontWeight: 'bold', lineHeight: 1, mb: 1 }} > {products.reduce((sum, p) => sum + (p.stock || 0), 0)} </Typography>
+                    <Typography variant="subtitle2" color="text.secondary" >Total Stok Barang</Typography>
                   </CardContent>
                 </Card>
-                <Card>
-                  <CardContent>
-                    <Typography variant="subtitle1" gutterBottom>
-                      Grafik Stok per Kategori
-                    </Typography>
-                    {barChartStokPerKategori(stokByKategori)}
+                <Card sx={{ flex: 1, height: 160, bgcolor: '#E3F2FD', display: 'flex', alignItems: 'center', justifyContent: 'left'}}>
+                  <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'left', justifyContent: 'center', height: '100%', textAlign: 'left' }}>
+                    <Box component="img" src="/Icon/categories.png" alt="barang" sx={{ width: 30, height: 30, mb: 1, mt: 2 }} />              
+                      <Typography variant="h5" sx={{ fontWeight: 'bold', lineHeight: 1, mb: 1 }}>{categories.length}</Typography>
+                      <Typography variant="subtitle2" color="text.secondary">Total Kategori Barang</Typography>
+                  </CardContent>
+                </Card>
+                <Card sx={{ flex: 1, height: 160, bgcolor: '#E3F2FD', display: 'flex', alignItems: 'center', justifyContent: 'left' }}>
+                  <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'left', justifyContent: 'center', height: '100%', textAlign: 'left' }}>
+                    <Box component="img" src="/Icon/coin.png" alt="barang" sx={{ width: 30, height: 30, mb: 1, mt: 2 }} />                      
+                      <Typography variant="h5" sx={{ fontWeight: 'bold', lineHeight: 1, mb: 1 }}>Rp {funds.balance.toLocaleString()}</Typography>
+                      <Typography variant="subtitle2" color="text.secondary">Total Dana Tahun Ini</Typography>
                   </CardContent>
                 </Card>
               </Stack>
             </Grid>
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Stack spacing={2}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="subtitle1" gutterBottom>
-                      Barang yang Paling Banyak Diambil Staf
-                    </Typography>
-                    <Divider sx={{ mb: 1 }} />
-                    {topProducts && topProducts.length > 0 ? (
-                      topProducts.map((p, i) => (
-                        <Box key={i} sx={{ mb: 1 }}>
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>{p.name}</Typography>
+            <Grid item xs={4}>
+              <Card sx={{ width: 341, height: 160, borderRadius: 2, boxShadow: 1 }}>
+                <CardContent sx={{ 
+                  height: '100%', 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  p: 2 
+                }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                    Pengambilan Barang Terbaru
+                  </Typography>
+                  <Divider sx={{ my: 1 }} />
+
+                  {todayList.length ? (
+                    <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                      {todayList.map(co => (
+                        <Box
+                          key={co.id}
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            borderLeft: '4px solid',
+                            borderColor: 'primary.main',
+                            pl: 1,
+                            py: 0.5,
+                            mb: 0.5
+                          }}
+                        >
+                          <Typography variant="body2">
+                            {co.initial}
+                          </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            Diambil: {p.count} kali
+                            {new Date(co.checkout_date).toLocaleString()}
                           </Typography>
                         </Box>
-                      ))
-                    ) : (
-                      <Typography variant="body2" color="text.secondary">Tidak ada data</Typography>
-                    )}
+                      ))}
+                    </Box>
+                  ) : (
+                    <Box sx={{ 
+                      flex: 1, 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      mt: 1, 
+                    }}>
+                      <Typography variant="body2" color="text.disabled" >
+                        Tidak Ada Pengambilan Hari Ini
+                      </Typography>
+                    </Box>
+                  )}
+
+                  <Box sx={{ textAlign: 'right', mb:-2.5 }}>
+                    <Button size="small" component={Link} to="/ambil">
+                      Lihat Semua
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+
+          <Grid container spacing={2} sx={{ mt: 3 }}>
+            <Grid size={{ xs: 8 }}>
+              <Stack spacing={2}>
+                <Card sx={{ height: '40vh' }}>
+                  <CardContent>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Jumlah Barang Diambil Tiap Bulan</Typography>
+                    <Box sx={{ height: '80%' }}>
+                      <BarChart
+                        dataset={barDataItems}
+                        xAxis={[{ dataKey: 'x' }]}
+                        series={[{ dataKey: 'y', label: 'Jumlah Barang' }]}
+                        height={200}
+                      />
+                    </Box>
+                  </CardContent>
+                </Card>
+                <Card sx={{ height: '40vh' }}>
+                  <CardContent>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Pengeluaran Dana Tiap Bulan</Typography>
+                    <Box sx={{ height: '80%' }}>
+                      <BarChart
+                        dataset={barDataFunds}
+                        xAxis={[{ dataKey: 'x' }]}
+                        series={[{ dataKey: 'y', label: 'Jumlah Rp' }]}
+                        height={200}
+                      />
+                    </Box>
                   </CardContent>
                 </Card>
               </Stack>
             </Grid>
-          </Grid>
+            <Grid size={{ xs: 4 }}>
+              <Card sx={{ height: '40vh', mb: 2 }}>
+                <CardContent>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Barang Paling Banyak Diambil</Typography>
+                  <Box sx={{ width: '100%', height: '60%' }}>
+                    <PieChart series={[{ data: top3 }]} width={200} height={200} />
+                  </Box>
+                </CardContent>
+              </Card>
+              <Card sx={{ height: '40vh', borderRadius: 2, boxShadow: 1 }}>
+                <CardContent sx={{ display: 'flex', flexDirection: 'column', height: '100%', p: 2 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                    Barang yang Perlu Pengadaan
+                  </Typography>
+                  <Divider sx={{ my: 1 }} />
 
+                  {lowStock.length ? (
+                    <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                      {lowStock.slice(0, 5).map(p => (
+                        <Box
+                          key={p.id}
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            borderLeft: '4px solid',
+                            borderColor: 'primary.main',
+                            pl: 1,
+                            py: 0.5,
+                            mb: 0.5
+                          }}
+                        >
+                          <Typography variant="body2">{p.name}</Typography>
+                          <Typography variant="caption" color="text.secondary" >
+                            Stok: {p.stock}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </Box>
+                  ) : (
+                    <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 1 }}>
+                      <Typography variant="body2" color="text.disabled">
+                        Semua stok aman
+                      </Typography>
+                    </Box>
+                  )}
+
+                  <Box sx={{ textAlign: 'right', pt: 1 }}>
+                    <Button size="small" component={Link} to="/barang">
+                      Lihat Semua
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
         </Box>
       </Box>
-    </div>
+    </Box>
   );
 }
