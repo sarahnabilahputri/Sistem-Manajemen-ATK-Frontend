@@ -55,6 +55,10 @@ export default function SatuanList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [autoOptions, setAutoOptions] = useState([]);
 
+  const stored = localStorage.getItem("user");
+  const user = stored ? JSON.parse(stored) : null;
+  const role = user?.role;
+
   const handleOpen = () => setOpen(true);
   const handleEditOpen = () => setEditOpen(true);
   const handleClose = () => setOpen(false);
@@ -242,7 +246,8 @@ export default function SatuanList() {
           </Box>
         </Modal>
       </div>
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, mr: 2.5 }}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, mr: 2.5, ...(role === "Kabag" && { mb: 6 }) }}>
+        {role !== "Kabag" && (
         <Button
           variant="contained"
           onClick={handleClickImport}
@@ -265,6 +270,7 @@ export default function SatuanList() {
         >
           {importing ? "Importing..." : "Import"}
         </Button>
+        )}
         <input
           ref={fileInputRef}
           type="file"
@@ -272,9 +278,11 @@ export default function SatuanList() {
           style={{ display: "none" }}
           onChange={handleFileChange}
         />
+        {role !== "Kabag" && (
         <Button sx={{textTransform: 'capitalize'}} variant="contained" startIcon={<AddIcon />} onClick={handleOpen}>
           Tambah Satuan
         </Button>
+        )}
       </Box>
       <Paper sx={{ width: '100%', overflow: 'hidden' }}>
         <Divider />
@@ -333,7 +341,9 @@ export default function SatuanList() {
               <TableRow>
                 <TableCell align="left" sx={{ width: '10%' }}>No</TableCell>
                 <TableCell align="center" sx={{ width: '10%' }}>Satuan</TableCell>
+                {role !== "Kabag" && (
                 <TableCell align="right" sx={{ width: '10%' }}>Aksi</TableCell>
+                )}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -341,12 +351,14 @@ export default function SatuanList() {
                 <TableRow hover key={row.id}>
                   <TableCell align="left" >{page * rowsPerPage + index + 1}</TableCell>
                   <TableCell align="center">{row.Unit}</TableCell>
+                  {role !== "Kabag" && (
                   <TableCell align="right">
                     <Stack direction="row" spacing={2} justifyContent="flex-end">
                       <EditIcon sx={{ color: "blue", cursor: "pointer" }} onClick={() => editData(row.id, row.IdUnit, row.Unit)} />
                       <DeleteIcon sx={{ color: "darkred", cursor: "pointer" }} onClick={() => deleteUser(row.id)} />
                     </Stack>
                   </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>

@@ -67,6 +67,10 @@ export default function PesanList() {
   const [selectedOrderForSend, setSelectedOrderForSend] = useState(null);
   const [selectedUserForSend, setSelectedUserForSend] = useState(null);
 
+  const stored = localStorage.getItem("user");
+  const user = stored ? JSON.parse(stored) : null;
+  const role = user?.role;
+
   const navigate = useNavigate();
   const handleChangePage = (_, newPage) => setPage(newPage);
   const handleChangeRowsPerPage = (e) => { setRowsPerPage(+e.target.value); setPage(0); };
@@ -375,7 +379,8 @@ export default function PesanList() {
 
   return (
     <>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, mt: 1, px: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, mt: 1, px: 2, ...(role === "Kabag" && { mb: 6 }) }}>
+        {role !== "Kabag" && (
         <Button
           variant="contained"
           startIcon={<AddIcon />}
@@ -384,6 +389,7 @@ export default function PesanList() {
         >
           Tambah Pemesanan
         </Button>
+        )}
       </Box>
       <Paper sx={{ width: '100%', overflow: 'hidden' }}>
         <Divider />
@@ -438,6 +444,8 @@ export default function PesanList() {
                   <TableCell>{renderReorderStatus(row.reorder_status)}</TableCell>
                   <TableCell>
                     <Stack direction="row" spacing={1} alignItems="center">
+                      {role !== "Kabag" && (
+                      <>
                       <IconButton size="small" onClick={() => openEdit(row)}>
                         <EditIcon sx={{ color: 'blue' }} />
                       </IconButton>
@@ -454,18 +462,13 @@ export default function PesanList() {
                           <SendIcon sx={{ color: 'orange' }} />
                         </IconButton>
                       )}
-                      {/* Jika update belum dikirim dan proses: tampilkan Cancel + Pembaruan */}
                       {row.whatsapp_status === 'update_belum_dikirim' && row.reorder_status === 'proses' && (
                         <>
-                          {/* <IconButton size="small" onClick={() => cancelWA(row.id)}>
-                            <CancelIcon sx={{ color: 'darkred' }} />
-                          </IconButton> */}
                           <IconButton size="small" onClick={() => sendUpdateWA(row.id)}>
                             <SendIcon sx={{ color: 'blue' }} />
                           </IconButton>
                         </>
                       )}
-                      {/* Jika update belum dikirim dan dibatalkan: tampilkan hanya Pembaruan WA */}
                       {row.whatsapp_status === 'update_belum_dikirim' && row.reorder_status === 'dibatalkan' && (
                         <IconButton size="small" onClick={() => sendUpdateWA(row.id)}>
                           <SendIcon sx={{ color: 'blue' }} />
@@ -475,6 +478,8 @@ export default function PesanList() {
                         <IconButton size="small" onClick={() => cancelWA(row.id)}>
                           <CancelIcon sx={{ color: 'darkred' }} />
                         </IconButton>
+                      )}
+                      </>
                       )}
                       <IconButton size="small" onClick={() => openDetail(row)}>
                         <InfoIcon sx={{ color: 'gray' }} />

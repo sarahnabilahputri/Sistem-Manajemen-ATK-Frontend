@@ -65,6 +65,18 @@ export default function Sidenav({ user }) {
   if (!user) {
     return null;
   }  
+
+  const getAvatarSrc = (rawAvatar) => {
+    const avatar = rawAvatar || ''; 
+    const cleaned = avatar.replace(/^\//, '');
+    if (/^https?:\/\//i.test(cleaned)) {
+      return cleaned;
+    }
+    if (cleaned.startsWith('avatars/') || cleaned.startsWith('images/')) {
+      return `${API_BASE_URL}/storage/${cleaned}`;
+    }
+    return `${API_BASE_URL}/${cleaned}`; 
+  };
   
   return (
     <Box sx={{ display: 'flex' }}>
@@ -106,9 +118,12 @@ export default function Sidenav({ user }) {
           >
             <Box
               component="img"
-              src={user?.avatar || "/profile.jpeg"}
+              src={getAvatarSrc(user.avatar) || `${API_BASE_URL}/assets/images/default_user.jpg`}
               alt="Profile"
-              onError={(e) => { e.target.src = "/profile.jpeg"; }}
+              onError={(e) => { 
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = `${API_BASE_URL}/assets/images/default_user.jpg`; 
+              }}
               sx={{
                 width: 100,
                 height: 100,

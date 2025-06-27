@@ -72,6 +72,10 @@ export default function Navbar() {
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
+  const stored = localStorage.getItem("user");
+  const user = stored ? JSON.parse(stored) : null;
+  const role = user?.role;
+
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -128,7 +132,7 @@ export default function Navbar() {
       }}
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
-    >
+    > 
       <MenuItem onClick={() => { openCart(); handleMobileMenuClose(); }}>
         <IconButton size="large" aria-label="Show cart" color="inherit">
           <Badge badgeContent={cartCount} color="error" invisible={cartCount === 0}>
@@ -188,11 +192,13 @@ export default function Navbar() {
             />
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+            {role !== "Kabag" && (
             <IconButton size="large" color="inherit" onClick={openCart}>
               <Badge badgeContent={cartCount} color="error" invisible={cartCount === 0}>
                 <ShoppingCartIcon />
               </Badge>
             </IconButton>
+            )}
             {/* <IconButton size="large" aria-label="show 4 new mails" color="inherit">
               <Badge badgeContent={4} color="error">
                 <MailIcon />

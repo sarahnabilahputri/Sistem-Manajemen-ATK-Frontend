@@ -16,7 +16,9 @@ const Login = ({ setUser }) => {
       axios.post(callbackURL)
         .then(res => {
           const data = res.data;
+          console.log("Full login response:", res.data);
           const { access_token, token_type, user } = data;
+          
           if (!access_token) throw new Error("No access_token in response");
           localStorage.setItem("access_token", access_token);
           localStorage.setItem("token_type", token_type);

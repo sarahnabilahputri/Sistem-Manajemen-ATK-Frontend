@@ -58,6 +58,7 @@ export default function DanaBAAK() {
   const [year, setYear] = useState(currentYear);
   const [monthIndex, setMonthIndex] = useState(currentMonthIndex);
 
+  const [danaMasukDefault, setDanaMasukDefault] = useState(0);
   const [danaKeluar, setDanaKeluar] = useState(null);
   const [danaSisa, setDanaSisa] = useState(null);
   const [loadingData, setLoadingData] = useState(false);
@@ -66,6 +67,10 @@ export default function DanaBAAK() {
     getDefaultDate(currentYear, currentMonthIndex)
   );
   const [inputDanaMasukBaru, setInputDanaMasukBaru] = useState("");
+
+  const stored = localStorage.getItem("user");
+  const user = stored ? JSON.parse(stored) : null;
+  const role = user?.role;
 
   const getAuthHeader = () => {
     const token = localStorage.getItem("access_token");
@@ -102,6 +107,7 @@ export default function DanaBAAK() {
       }
       const outNum = resp.out != null ? Number(resp.out) : 0;
       const balanceNum = resp.balance != null ? Number(resp.balance) : 0;
+      setDanaMasukDefault(Number(resp.in || 0));
       setDanaKeluar(outNum);
       setDanaSisa(balanceNum);
     } catch (err) {
@@ -249,6 +255,16 @@ export default function DanaBAAK() {
               <Typography>Dana Masuk</Typography>
             </Grid>
             <Grid size={{ xs: 12, sm: 9 }}>
+              {role === "Kabag" ? (
+                // Hanya lihat: tampilkan nilai default read-only
+                <TextField
+                  value={ formatRupiah(danaMasukDefault) }
+                  size="small"
+                  InputProps={{ readOnly: true }}
+                  variant="outlined"
+                  sx={{ width: 500 }}
+                />
+              ) : (
               <TextField
                 value={inputDanaMasukBaru ? formatRupiah(inputDanaMasukBaru) : ""}
                 onChange={handleInputDanaMasukBaru}
@@ -257,6 +273,7 @@ export default function DanaBAAK() {
                 variant="outlined"
                 sx={{ width: 500 }}
               />
+              )}
             </Grid>
           </Grid>
 
@@ -291,11 +308,13 @@ export default function DanaBAAK() {
               />
             </Grid>
           </Grid>
+          {role !== "Kabag" && (
           <Box sx={{ textAlign: "right", mr:31.5 }}>
             <Button variant="contained" onClick={handleSubmitDanaMasukBaru} >
               Simpan
             </Button>
           </Box>
+          )}
         </Box>
       </Paper>
     </Box>

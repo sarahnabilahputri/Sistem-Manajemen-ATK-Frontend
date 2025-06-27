@@ -3,6 +3,8 @@ import { Box, Paper, Typography, Button, Divider, Avatar, Grid } from '@mui/mate
 import { useNavigate } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/Edit';
 
+const API_BASE_URL = import.meta.env.VITE_BASE_URL.replace(/\/$/, '');
+
 const getUserFromStorage = () => {
   try {
     const raw = localStorage.getItem('user');
@@ -29,14 +31,31 @@ const ProfilePage = () => {
     }
   };
 
+  const getAvatarSrc = (rawAvatar) => {
+    const avatar = rawAvatar || '';
+    const cleaned = avatar.replace(/^\//, '');
+    if (/^https?:\/\//i.test(cleaned)) {
+      return cleaned;
+    }
+    if (cleaned.startsWith('avatars/') || cleaned.startsWith('images/')) {
+      return `${API_BASE_URL}/storage/${cleaned}`;
+    }
+    return cleaned
+      ? `${API_BASE_URL}/${cleaned}`
+      : `${API_BASE_URL}/assets/images/default_user.jpg`;
+  };
+
   return (
     <Box sx={{ mx: 'auto', mt: 4}}>
       <Paper elevation={1} sx={{ display: 'flex', alignItems: 'center', p: 2, mb: 2 }}>
         <Avatar
-          src={user?.avatar || '/profile.jpeg'}
+          src={getAvatarSrc(user?.avatar)}
           alt={user?.name || ''}
           sx={{ width: 100, height: 100, mr: 5, ml:5 }}
-          onError={(e) => { e.target.src = '/profile.jpeg'; }}
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = `${API_BASE_URL}/assets/images/default_user.jpg`;
+          }}
         />
         <Typography variant="h6" component="h1" sx={{ fontWeight: 'bold' }}>
           {user?.name || 'Nama Pengguna'}

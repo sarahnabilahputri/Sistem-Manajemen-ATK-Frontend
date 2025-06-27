@@ -67,6 +67,10 @@ export default function TerimaList() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailData, setDetailData] = useState(null);
 
+  const stored = localStorage.getItem("user");
+  const user = stored ? JSON.parse(stored) : null;
+  const role = user?.role;
+
   const formatDateOnly = dateStr => {
     if (!dateStr) return '-';
     const d = new Date(dateStr);
@@ -338,8 +342,10 @@ export default function TerimaList() {
         </Paper>
       </Modal>
 
-      <Box sx={{ display:'flex', justifyContent:'flex-end', mb:2, mr:2.5 }}>
+      <Box sx={{ display:'flex', justifyContent:'flex-end', mb:2, mr:2.5, ...(role === "Kabag" && { mb: 6 }) }}>
+        {role !== "Kabag" && (
         <Button variant="contained" startIcon={<AddIcon />} onClick={openAddModal} sx={{ textTransform:'capitalize' }}>Tambah Penerimaan</Button>
+        )}
       </Box>
 
       <Paper sx={{ width:'100%', overflow:'hidden' }}>
@@ -413,6 +419,8 @@ export default function TerimaList() {
                     <TableCell>{renderReceivedStatus(row.status)}</TableCell>
                     <TableCell>
                       <Stack direction="row" spacing={1} justifyContent="flex-start">
+                        {role !== "Kabag" && (
+                        <>
                         <Tooltip title="Edit">
                           <span>
                             <IconButton size="small" onClick={()=>handleEdit(row)} disabled={row.status==='selesai' || row.status==='diretur'}>
@@ -426,6 +434,8 @@ export default function TerimaList() {
                               <CheckCircleOutlineIcon />
                             </IconButton>
                           </Tooltip>
+                        )}
+                        </>
                         )}
                         <Tooltip title="Detail">
                           <IconButton size="small" onClick={()=>openDetailModal(row)}>

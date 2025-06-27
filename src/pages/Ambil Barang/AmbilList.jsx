@@ -51,6 +51,10 @@ export default function AmbilList() {
     endDate: ''     
   });
 
+  const stored = localStorage.getItem("user");
+  const user = stored ? JSON.parse(stored) : null;
+  const role = user?.role;
+
   const openEdit = row => { setEditData(row); setEditOpen(true); };
   const closeEdit = () => setEditOpen(false);
   const handleSave = updated => {
@@ -227,7 +231,7 @@ export default function AmbilList() {
           {exporting ? "Exporting..." : "Export"}
         </Button>
 
-        {/* Button Tambah Checkout */}
+        {role !== "Kabag" && (  
         <Button
           variant="contained"
           startIcon={<AddIcon />}
@@ -236,6 +240,7 @@ export default function AmbilList() {
         >
           Tambah Checkout
         </Button>
+        )}
       </Box>
 
       <Modal
@@ -392,8 +397,12 @@ export default function AmbilList() {
                   <TableCell>{row.purpose}</TableCell>
                   <TableCell>
                     <Stack direction="row" spacing={1}>
+                      {role !== "Kabag" && (
+                      <>
                       <IconButton sx={{ color: 'blue' }} onClick={() => openEdit(row)}><EditIcon/></IconButton>
                       <IconButton sx={{ color: 'darkred' }} onClick={() => deleteItem(row.id)}><DeleteIcon/></IconButton>
+                      </>
+                      )}
                       <IconButton sx={{ color: 'gray' }} onClick={() => openDetail(row)}><InfoIcon/></IconButton>
                     </Stack>
                   </TableCell>

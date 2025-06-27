@@ -52,6 +52,10 @@ export default function BAAKList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [autoOptions, setAutoOptions] = useState([]);
 
+  const stored = localStorage.getItem("user");
+  const user = stored ? JSON.parse(stored) : null;
+  const role = user?.role;
+
   const handleOpen = () => setOpen(true);
   const handleEditOpen = () => setEditOpen(true);
   const handleClose = () => setOpen(false);
@@ -220,10 +224,12 @@ export default function BAAKList() {
           </Box>
         </Modal>
       </div>
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, mr: 2.5 }}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, mr: 2.5, ...(role === "Kabag" && { mb: 6 }) }}>
+        {role !== "Kabag" && (
         <Button sx={{textTransform: 'capitalize'}} variant="contained" startIcon={<AddIcon />} onClick={handleOpen}>
           Tambah User
         </Button>
+        )}
       </Box>
       <Paper sx={{ width: '100%', overflow: 'hidden' }}>
         <Divider />
@@ -286,8 +292,9 @@ export default function BAAKList() {
                 <TableCell align="left">Position</TableCell>
                 <TableCell align="left">Initial</TableCell>
                 <TableCell align="left">Role</TableCell>
-                {/* <TableCell align="left">Study Program ID</TableCell> */}
+                {role !== "Kabag" && (
                 <TableCell align="left" sx={{ width: 10 }}>Aksi</TableCell>
+                )}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -300,13 +307,14 @@ export default function BAAKList() {
                   <TableCell align="left">{row.position}</TableCell>
                   <TableCell align="left">{row.initial}</TableCell>
                   <TableCell align="left">{row.role}</TableCell>
-                  {/* <TableCell align="left">{row.study_program_id}</TableCell> */}
+                  {role !== "Kabag" && (
                   <TableCell align="left">
                     <Stack direction="row" spacing={2}>
                       <EditIcon sx={{ color: "blue", cursor: "pointer" }} onClick={() => editData(row)} />
                       <DeleteIcon sx={{ color: "darkred", cursor: "pointer" }} onClick={() => deleteUser(row.id)} />
                     </Stack>
                   </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
