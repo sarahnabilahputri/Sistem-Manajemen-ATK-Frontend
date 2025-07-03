@@ -511,6 +511,9 @@ export default function CheckoutPage() {
                       <Autocomplete
                         options={products}
                         getOptionLabel={opt => opt.name}
+                        filterOptions={(opts) => 
+                          [...opts].sort((a, b) => a.name.localeCompare(b.name))
+                        }
                         value={selectedProduct}
                         onChange={(e, val) => {
                           setSelectedProduct(val);
@@ -571,7 +574,15 @@ export default function CheckoutPage() {
                     <Box sx={{ display: 'flex', justifyContent: 'right', gap: 2 }}>
                       <Button
                         variant="outlined"
-                        sx={{ textTransform: 'capitalize' }}
+                        sx={{
+                          textTransform: 'capitalize',
+                          color: 'red',
+                          borderColor: 'red',
+                          '&:hover': {
+                            backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                            borderColor: 'red',
+                          },
+                        }}
                         onClick={handleClose}
                       >
                         Hapus

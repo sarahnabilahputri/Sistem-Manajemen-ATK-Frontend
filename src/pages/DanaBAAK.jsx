@@ -11,6 +11,7 @@ import {
   Typography,
   Grid,
   Divider,
+  Modal,
 } from "@mui/material";
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -62,6 +63,12 @@ export default function DanaBAAK() {
   const [danaKeluar, setDanaKeluar] = useState(null);
   const [danaSisa, setDanaSisa] = useState(null);
   const [loadingData, setLoadingData] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportRange, setExportRange] = useState({
+    startDate: '',
+    endDate: ''
+  });
 
   const [selectedDate, setSelectedDate] = useState(
     getDefaultDate(currentYear, currentMonthIndex)
@@ -71,6 +78,9 @@ export default function DanaBAAK() {
   const stored = localStorage.getItem("user");
   const user = stored ? JSON.parse(stored) : null;
   const role = user?.role;
+
+  const openExport = () => setExportOpen(true);
+  const closeExport = () => setExportOpen(false);
 
   const getAuthHeader = () => {
     const token = localStorage.getItem("access_token");
@@ -181,9 +191,63 @@ export default function DanaBAAK() {
 
   const firstRowMonths = MONTH_NAMES.slice(0, 8);
   const secondRowMonths = MONTH_NAMES.slice(8);
+  const formatDMY = isoDate => {
+    const [year, month, day] = isoDate.split('-');
+    return `${day}-${month}-${year}`;
+  };
+
+  const handleExport = async () => {
+    const { startDate, endDate } = exportRange;
+    if (!startDate || !endDate) {
+      Swal.fire('Oops', 'Rentang tanggal wajib diisi.', 'warning');
+      return;
+    }
+
+    setExporting(true);
+    try {
+      const res = await axios.get(
+        `${API_BASE_URL}/api/export-report`,  
+        {
+          params: { start_date: startDate, end_date: endDate },
+          responseType: 'blob',
+          headers: { ...getAuthHeader() }
+        }
+      );
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      const disposition = res.headers['content-disposition'];
+      const start = formatDMY(startDate);  
+      const end   = formatDMY(endDate);    
+      const filename = `Report ${start} – ${end}.xlsx`;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+    } catch (err) {
+      console.error(err);
+      Swal.fire('Error', 'Gagal mengekspor data.', 'error');
+    } finally {
+      setExporting(false);
+      closeExport();
+    }
+  };
 
   return (
-    <Box sx={{ mt: 5, display: "flex", justifyContent: "center" }}>
+    <>
+    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, mr:2 }}>
+      <Button
+        variant="contained"
+        onClick={openExport}
+        disabled={exporting}
+        startIcon={<img src="/Icon/export.png" alt="Export" width={15} height={15} />}
+        sx={{ textTransform: 'capitalize', bgcolor: '#09C690', '&:hover': { bgcolor: '#07a574' } }}
+      >
+        {exporting ? 'Exporting...' : 'Export'}
+      </Button>
+    </Box>
+    <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
       <Paper elevation={1} sx={{ width: "100%", p: 3, borderRadius: 2 }}>
         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
           <Typography variant="subtitle1" sx={{ mr: 2 }}>
@@ -256,7 +320,6 @@ export default function DanaBAAK() {
             </Grid>
             <Grid size={{ xs: 12, sm: 9 }}>
               {role === "Kabag" ? (
-                // Hanya lihat: tampilkan nilai default read-only
                 <TextField
                   value={ formatRupiah(danaMasukDefault) }
                   size="small"
@@ -317,6 +380,106 @@ export default function DanaBAAK() {
           )}
         </Box>
       </Paper>
+      <Modal
+        open={exportOpen}
+        onClose={closeExport}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: 'rgba(0,0,0,0.5)',
+          p: 2,
+        }}
+      >
+        <Paper
+          elevation={3}
+          sx={{
+            width: 500,
+            borderRadius: 2,
+            overflow: 'hidden',
+          }}
+        >
+          {/* HEADER */}
+          <Box sx={{ p: 2, ml: 1 }}>
+            <Typography variant="h7" fontWeight="bold">
+              Export Data Dana BAAK
+            </Typography>
+          </Box>
+          <Divider />
+
+          {/* BODY */}
+          <Box sx={{ p: 3 }}>
+            <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1 }}>
+              Rentang Waktu
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              {/* Start date */}
+              <TextField
+                type="date"
+                size="small"
+                value={exportRange.startDate}
+                onChange={e =>
+                  setExportRange(prev => ({ ...prev, startDate: e.target.value }))
+                }
+                sx={{ flex: 1 }}
+                InputLabelProps={{ shrink: true }}
+              />
+
+              {/* Label 's.d.' */}
+              <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                s.d.
+              </Typography>
+
+              {/* End date */}
+              <TextField
+                type="date"
+                size="small"
+                value={exportRange.endDate}
+                onChange={e =>
+                  setExportRange(prev => ({ ...prev, endDate: e.target.value }))
+                }
+                sx={{ flex: 1 }}
+                InputLabelProps={{ shrink: true }}
+              />
+            </Box>
+          </Box>
+          <Divider />
+
+          {/* FOOTER */}
+          <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+            <Button
+              variant="contained"
+              onClick={closeExport}
+              sx={{
+                mr: 1,
+                bgcolor: "#E4E6EF",
+                color: "black",
+                textTransform: "capitalize",
+                "&:hover": { bgcolor: "#d1d3db" }
+              }}
+            >
+              Tutup
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={
+                <Box component="img" src="/Icon/export.png" sx={{ width:15, height:15 }} />
+              }
+              disabled={exporting}
+              onClick={handleExport}
+              sx={{
+                bgcolor: "#009D70",
+                color: "white",
+                textTransform: "capitalize",
+                "&:hover": { bgcolor: "#008a60" }
+              }}
+            >
+              {exporting ? 'Exporting...' : 'Export'}
+            </Button>
+          </Box>
+        </Paper>
+      </Modal>
     </Box>
+    </>
   );
 }

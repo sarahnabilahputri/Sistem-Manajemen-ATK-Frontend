@@ -282,7 +282,7 @@ export default function TerimaList() {
   return (
     <>
       <Modal open={openAdd} onClose={closeAddModal} sx={modalStyle}>
-        <AddTerima CloseEvent={closeAddModal} onSuccess={()=>{ closeAddModal(); fetchReceived(1,rowsPerPage); }}/>
+        <AddTerima CloseEvent={closeAddModal} onSuccess={()=>{ closeAddModal(); setPage(0); fetchReceived(1,rowsPerPage); }}/>
       </Modal>
       <Modal open={openEdit} onClose={closeEditModal} sx={modalStyle}>
         <EditTerima CloseEvent={closeEditModal} formData={formData} onSuccess={()=>{ closeEditModal(); fetchReceived(page+1,rowsPerPage); }}/>
@@ -377,7 +377,6 @@ export default function TerimaList() {
                 {...params}
                 size="small"
                 sx={{ width:200 }}
-                placeholder="Kode Pesanan"
                 InputProps={{
                   ...params.InputProps,
                   endAdornment: (

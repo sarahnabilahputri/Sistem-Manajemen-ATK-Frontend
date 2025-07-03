@@ -92,6 +92,10 @@ export default function Home() {
 
   const today = new Date().toISOString().slice(0, 10);
   const todayList = checkouts.filter(co => co.checkout_date.slice(0, 10) === today);
+  const totalToday = todayList.reduce((sum, co) => {
+    const qtyThisCheckout = (co.items || []).reduce((s, i) => s + (i.checkout_quantity || 0), 0);
+    return sum + qtyThisCheckout;
+  }, 0);
 
   const top3 = useMemo(() => {
     const map = {};
@@ -136,9 +140,14 @@ export default function Home() {
                 </Card>
                 <Card sx={{ flex: 1, height: 160, bgcolor: '#E3F2FD', display: 'flex', alignItems: 'center', justifyContent: 'left'}}>
                   <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'left', justifyContent: 'center', height: '100%', textAlign: 'left' }}>
-                    <Box component="img" src="/Icon/categories.png" alt="barang" sx={{ width: 30, height: 30, mb: 1, mt: 2 }} />              
-                      <Typography variant="h5" sx={{ fontWeight: 'bold', lineHeight: 1, mb: 1 }}>{categories.length}</Typography>
-                      <Typography variant="subtitle2" color="text.secondary">Total Kategori Barang</Typography>
+                    {/* (opsional) Ganti ikon jika mau */}
+                    <Box component="img" src="/Icon/categories.png" alt="pengambilan" sx={{ width: 30, height: 30, mb: 1, mt: 2 }} />              
+                    <Typography variant="h5" sx={{ fontWeight: 'bold', lineHeight: 1, mb: 1 }}>
+                      {totalToday}
+                    </Typography>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Total Barang Diambil Hari Ini
+                    </Typography>
                   </CardContent>
                 </Card>
                 <Card sx={{ flex: 1, height: 160, bgcolor: '#E3F2FD', display: 'flex', alignItems: 'center', justifyContent: 'left' }}>
@@ -150,7 +159,7 @@ export default function Home() {
                 </Card>
               </Stack>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 3 }}>
               <Card sx={{ width: 341, height: 160, borderRadius: 2, boxShadow: 1 }}>
                 <CardContent sx={{ 
                   height: '100%', 

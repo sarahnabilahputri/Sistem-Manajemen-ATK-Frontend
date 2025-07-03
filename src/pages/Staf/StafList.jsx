@@ -64,20 +64,30 @@ export default function StafList() {
   const handleClose = () => setOpen(false);
   const handleEditClose = () => setEditOpen(false);
 
-  const fetchUsers = (pageArg = 1, limitArg = rowsPerPage, search = "") => {
-    axios.get(`${API_BASE_URL}/api/users`, {
-      params: { page: pageArg, limit: limitArg, search },
-      headers: {
-        'ngrok-skip-browser-warning': 'true',
-        'Accept': 'application/json'
-      }
-    })
-    .then((response) => {
-      const data = response.data.data;
-      const items = data.data
-        .filter((user) => user.role === 'Staff')
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      const formattedRows = items.map((user) => ({
+  const fetchUsers = async (pageArg = 1, limitArg = rowsPerPage, search = "") => {
+    try {
+      const respAll = await axios.get(`${API_BASE_URL}/api/users`, {
+        params: {
+          page: 1,
+          limit: 1000,     
+          search
+        },
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+          'Accept': 'application/json'
+        }
+      });
+
+      const allUsers = respAll.data.data.data;
+
+      const staffOnly = allUsers.filter(user => user.role === 'Staff');
+
+      setTotalItems(staffOnly.length);
+
+      const startIdx = (pageArg - 1) * limitArg;
+      const pageOfStaff = staffOnly.slice(startIdx, startIdx + limitArg);
+
+      const formattedRows = pageOfStaff.map(user => ({
         id: user.id,
         name: user.name,
         email: user.email,
@@ -87,14 +97,14 @@ export default function StafList() {
         role: user.role,
         study_program_id: user.study_program_id
       }));
+
       setRows(formattedRows);
       setAllRows(formattedRows);
-      setTotalItems(items.length);
-    })
-    .catch((error) => {
+
+    } catch (error) {
       console.error('Error fetching users:', error);
       setError(error);
-    });
+    }
   };
 
   const handleClickImport = () => {

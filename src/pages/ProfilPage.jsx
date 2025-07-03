@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Paper, Typography, Button, Divider, Avatar, Grid } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/Edit';
+import EditProfile from '../pages/Profil/EditProfil';
 
 const API_BASE_URL = import.meta.env.VITE_BASE_URL.replace(/\/$/, '');
 
@@ -16,19 +17,16 @@ const getUserFromStorage = () => {
 };
 
 const ProfilePage = () => {
-  const navigate = useNavigate();
   const user = getUserFromStorage();
+  const role = user?.role;
+  const [editOpen, setEditOpen] = useState(false);
 
-  const handleEdit = () => {
-    if (!user) return;
-    const role = (user.role || '').toLowerCase();
-    if (role === 'baak') {
-      navigate('/user');
-    } else if (role === 'staff') {
-      navigate('/staf');
-    } else {
-      navigate('/profile/edit');
-    }
+  const handleEditClick = () => {
+    setEditOpen(true);
+  };
+  const handleClose = () => setEditOpen(false);
+  const handleSuccess = () => {
+    window.location.reload();
   };
 
   const getAvatarSrc = (rawAvatar) => {
@@ -48,14 +46,15 @@ const ProfilePage = () => {
   return (
     <Box sx={{ mx: 'auto', mt: 4}}>
       <Paper elevation={1} sx={{ display: 'flex', alignItems: 'center', p: 2, mb: 2 }}>
-        <Avatar
-          src={getAvatarSrc(user?.avatar)}
-          alt={user?.name || ''}
-          sx={{ width: 100, height: 100, mr: 5, ml:5 }}
-          onError={(e) => {
+        <Box
+          component="img"
+          src={getAvatarSrc(user.avatar) || `${API_BASE_URL}/assets/images/default_user.jpg`}
+          alt="Profile"
+          onError={(e) => { 
             e.currentTarget.onerror = null;
-            e.currentTarget.src = `${API_BASE_URL}/assets/images/default_user.jpg`;
+            e.currentTarget.src = `${API_BASE_URL}/assets/images/default_user.jpg`; 
           }}
+          sx={{ width: 100, height: 100, mr: 5, ml:5, borderRadius: "50%" }}
         />
         <Typography variant="h6" component="h1" sx={{ fontWeight: 'bold' }}>
           {user?.name || 'Nama Pengguna'}
@@ -67,9 +66,16 @@ const ProfilePage = () => {
           <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
             Detail Profil
           </Typography>
-          <Button variant="contained" onClick={handleEdit} startIcon={<EditIcon />}sx={{textTransform: 'capitalize'}}>
+          {role !== "Kabag" && (
+          <Button
+            variant="contained"
+            onClick={handleEditClick}
+            startIcon={<EditIcon />}
+            sx={{ textTransform: 'capitalize' }}
+          >
             Ubah Data Diri
           </Button>
+          )}
         </Box>
         <Divider />
 
@@ -129,7 +135,13 @@ const ProfilePage = () => {
             </Typography>
           </Grid>
         </Grid>
-      </Paper>
+      </Paper>    
+      <EditProfile
+        open={editOpen}
+        userId={user?.id}
+        onClose={handleClose}
+        onSuccess={handleSuccess}
+      />
     </Box>
   );
 };

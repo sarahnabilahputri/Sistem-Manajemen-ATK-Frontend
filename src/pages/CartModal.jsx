@@ -123,7 +123,7 @@ export default function CartModal() {
   const handleRemove = async (itemId) => {
     const result = await Swal.fire({
       title: 'Hapus item?',
-      text: 'Yakin ingin menghapus item ini dari keranjang?',
+      text: 'Yakin ingin menghapus item ini dari daftar?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Ya',
@@ -186,14 +186,14 @@ export default function CartModal() {
     const result = await Swal.fire({
       title: 'Konfirmasi Pengadaan',
       html: `
-        <p>Total barang: ${cartItems.length}</p>
-        <p>Total harga: <strong>${formatRp(totalAll)}</strong></p>
+        <p>Total Barang: ${cartItems.length}</p>
+        <p>Total Estimasi Harga: <strong>${formatRp(totalAll)}</strong></p>
         <p>Tanggal Butuh: ${reorderDate}</p>
         <p>Tanggal Pengiriman: ${deliveryDate}</p>
       `,
       icon: 'question',
       showCancelButton: true,
-      confirmButtonText: 'Ya, Checkout',
+      confirmButtonText: 'Ya',
       cancelButtonText: 'Batal',
       willOpen: () => {
         const swalContainer = document.querySelector('.swal2-container');
@@ -408,7 +408,7 @@ export default function CartModal() {
 
                         {/* Total harga item */}
                         <Box sx={{ width: 100, textAlign: 'left', ml: 1 }}>
-                          <Typography variant="body2">Total:</Typography>
+                          <Typography variant="body2">Estimasi:</Typography>
                           <Typography variant="subtitle2">{formatRp(itemTotal)}</Typography>
                         </Box>
 
@@ -452,7 +452,7 @@ export default function CartModal() {
                   <Divider sx={{ my: 1 }} />
                   {/* Total Harga */}
                   <Box sx={{ mt: 1 }}>
-                    <Typography variant="subtitle1">Total Harga:</Typography>
+                    <Typography variant="subtitle1">Estimasi Total Harga:</Typography>
                     <Typography variant="h6" fontWeight="bold">{formatRp(totalAll)}</Typography>
                   </Box>
                 </Paper>

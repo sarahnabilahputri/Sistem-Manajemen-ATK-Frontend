@@ -108,8 +108,12 @@ export default function ProductList() {
         EOQ: product.economic_order_quantity,
         _raw: product,
       }));
-      setRows(formattedRows);
-      setAllRows(formattedRows);
+      const sortedRows = [
+        ...formattedRows.filter(r => r.Stock <= r.ReorderPoint),
+        ...formattedRows.filter(r => r.Stock > r.ReorderPoint),
+      ];
+      setRows(sortedRows);
+      setAllRows(sortedRows);
       setTotalItems(data.total); 
     })
     .catch((error) => {
@@ -439,8 +443,25 @@ export default function ProductList() {
             <TableBody>
             {rows.map((row, index) => {
               const inCart = cartItems.some(item => item.product.id === row.id);
-              return (
-                <TableRow hover key={row.id}>
+              return (               
+                <TableRow
+                  key={row.id}
+                  sx={{
+                    backgroundColor: row.Stock <= row.ReorderPoint ? "#FFE0E9" : "inherit",
+                    ...(row.Stock <= row.ReorderPoint && {
+                      "& .MuiTableCell-root": {
+                        borderTop: "1px solid #FF0000",
+                        borderBottom: "1px solid #FF0000",
+                      },
+                      "& .MuiTableCell-root:first-of-type": {
+                        borderLeft: "1px solid #FF0000",
+                      },
+                      "& .MuiTableCell-root:last-of-type": {
+                        borderRight: "1px solid #FF0000",
+                      },
+                    })
+                  }}
+                >
                   <TableCell>{page * rowsPerPage + index + 1}</TableCell>
                   <TableCell>{row.NamaProduk}</TableCell>
                   <TableCell>{row.Kategori}</TableCell>
@@ -462,6 +483,7 @@ export default function ProductList() {
                           variant="contained"
                           size="small"
                           onClick={() => handleAddToCart(row)}
+                          color={row.Stock <= row.ReorderPoint ? "error" : "primary"}
                         >
                           Pesan
                         </Button>

@@ -169,9 +169,11 @@ export default function PesanList() {
     });
     const sorted = sortRows(updated);
     setAllRows(sorted);
-    const initials = Array.from(new Set(sorted.map(r => r.initial))).filter(v => v);
-    setAutoOptions(initials);
-    const filtered = sorted.filter(r => !searchTerm || r.initial.toLowerCase().includes(searchTerm.toLowerCase()));
+    const codes = Array.from(new Set(sorted.map(r => r.reorder_code))).filter(v => v);
+    setAutoOptions(codes);
+    const filtered = sorted.filter(r =>
+      !searchTerm || r.reorder_code.toLowerCase().includes(searchTerm.toLowerCase())
+    );
     setRows(filtered);
     setTotalItems(filtered.length);
     setPage(0);
@@ -426,7 +428,7 @@ export default function PesanList() {
                 <TableCell>Kode Pesan</TableCell>
                 <TableCell>Tgl Butuh</TableCell>
                 <TableCell>Tgl Pengiriman</TableCell>
-                <TableCell>Total Harga</TableCell>
+                <TableCell>Estimasi Total Harga</TableCell>
                 <TableCell>WhatsApp Status</TableCell>
                 <TableCell>Pesan Status</TableCell>
                 <TableCell align="left" sx={{ width: 10 }}>Aksi</TableCell>
@@ -560,11 +562,11 @@ export default function PesanList() {
                     <Typography variant="subtitle2">{item.product.name}</Typography>
                     <Typography variant="subtitle2">Jumlah dipesan:</Typography>
                     <Typography variant="subtitle2">{item.reorder_quantity}</Typography>
-                    <Typography variant="subtitle2">Stok saat ini:</Typography>
+                    <Typography variant="subtitle2">Stok Saat Ini:</Typography>
                     <Typography variant="subtitle2">{item.product.stock}</Typography>
-                    <Typography variant="subtitle2">Harga satuan:</Typography>
+                    <Typography variant="subtitle2">Harga Satuan:</Typography>
                     <Typography variant="subtitle2">{formatRp(item.original_price)}</Typography>
-                    <Typography variant="subtitle2">Total harga:</Typography>
+                    <Typography variant="subtitle2">Estimasi Total:</Typography>
                     <Typography variant="subtitle2">{formatRp(item.total_product_price)}</Typography>
                   </Box>
                 </Paper>
@@ -579,7 +581,7 @@ export default function PesanList() {
               <Typography variant="subtitle2">{formatDateOnly(detailData?.reorder_date)}</Typography>
               <Typography variant="subtitle2" sx={{ mt: 2, mb: 1, color: '#1976D2' }}>Tanggal Pengiriman</Typography>
               <Typography variant="subtitle2">{formatDateOnly(detailData?.delivery_date)}</Typography>
-              <Typography variant="subtitle2" sx={{ mt: 2, mb: 1, color: '#1976D2' }}>Total Harga</Typography>
+              <Typography variant="subtitle2" sx={{ mt: 2, mb: 1, color: '#1976D2' }}>Estimasi Total Harga</Typography>
               <Typography variant="subtitle2">{formatRp(detailData?.total_reorder_price)}</Typography>
               <Typography variant="subtitle2" sx={{ mt: 2, mb: 1, color: '#1976D2' }}>WhatsApp Status</Typography>
               <Typography variant="subtitle2">{detailData?.whatsapp_status}</Typography>

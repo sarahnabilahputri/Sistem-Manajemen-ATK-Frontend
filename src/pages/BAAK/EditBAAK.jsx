@@ -17,6 +17,10 @@ export default function EditBaak({ fid, CloseEvent, onSuccess }) {
 
     const [loading, setLoading] = useState(true);
 
+    const stored = localStorage.getItem("user");
+    const user = stored ? JSON.parse(stored) : null;
+    const role = user?.role;
+
     const fetchBaakById = async (id) => {
         try {
             const response = await axios.get(
@@ -52,38 +56,37 @@ export default function EditBaak({ fid, CloseEvent, onSuccess }) {
     };
 
     const updateBaak = async () => {
-        const { name, email, nip, initial } = formData;
-
-        if (!name || !email || !nip || !initial) {
-            Swal.fire("Error!", "Semua kolom harus diisi.", "error");
-            return;
-        }
-
         const token = `${localStorage.getItem("token_type")} ${localStorage.getItem("access_token")}`;
 
+        const { name, email, nip, initial } = formData;
+        if (!name || !email || !nip || !initial) {
+            return Swal.fire("Error!", "Semua kolom harus diisi.", "error");
+        }
+
         try {
-            const response = await axios({
-                method: "post",
-                url: `${API_BASE_URL}/api/users/${fid.id}`,
-                data: formData,
+            const response = await axios.patch(
+            `${API_BASE_URL}/api/users/${fid.id}`,
+            formData, 
+            {
                 headers: {
-                    "ngrok-skip-browser-warning": "true",
-                    "Accept": "application/json",
-                    "Content-Type": "application/json",
-                    "X-HTTP-Method-Override": "PATCH",
-                    "Authorization": token,
-                }
-            });
+                "ngrok-skip-browser-warning": "true",
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Authorization": token,
+                },
+            }
+            );
 
             if (response.status === 200) {
-                CloseEvent();
-                Swal.fire("Berhasil!", "BAAK telah diperbarui.", "success").then(() => {
-                    onSuccess();
-                });
+            CloseEvent();
+            Swal.fire("Berhasil!", "Data berhasil diperbarui.", "success")
+                .then(() => onSuccess());
             }
         } catch (error) {
+            CloseEvent();
+            const msg = error.response?.data?.message || "Gagal memperbarui data.";
             console.error("❌ Error updating BAAK:", error);
-            Swal.fire("Error!", "Gagal memperbarui BAAK.", "error");
+            Swal.fire("Error!", msg, "error");
         }
     };
 
@@ -94,7 +97,7 @@ export default function EditBaak({ fid, CloseEvent, onSuccess }) {
                 <Grid container spacing={2}>
                     <Grid size={{ xs: 12 }} >
                         <Typography sx={{ mb:1 }}>Nama</Typography>
-                        <TextField name="name" value={formData.name} onChange={handleChange} fullWidth size="small" />
+                        <TextField name="name" value={formData.name} onChange={handleChange} fullWidth size="small"/>
                     </Grid>
                     <Grid size={{ xs: 12 }}>
                         <Typography sx={{ mb:1 }}>Email</Typography>
@@ -141,9 +144,9 @@ export default function EditBaak({ fid, CloseEvent, onSuccess }) {
                         <TextField
                             name="role"
                             value={formData.role}
+                            onChange={handleChange}
                             size="small"
                             fullWidth
-                            disabled
                         />
                     </Grid>
                 </Grid>

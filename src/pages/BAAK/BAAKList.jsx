@@ -21,6 +21,7 @@ import Swal from "sweetalert2";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import Modal from '@mui/material/Modal';
+import IconButton from "@mui/material/IconButton";
 import AddBaak from './AddBAAK';
 import EditBaak from './EditBAAK';
 
@@ -72,7 +73,7 @@ export default function BAAKList() {
     .then((response) => {
       const data = response.data.data;
       const items = data.data
-        .filter((user) => user.role === 'BAAK')
+        .filter((user) => user.role === 'BAAK' || user.role === 'Kabag')
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       const formattedRows = items.map((user) => ({
 
@@ -114,7 +115,7 @@ export default function BAAKList() {
         });
         if (!active) return;
         const opts = resp.data.data.data
-          .filter(user => user.role === 'BAAK')
+          .filter(user => user.role === 'BAAK' || user.role === 'Kabag')
           .map(user => user.name);
         setAutoOptions(opts);
       } catch (err) {
@@ -224,8 +225,8 @@ export default function BAAKList() {
           </Box>
         </Modal>
       </div>
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, mr: 2.5, ...(role === "Kabag" && { mb: 6 }) }}>
-        {role !== "Kabag" && (
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, mr: 2.5, ...(role === "BAAK" && { mb: 6 }) }}>
+        {role !== "BAAK" && (
         <Button sx={{textTransform: 'capitalize'}} variant="contained" startIcon={<AddIcon />} onClick={handleOpen}>
           Tambah User
         </Button>
@@ -292,7 +293,7 @@ export default function BAAKList() {
                 <TableCell align="left">Position</TableCell>
                 <TableCell align="left">Initial</TableCell>
                 <TableCell align="left">Role</TableCell>
-                {role !== "Kabag" && (
+                {role !== 'BAAK' && (
                 <TableCell align="left" sx={{ width: 10 }}>Aksi</TableCell>
                 )}
               </TableRow>
@@ -307,7 +308,7 @@ export default function BAAKList() {
                   <TableCell align="left">{row.position}</TableCell>
                   <TableCell align="left">{row.initial}</TableCell>
                   <TableCell align="left">{row.role}</TableCell>
-                  {role !== "Kabag" && (
+                  {role !== 'BAAK' && (
                   <TableCell align="left">
                     <Stack direction="row" spacing={2}>
                       <EditIcon sx={{ color: "blue", cursor: "pointer" }} onClick={() => editData(row)} />

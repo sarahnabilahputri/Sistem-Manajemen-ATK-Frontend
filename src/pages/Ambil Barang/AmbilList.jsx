@@ -238,7 +238,7 @@ export default function AmbilList() {
           onClick={() => window.open('http://localhost:5173/checkout', '_blank')}
           sx={{ textTransform: 'capitalize' }}
         >
-          Tambah Checkout
+          Tambah Pengambilan
         </Button>
         )}
       </Box>

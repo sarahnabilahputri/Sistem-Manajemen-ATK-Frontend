@@ -7,6 +7,7 @@ import {
   Autocomplete, CircularProgress
 } from '@mui/material';
 import Swal from 'sweetalert2';
+import InputAdornment from '@mui/material/InputAdornment';
 
 const BASE_URL = 'https://boar-lenient-similarly.ngrok-free.app';
 const REORDERS_URL = `${BASE_URL}/api/reorders`;
@@ -16,6 +17,14 @@ const getToday = () => {
   const today = new Date();
   const pad = n => String(n).padStart(2, '0');
   return `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+};
+
+const formatRupiah = (value) => {
+  if (!value) return "";
+  return value
+    .toString()
+    .replace(/\D/g, "")
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 };
 
 export default function AddTerima({ CloseEvent, onSuccess }) {
@@ -119,7 +128,7 @@ export default function AddTerima({ CloseEvent, onSuccess }) {
 
   return (
     <Modal open onClose={CloseEvent} BackdropProps={{ sx:{ bgcolor:'rgba(0,0,0,0.2)' } }} sx={{ display:'flex', alignItems:'center', justifyContent:'center', p:2 }}>
-      <Paper sx={{ width:500, maxHeight:'80vh', display:'flex', flexDirection:'column', borderRadius:2, overflow:'hidden' }}>
+      <Paper sx={{ width:550, maxHeight:'80vh', display:'flex', flexDirection:'column', borderRadius:2, overflow:'hidden' }}>
         <Box sx={{ p:2, borderBottom:'1px solid #ddd' }}><Typography variant='h6' align='center'>Tambah Penerimaan</Typography></Box>
         <Box sx={{ flex:1, overflowY:'auto', p:2, bgcolor:'#f5f5f5' }}>
 
@@ -152,7 +161,7 @@ export default function AddTerima({ CloseEvent, onSuccess }) {
           {items.map((it, idx) => {
             const qty = parseInt(receivedQuantities[it.product_id], 10) || 0;
             const unitPrice = receivedPrices[it.product_id] || 0;
-            const totalPrice = qty * unitPrice;
+            // const totalPrice = qty * unitPrice;
             return (
               <Paper key={it.product_id} variant='outlined' sx={{ display:'flex', alignItems:'center', p:2, my:1, bgcolor:'white' }}>
                 <Box component='img' src={(/^https?:\/\//.test(it.product.image)?it.product.image:`${BASE_URL}/${it.product.image.replace(/^\//,'')}`)}
@@ -162,6 +171,8 @@ export default function AddTerima({ CloseEvent, onSuccess }) {
                   <Typography variant='subtitle2' fontWeight='bold' noWrap>{it.product.name}</Typography>
                   <Typography variant='caption'>Dipesan: {it.reorder_quantity}</Typography>
                 </Box>
+                <Box sx={{ textAlign: 'left', width: 100, mr: 2 }}>
+                <Typography variant='caption'>Jumlah:</Typography>
                 <TextField
                   size="small"
                   type="number"
@@ -182,14 +193,62 @@ export default function AddTerima({ CloseEvent, onSuccess }) {
                     setReceivedQuantities(prev => ({ ...prev, [it.product_id]: num }));
                   }}
                   inputProps={{ min: 1, max: it.reorder_quantity }}
-                  sx={{ width: 60, mr: 7, '& input[type=number]': { MozAppearance: 'textfield', appearance: 'textfield' }, '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': { WebkitAppearance: 'inner-spin-button', opacity: 1, display: 'block' } }}
+                  sx={{
+                    width: 60,
+                    mr: 7,
+                    mt: 0.5,
+                    '& .MuiOutlinedInput-root': {
+                      height: 36,
+                      '& .MuiOutlinedInput-input': {
+                        padding: '8px 12px',
+                        textAlign: 'center'
+                      }
+                    },
+                    '& input[type=number]': {
+                      MozAppearance: 'textfield',
+                      appearance: 'textfield'
+                    },
+                    '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'inner-spin-button',
+                      opacity: 1,
+                      display: 'block'
+                    }
+                  }}
                   InputProps={{ sx: { '& input': { textAlign: 'center', padding: '4px' } } }}
                   error={!!errors[`qty_${idx}`]}
                   helperText={errors[`qty_${idx}`]}
                 />
-                <Box sx={{ textAlign: 'left', width: 100 }}>
-                  <Typography variant='caption'>Total:</Typography>
-                  <Typography variant='subtitle2'>{totalPrice.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 })}</Typography>
+                </Box>
+                <Box sx={{ textAlign: 'left', width: 100, mr:6 }}>
+                  <Typography variant='caption'>Harga Satuan:</Typography>
+                  <TextField
+                    size="small"
+                     value={formatRupiah(receivedPrices[it.product_id])}
+                    onChange={e => {
+                      const val = e.target.value.replace(/\D/g, '');
+                      setReceivedPrices(prev => ({
+                        ...prev,
+                        [it.product_id]: val
+                      }));
+                    }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          Rp
+                        </InputAdornment>
+                      )
+                    }}
+                    sx={{
+                      width: 150,
+                      mt: 0.5,
+                      '& .MuiOutlinedInput-root': {
+                        height: 36,
+                        '& .MuiOutlinedInput-input': {
+                          padding: '8px 12px',
+                        }
+                      }
+                    }}
+                  />
                 </Box>
               </Paper>
             );
