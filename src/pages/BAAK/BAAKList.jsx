@@ -287,11 +287,11 @@ export default function BAAKList() {
             <TableHead>
               <TableRow>
                 <TableCell align="left">No</TableCell>
-                <TableCell align="left">Name</TableCell>
+                <TableCell align="left">Nama</TableCell>
                 <TableCell align="left">Email</TableCell>
                 <TableCell align="left">NIP</TableCell>
-                <TableCell align="left">Position</TableCell>
-                <TableCell align="left">Initial</TableCell>
+                <TableCell align="left">Posisi</TableCell>
+                <TableCell align="left">Inisial</TableCell>
                 <TableCell align="left">Role</TableCell>
                 {role !== 'BAAK' && (
                 <TableCell align="left" sx={{ width: 10 }}>Aksi</TableCell>

@@ -12,6 +12,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import Swal from 'sweetalert2';
+import InputAdornment from '@mui/material/InputAdornment';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL.replace(/\/$/, '');
 
@@ -189,7 +190,7 @@ export default function EditTerima({ CloseEvent, formData, onSuccess }) {
 
   return (
     <Modal open onClose={CloseEvent} BackdropProps={{ sx:{ bgcolor:'rgba(0,0,0,0.2)' } }} sx={{ display:'flex', alignItems:'center', justifyContent:'center', p:2 }}>
-      <Paper sx={{ width:500, maxHeight:'80vh', display:'flex', flexDirection:'column', borderRadius:2, overflow:'hidden' }}>
+      <Paper sx={{ width:550, maxHeight:'80vh', display:'flex', flexDirection:'column', borderRadius:2, overflow:'hidden' }}>
         <Box sx={{ p:2, borderBottom:'1px solid #ddd' }}>
           <Typography variant='h6' align='center'>Edit Penerimaan</Typography>
         </Box>
@@ -208,12 +209,11 @@ export default function EditTerima({ CloseEvent, formData, onSuccess }) {
               <Typography color="error" variant="caption">{errors.form}</Typography>
             )}
           </Box>
-          {/* Items list */}
           {items.map((it) => {
             const pid = it.product.id;
             const imgSrc = (/^https?:\/\//.test(it.product.image) ? it.product.image : `${BASE_URL}/${it.product.image.replace(/^\//,'')}`);
             const qty = parseInt(receivedQuantities[pid], 10) || 0;
-            const price = parseInt(receivedPrices[pid], 10) || 0;
+            const price = parseInt(receivedPrices[pid], 10) || it.product.price;
             const total = qty * price;
             return (
               <Paper key={pid} variant='outlined' sx={{ display:'flex', alignItems:'center', p:2, my:1, bgcolor:'white' }}>
@@ -224,7 +224,8 @@ export default function EditTerima({ CloseEvent, formData, onSuccess }) {
                   <Typography variant='subtitle2' fontWeight='bold' noWrap>{it.product.name}</Typography>
                   <Typography variant='caption'>Dipesan: {it.reorder_quantity}</Typography>
                 </Box>
-                {/* Quantity input */}
+                <Box sx={{ textAlign: 'left', width: 100, mr: 2 }}>
+                <Typography variant='caption'>Jumlah:</Typography>
                 <TextField
                   size="small"
                   type="number"
@@ -235,6 +236,7 @@ export default function EditTerima({ CloseEvent, formData, onSuccess }) {
                   sx={{
                     width: 60,
                     mr: 7,
+                    mt: 0.5,
                     '& input[type=number]': { appearance: 'textfield' },
                     '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
                       WebkitAppearance: 'inner-spin-button', opacity: 1, display: 'block'
@@ -242,16 +244,33 @@ export default function EditTerima({ CloseEvent, formData, onSuccess }) {
                   }}
                   InputProps={{ sx: { '& input': { textAlign: 'center', padding: '4px' } } }}
                   error={!!errors[`qty_${pid}`]} helperText={errors[`qty_${pid}`]}
-                />
-                
-                {/* Total display */}
-                <Box sx={{ textAlign: 'left', width: 100 }}>
-                  <Typography variant='caption'>Total:</Typography>
-                  <Typography variant='subtitle2'>
-                    {total.toLocaleString('id-ID', {
-                      style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0
-                    })}
-                  </Typography>
+                />  
+                </Box>
+                <Box sx={{ textAlign: 'left', width: 120, mr: 4 }}>
+                  <Typography variant='caption'>Harga Satuan:</Typography>
+                  <TextField
+                    size="small"
+                    type="text"
+                    value={price.toLocaleString('id-ID')}
+                    onChange={e => {
+                      const num = e.target.value.replace(/\D/g, '');
+                      setReceivedPrices(prev => ({ ...prev, [pid]: num }));
+                    }}
+                    InputProps={{
+                      startAdornment: <InputAdornment position="start">Rp</InputAdornment>,
+                      sx: { '& input': { textAlign: 'left', padding: '4px' } }
+                    }}
+                    sx={{ 
+                      width: 150, 
+                      mt: 0.5,
+                      '& .MuiOutlinedInput-root': {
+                        height: 36,
+                        '& .MuiOutlinedInput-input': {
+                          padding: '8px 12px',
+                        }
+                      } 
+                    }}
+                  />
                 </Box>
               </Paper>
             );

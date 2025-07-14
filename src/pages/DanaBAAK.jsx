@@ -148,18 +148,15 @@ export default function DanaBAAK() {
       Swal.fire("Peringatan", "Masukkan Jumlah Dana Masuk yang valid.", "warning");
       return;
     }
-    if (!selectedDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
-      Swal.fire("Peringatan", "Tanggal tidak valid.", "warning");
-      return;
-    }
-    const [yStr, mStr, dStr] = selectedDate.split("-");
+    const todayIso = new Date().toISOString().split("T")[0];
+    const [yStr, mStr] = todayIso.split("-");
     const yNum = Number(yStr), mNum = Number(mStr);
     if (yNum !== year || mNum !== monthIndex + 1) {
       Swal.fire("Peringatan", `Tanggal harus di bulan ${MONTH_NAMES[monthIndex]} ${year}.`, "warning");
       return;
     }
     try {
-      const dateForApi = convertToDDMMYYYY(selectedDate);
+      const dateForApi = convertToDDMMYYYY(todayIso);
       const payload = {
         type: "in",
         amount: inputDanaMasukBaru,
@@ -237,6 +234,7 @@ export default function DanaBAAK() {
   return (
     <>
     <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, mr:2 }}>
+      {role !== "Kabag" && (
       <Button
         variant="contained"
         onClick={openExport}
@@ -246,6 +244,7 @@ export default function DanaBAAK() {
       >
         {exporting ? 'Exporting...' : 'Export'}
       </Button>
+      )}
     </Box>
     <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
       <Paper elevation={1} sx={{ width: "100%", p: 3, borderRadius: 2 }}>
@@ -304,8 +303,8 @@ export default function DanaBAAK() {
             <Grid size={{ xs: 12, sm: 9 }}>
               <TextField
                 type="date"
-                value={selectedDate}
-                onChange={handleDateChange}
+                value={getDefaultDate(year, monthIndex)}
+                disabled
                 size="small"
                 InputLabelProps={{ shrink: true }}
                 sx={{ width: 500 }}
@@ -340,6 +339,23 @@ export default function DanaBAAK() {
             </Grid>
           </Grid>
 
+           {/* Total Dana Masuk */}
+          <Grid container spacing={2} alignItems="center" sx={{ mb: 2 }}>
+            <Grid size={{ xs: 12, sm: 3 }}>
+              <Typography>Total Dana Masuk</Typography>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 9 }}>
+              <TextField
+                value={ formatRupiah(danaMasukDefault) }
+                size="small"
+                disabled
+                InputProps={{ readOnly: true }}
+                variant="outlined"
+                sx={{ width: 500 }}
+              />
+            </Grid>
+          </Grid>
+
           {/* Dana Keluar */}
           <Grid container spacing={2} alignItems="center" sx={{ mb: 2 }}>
             <Grid size={{ xs: 12, sm: 3 }}>
@@ -349,6 +365,7 @@ export default function DanaBAAK() {
               <TextField
                 value={danaKeluar != null ? formatRupiah(danaKeluar) : ""}
                 size="small"
+                disabled
                 InputProps={{ readOnly: true }}
                 variant="outlined"
                 sx={{ width: 500 }}
@@ -365,19 +382,22 @@ export default function DanaBAAK() {
               <TextField
                 value={danaSisa != null ? formatRupiah(danaSisa) : ""}
                 size="small"
+                disabled
                 InputProps={{ readOnly: true }}
                 variant="outlined"
                 sx={{ width: 500 }}
               />
             </Grid>
           </Grid>
-          {role !== "Kabag" && (
-          <Box sx={{ textAlign: "right", mr:31.5 }}>
-            <Button variant="contained" onClick={handleSubmitDanaMasukBaru} >
-              Simpan
-            </Button>
-          </Box>
-          )}
+           {role !== "Kabag" && (
+              <Grid container sx={{ mt: 2 }}>
+                <Grid size={{ xs: 12, sm: 9 }} sx={{ textAlign: "right" }}>
+                  <Button variant="contained" onClick={handleSubmitDanaMasukBaru}>
+                    Simpan
+                  </Button>
+                </Grid>
+              </Grid>
+            )}
         </Box>
       </Paper>
       <Modal

@@ -72,8 +72,6 @@ export default function PesanList() {
   const role = user?.role;
 
   const navigate = useNavigate();
-  const handleChangePage = (_, newPage) => setPage(newPage);
-  const handleChangeRowsPerPage = (e) => { setRowsPerPage(+e.target.value); setPage(0); };
 
   const formatDateOnly = (dateStr) => {
     if (!dateStr) return '-';
@@ -130,36 +128,67 @@ export default function PesanList() {
       .catch(err => console.error('Error fetch users:', err));
   }, []);
 
-  useEffect(() => {
-    const fetchReorders = async () => {
-      try {
-        const res = await axios.get(`${API_BASE_URL}/api/reorders`, { headers: { 'ngrok-skip-browser-warning': 'true' } });
-        const arr = res.data.data || [];
-        const baseRows = arr.map(r => ({
-          id: r.id,
-          created_at: r.created_at,
-          reorder_code: r.reorder_code,
-          reorder_date: r.reorder_date,
-          delivery_date: r.delivery_date,
-          total_reorder_price: r.total_reorder_price,
-          whatsapp_status: r.whatsapp_status,
-          reorder_status: r.reorder_status,
-          items: r.items || [],
-          description: r.description || '',
-          user_id: r.user_id,
-          initial: '',
-        }));
-        const sorted = sortRows(baseRows);
-        setAllRows(sorted);
-        setRows(sorted);
-        setTotalItems(sorted.length);
-      } catch(err) {
-        console.error('Error fetch reorders:', err);
-        setError(err);
-      }
+  const fetchReorders = async (pageArg = 1, limitArg = rowsPerPage) => {
+    try {
+      const res = await axios.get(
+        `${API_BASE_URL}/api/reorders`,
+        { params: { page: pageArg, limit: limitArg },
+          headers: { 'ngrok-skip-browser-warning': 'true' } }
+      );
+      const payload = res.data.data || res.data;
+      const arr     = payload.data     || payload;
+      const total   = payload.meta?.total ?? payload.total ?? arr.length;
+      console.log(`📄 fetchReorders page=${pageArg}, limit=${limitArg}, totalItems from API =`, total);
+      const baseRows = arr.map(r => ({
+        id:                 r.id,
+        created_at:         r.created_at,
+        reorder_code:       r.reorder_code,
+        reorder_date:       r.reorder_date,
+        delivery_date:      r.delivery_date,
+        total_reorder_price:r.total_reorder_price,
+        whatsapp_status:    r.whatsapp_status,
+        reorder_status:     r.reorder_status,
+        items:              r.items || [],
+        description:        r.description || '',
+        user_id:            r.user_id,
+        initial:            '',  // nanti di‑fill di langkah 3
+      }));
+      const sorted = sortRows(baseRows);
+
+      setAllRows(sorted);
+      setRows(sorted);
+      setTotalItems(total);
+    } catch(err) {
+      console.error('Error fetch reorders:', err);
+      setError(err);
+    }
+  };
+
+   useEffect(() => {
+    const fetchAll = async () => {
+      const res = await axios.get(`${API_BASE_URL}/api/reorders`, {
+        params: { page: 1, limit: 1000 },            // tarik semua data
+        headers: { 'ngrok-skip-browser-warning': 'true' }
+      });
+      const arr = res.data.data?.data || res.data.data || [];
+      setAllRows(arr);
+      setTotalItems(arr.length);
     };
-    fetchReorders();
-  }, [location.key]);
+
+    fetchAll();
+    setPage(0);
+  }, []);
+
+  const handleChangePage = (_, newPage) => {
+    console.log('⏭ handleChangePage to page', newPage);
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = e => {
+    const newLimit = +e.target.value;
+    setRowsPerPage(newLimit);
+    setPage(0);
+  };
 
   useEffect(() => {
     if (!users.length || !allRows.length) return;
@@ -176,7 +205,6 @@ export default function PesanList() {
     );
     setRows(filtered);
     setTotalItems(filtered.length);
-    setPage(0);
   }, [users, allRows.length]);
 
   useEffect(() => {
@@ -435,7 +463,9 @@ export default function PesanList() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, idx) => (
+              {allRows
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) 
+                .map((row, idx) => (
                 <TableRow hover key={row.id}>
                   <TableCell>{page * rowsPerPage + idx + 1}</TableCell>
                   <TableCell>{row.reorder_code}</TableCell>
@@ -448,12 +478,16 @@ export default function PesanList() {
                     <Stack direction="row" spacing={1} alignItems="center">
                       {role !== "Kabag" && (
                       <>
-                      <IconButton size="small" onClick={() => openEdit(row)}>
-                        <EditIcon sx={{ color: 'blue' }} />
-                      </IconButton>
-                      <IconButton size="small" onClick={() => handleDelete(row)}>
-                        <DeleteIcon sx={{ color: 'darkred' }} />
-                      </IconButton>
+                      {!(row.whatsapp_status === 'selesai' && row.reorder_status === 'selesai') && (
+                        <>
+                          <IconButton size="small" onClick={() => openEdit(row)}>
+                            <EditIcon sx={{ color: 'blue' }} />
+                          </IconButton>
+                          <IconButton size="small" onClick={() => handleDelete(row)}>
+                            <DeleteIcon sx={{ color: 'darkred' }} />
+                          </IconButton>
+                        </>
+                      )}
                       {row.whatsapp_status === 'belum_dikirim' && row.reorder_status === 'draft' && (
                         <IconButton size="small" onClick={() => openSendModal(row)}>
                           <SendIcon sx={{ color: 'green' }} />
@@ -506,7 +540,6 @@ export default function PesanList() {
         />
       </Paper>
 
-      {/* Modal pilih User sebelum Kirim WA */}
       <Modal open={sendModalOpen} onClose={closeSendModal} sx={modalStyle}>
         <Paper sx={panelStyle}>
           <Typography variant="h6" sx={{ mb: 2, textAlign: 'center' }}>Pilih User Rumah Tangga</Typography>

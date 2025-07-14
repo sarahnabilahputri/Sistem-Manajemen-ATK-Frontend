@@ -54,6 +54,7 @@ export default function TerimaList() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [allRows, setAllRows] = useState([]);
   const [rows, setRows] = useState([]);
+  const [totalItems, setTotalItems] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [autoOptions, setAutoOptions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -100,17 +101,20 @@ export default function TerimaList() {
   const closeEditModal = () => setOpenEdit(false);
 
   const fetchReceived = async (pageArg = 1, limitArg = rowsPerPage) => {
-    setLoading(true);
+    // setLoading(true);
     try {
-      const params = { page: pageArg, limit: limitArg };
+      const params = { page: 1, limit: totalItems || 100000 };
       const response = await axios.get(`${API_BASE_URL}/api/product-received`, {
         params,
         headers: { 'Accept':'application/json','ngrok-skip-browser-warning':'true' }
       });
       const data = response?.data?.data;
+      setTotalItems(data.total);
       const items = data?.data || [];
-      const baseRows = items
-        .sort((a,b)=> new Date(b.received_date) - new Date(a.received_date))
+      items.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      const start = (pageArg - 1) * limitArg;
+      const pageItems = items.slice(start, start + limitArg);
+      const baseRows = pageItems
         .map(item=>({
           id: item.id,
           reorderId: item.reorder_id,
@@ -159,7 +163,6 @@ export default function TerimaList() {
     } else {
       setRows(allRows);
     }
-    setPage(0);
   }, [searchTerm, allRows]);
 
   const fetchSuggestions = async term => {
@@ -408,11 +411,17 @@ export default function TerimaList() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rows.slice(page*rowsPerPage, page*rowsPerPage+rowsPerPage).map((row, idx)=>(
+                {rows.map((row, idx) => (
                   <TableRow hover key={row.id}>
                     <TableCell>{page*rowsPerPage + idx +1}</TableCell>
                     <TableCell>{row.reorderCode || '-'}</TableCell>
-                    <TableCell>{new Date(row.createdAt).toLocaleString('id-ID')}</TableCell>
+                    <TableCell>
+                      {new Date(row.createdAt).toLocaleString('id-ID', {
+                        day:   '2-digit',
+                        month: '2-digit',
+                        year:  'numeric',
+                      })}
+                    </TableCell>
                     <TableCell>{formatDateOnly(row.date)}</TableCell>
                     <TableCell>{formatRp(row.totalPrice)}</TableCell>
                     <TableCell>{renderReceivedStatus(row.status)}</TableCell>
@@ -458,7 +467,7 @@ export default function TerimaList() {
         <TablePagination
           rowsPerPageOptions={[10,25,100]}
           component="div"
-          count={rows.length}
+          count={totalItems}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}

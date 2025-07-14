@@ -93,8 +93,33 @@ export default function KategoriList() {
   };
 
   const handleClickImport = () => {
-    fileInputRef.current.click();                   
-  };
+  Swal.fire({
+    title: 'Download template?',
+    text: 'Apakah Anda ingin mendownload template import kategori terlebih dahulu?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Ya, download',
+    cancelButtonText: 'Tidak, pilih file'
+  }).then(result => {
+    if (result.isConfirmed) {
+      // 1) Download template
+      const token = localStorage.getItem('access_token');
+      // Buka tab baru atau trigger download langsung
+      const url = `${API_BASE_URL}/api/category-template`;
+      const a = document.createElement('a');
+      a.href = url;
+      if (token) a.setAttribute('Authorization', `Bearer ${token}`);
+      a.download = 'kategori-template.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } else {
+      // 2) Buka file picker
+      fileInputRef.current.click();
+    }
+  });
+};
+
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];

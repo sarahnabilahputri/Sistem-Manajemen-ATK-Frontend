@@ -202,11 +202,6 @@ export default function EditPesan({ open, onClose, data, onSave, onDelete }) {
                     onBlur={() => {
                       let num = parseInt(editingQty[item.id], 10);
                       if (isNaN(num) || num < 1) num = 1;
-                      if (item.product.stock != null && num > item.product.stock) {
-                        num = item.product.stock;
-                        onClose();
-                        Swal.fire('Info', `Minimal stok adalah ${item.product.stock}`, 'info');
-                      }
                       handleUpdateQuantity(item.id, num);
                     }}
                     inputProps={{ min: 1 }}

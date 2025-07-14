@@ -93,7 +93,28 @@ export default function SatuanList() {
   };
 
   const handleClickImport = () => {
-    fileInputRef.current.click();                  
+    Swal.fire({
+      title: 'Download template?',
+      text: 'Apakah Anda ingin mendownload template import satuan terlebih dahulu?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, download',
+      cancelButtonText: 'Tidak, pilih file'
+    }).then(result => {
+      if (result.isConfirmed) {
+        const token = localStorage.getItem('access_token');
+        const url = `${API_BASE_URL}/api/unit-template`;
+        const a = document.createElement('a');
+        a.href = url;
+        if (token) a.setAttribute('Authorization', `Bearer ${token}`);
+        a.download = 'kategori-template.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } else {
+        fileInputRef.current.click();
+      }
+    });
   };
 
   const handleFileChange = async (e) => {

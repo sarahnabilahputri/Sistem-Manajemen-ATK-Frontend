@@ -48,9 +48,9 @@ export default function EditAmbil({
       const year  = dt.getFullYear();
       const month = pad(dt.getMonth() + 1);
       const day   = pad(dt.getDate());
-      const hour  = pad(dt.getHours());
-      const min   = pad(dt.getMinutes());
-      const lokalISO = `${year}-${month}-${day}T${hour}:${min}`;
+      // const hour  = pad(dt.getHours());
+      // const min   = pad(dt.getMinutes());
+      const lokalISO = `${year}-${month}-${day}`;
       setTanggalButuh(lokalISO);
     } else {
       setTanggalButuh('');
@@ -204,7 +204,7 @@ export default function EditAmbil({
           <Box sx={{ mt: 1, p: 2, bgcolor: 'white', borderRadius: 1, boxShadow: 1 }}>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>Tanggal Butuh</Typography>
             <TextField
-              type="datetime-local"
+              type="date"
               fullWidth
               size="small"
               InputLabelProps={{ shrink: true }}

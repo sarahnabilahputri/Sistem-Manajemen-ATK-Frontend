@@ -108,10 +108,11 @@ export default function ProductList() {
         EOQ: product.economic_order_quantity,
         _raw: product,
       }));
-      const sortedRows = [
-        ...formattedRows.filter(r => r.Stock <= r.ReorderPoint),
-        ...formattedRows.filter(r => r.Stock > r.ReorderPoint),
-      ];
+      const sortedRows = formattedRows.sort((a, b) => {
+        const da = Math.abs(a.Stock - a.ReorderPoint);
+        const db = Math.abs(b.Stock - b.ReorderPoint);
+        return da - db;
+      });
       setRows(sortedRows);
       setAllRows(sortedRows);
       setTotalItems(data.total); 
@@ -208,6 +209,49 @@ export default function ProductList() {
       console.error("Error fetchFirstPageCombined:", err);
       setError(err);
     }
+  };
+
+  const handleClickImport = () => {
+    Swal.fire({
+      title: 'Download template?',
+      text: 'Apakah Anda ingin mendownload template import barang terlebih dahulu?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, download',
+      cancelButtonText: 'Tidak, pilih file'
+    }).then(result => {
+      if (!result.isConfirmed) {
+        fileInputRef.current.click();
+        return;
+      }
+
+      fetch(`${API_BASE_URL}/api/product-template`, {
+        method: 'GET',
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+          'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.blob();
+      })
+      .then(blob => {
+        console.log('Downloaded blob type:', blob.type);
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'product-template.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      })
+      .catch(err => {
+        console.error('Download gagal:', err);
+        Swal.fire('Error', 'Gagal mendownload template.', 'error');
+      });
+    });
   };
 
   const handleFileChange = async (e) => {
@@ -324,7 +368,13 @@ export default function ProductList() {
       <div>
         <Modal open={open}>
           <Box sx={style}>
-            <AddProduct CloseEvent={handleClose} onSuccess={fetchProducts}/>
+            <AddProduct
+              CloseEvent={handleClose}
+              onSuccess={() => {
+                setPage(0);
+                fetchProducts(1, rowsPerPage, searchTerm);
+              }}
+            />
           </Box>
         </Modal>
         <Modal open={editopen}>
@@ -337,7 +387,7 @@ export default function ProductList() {
         {role !== "Kabag" && (
         <Button
           variant="contained"
-          onClick={() => fileInputRef.current.click()}
+          onClick={handleClickImport}
           disabled={importing}
           startIcon={
             <Box

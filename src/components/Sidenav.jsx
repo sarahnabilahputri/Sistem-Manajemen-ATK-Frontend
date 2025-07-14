@@ -1,5 +1,6 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
+import Avatar from '@mui/material/Avatar';
 import Drawer from '@mui/material/Drawer';
 import CssBaseline from '@mui/material/CssBaseline';
 import Toolbar from '@mui/material/Toolbar';
@@ -22,16 +23,26 @@ import { useLocation } from 'react-router-dom';
 
 const drawerWidth = 240;
 const API_BASE_URL = import.meta.env.VITE_BASE_URL;
+const DEFAULT_AVATAR = `${API_BASE_URL}/assets/images/default_user.jpg`;
+
+function getAvatarSrc(rawAvatar) {
+  if (!rawAvatar) return DEFAULT_AVATAR;
+  const cleaned = rawAvatar.replace(/^\//, "");
+  if (/^https?:\/\//i.test(cleaned)) return cleaned;
+  if (cleaned.startsWith("avatars/") || cleaned.startsWith("images/")) 
+    return `${API_BASE_URL}/storage/${cleaned}`;
+  return `${API_BASE_URL}/${cleaned}`;
+}
 
 export default function Sidenav({ user }) {
 
   console.log("Sidenav user:", user); 
+  const avatarUrl = getAvatarSrc(user?.avatar);
   const navigate = useNavigate(); 
   const location = useLocation();
   const [openMasterData, setOpenMasterData] = useState(false);
   const [openKelolaUser, setOpenKelolaUser] = useState(false);
   const [openPengadaan, setOpenPengadaan] = useState(false);
-
 
   const handleToggleMasterData = () => {
     setOpenMasterData(!openMasterData);
@@ -66,18 +77,6 @@ export default function Sidenav({ user }) {
     return null;
   }  
 
-  const getAvatarSrc = (rawAvatar) => {
-    const avatar = rawAvatar || ''; 
-    const cleaned = avatar.replace(/^\//, '');
-    if (/^https?:\/\//i.test(cleaned)) {
-      return cleaned;
-    }
-    if (cleaned.startsWith('avatars/') || cleaned.startsWith('images/')) {
-      return `${API_BASE_URL}/storage/${cleaned}`;
-    }
-    return `${API_BASE_URL}/${cleaned}`; 
-  };
-  
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
@@ -118,11 +117,10 @@ export default function Sidenav({ user }) {
           >
             <Box
               component="img"
-              src={getAvatarSrc(user.avatar) || `${API_BASE_URL}/assets/images/default_user.jpg`}
-              alt="Profile"
-              onError={(e) => { 
-                e.currentTarget.onerror = null;
-                e.currentTarget.src = `${API_BASE_URL}/assets/images/default_user.jpg`; 
+              src={avatarUrl}
+              alt={user.name}
+              onError={e => {
+                e.currentTarget.src = DEFAULT_AVATAR;
               }}
               sx={{
                 width: 100,
@@ -133,6 +131,7 @@ export default function Sidenav({ user }) {
                 margin: "0 auto",
               }}
             />
+
             <ListItemText
               primary={user?.name || "Nama Pengguna"}
               secondary={

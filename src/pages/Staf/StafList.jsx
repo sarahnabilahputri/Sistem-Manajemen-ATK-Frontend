@@ -108,7 +108,28 @@ export default function StafList() {
   };
 
   const handleClickImport = () => {
-    fileInputRef.current.click();                  
+    Swal.fire({
+      title: 'Download template?',
+      text: 'Apakah Anda ingin mendownload template import staf terlebih dahulu?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, download',
+      cancelButtonText: 'Tidak, pilih file'
+    }).then(result => {
+      if (result.isConfirmed) {
+        const token = localStorage.getItem('access_token');
+        const url = `${API_BASE_URL}/api/user-template`;
+        const a = document.createElement('a');
+        a.href = url;
+        if (token) a.setAttribute('Authorization', `Bearer ${token}`);
+        a.download = 'kategori-template.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } else {
+        fileInputRef.current.click();
+      }
+    });
   };
 
   const handleFileChange = async (e) => {
@@ -386,11 +407,11 @@ export default function StafList() {
             <TableHead>
               <TableRow>
                 <TableCell align="left">No</TableCell>
-                <TableCell align="left">Name</TableCell>
+                <TableCell align="left">Nama</TableCell>
                 <TableCell align="left">Email</TableCell>
                 <TableCell align="left">NIP</TableCell>
-                <TableCell align="left">Position</TableCell>
-                <TableCell align="left">Initial</TableCell>
+                <TableCell align="left">Posisi</TableCell>
+                <TableCell align="left">Inisial</TableCell>
                 <TableCell align="left">Role</TableCell>
                 {role !== "Kabag" && (
                 <TableCell align="left" sx={{ width: 10 }}>Aksi</TableCell>

@@ -34,14 +34,12 @@ const theme = createTheme({
   },
 });
 
-function toLocalDatetimeInputValue(date = new Date()) {
+function toLocalDateInputValue(date = new Date()) {
   const pad = n => String(n).padStart(2, '0');
   const Y = date.getFullYear();
-  const M = pad(date.getMonth()+1);
+  const M = pad(date.getMonth() + 1);
   const D = pad(date.getDate());
-  const h = pad(date.getHours());
-  const m = pad(date.getMinutes());
-  return `${Y}-${M}-${D}T${h}:${m}`;
+  return `${Y}-${M}-${D}`;
 }
 
 export default function CheckoutPage() {
@@ -51,7 +49,7 @@ export default function CheckoutPage() {
   const [cartItems, setCartItems] = useState([]);
   const [errors, setErrors] = useState({ product: "", quantity: "" });
   const [openCart, setOpenCart] = useState(false);
-  const [tanggalButuh, setTanggalButuh] = useState(toLocalDatetimeInputValue());
+  const [tanggalButuh, setTanggalButuh] = useState(toLocalDateInputValue());
   const [purposes, setPurposes] = useState([]);
   const [selectedPurpose, setSelectedPurpose] = useState(null);
   const [description, setDescription] = useState("");
@@ -236,7 +234,7 @@ export default function CheckoutPage() {
 
     const payload = {
       user_id:     selectedUserId,               
-      checkout_date: new Date(tanggalButuh).toISOString(),
+      checkout_date: tanggalButuh,
       purpose_id:    selectedPurpose.id,
       description,                               
     };
@@ -344,7 +342,7 @@ export default function CheckoutPage() {
   };
 
   const handleOpenCart = () => {
-    setTanggalButuh(toLocalDatetimeInputValue());
+    setTanggalButuh(toLocalDateInputValue());
     setOpenCart(true);
   };  
 
@@ -691,7 +689,7 @@ export default function CheckoutPage() {
                         }}
                         sx={{ width: 45, height: 45, ml: 2, mr: 2, objectFit: 'cover', borderRadius: 1 }}
                       />                     
-                      <Box sx={{ flexGrow:1, ml: 6 }}>
+                      <Box sx={{ flexGrow:1, ml: 4 }}>
                         <Typography variant="subtitle2" fontWeight="bold" >{item.product.name}</Typography>
                         <Typography variant="caption">Stok : {item.product.stock}</Typography>
                       </Box>
@@ -717,7 +715,7 @@ export default function CheckoutPage() {
                         }}
                         sx={{
                           width: 60,
-                          mr: 9,
+                          mr: 7,
                           '& input[type=number]': {
                             MozAppearance: 'textfield',
                             appearance: 'textfield',
@@ -742,10 +740,11 @@ export default function CheckoutPage() {
             {/* PANEL FORM */}
             {cartItems.length > 0 && (
             <Box sx={{ mt: 1, p: 2, bgcolor: 'white', borderRadius: 1, boxShadow: 1 }}>
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>Tanggal Butuh</Typography>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>Tanggal Butuh <span style={{ color: 'red' }}>*</span></Typography>
               <TextField
-                type="datetime-local"
+                type="date"
                 fullWidth size="small"
+                required                          
                 InputLabelProps={{ shrink: true }}
                 value={tanggalButuh}
                 onChange={e => {
@@ -760,7 +759,7 @@ export default function CheckoutPage() {
                 sx={{ mb: checkoutErrors.checkout_date ? 1 : -1 }}
               />
 
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>Kebutuhan</Typography>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>Kebutuhan <span style={{ color: 'red' }}>*</span></Typography>
               <Autocomplete
                 options={purposes}
                 getOptionLabel={opt => opt.name}
@@ -772,6 +771,7 @@ export default function CheckoutPage() {
                 disablePortal
                 fullWidth
                 size="small"
+                required
                 renderInput={params => (
                   <TextField
                     {...params}
@@ -788,7 +788,7 @@ export default function CheckoutPage() {
                   />
                 )}
               />
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>Inisial</Typography>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>Inisial <span style={{ color: 'red' }}>*</span></Typography>
               <Autocomplete
                 options={initialOptions}             
                 getOptionLabel={opt => opt}
@@ -796,6 +796,7 @@ export default function CheckoutPage() {
                 disablePortal
                 fullWidth
                 size="small"
+                required
                 popupIcon={<ArrowDropDownIcon />}  
                 clearOnEscape
                 clearIcon={initial ? <ClearIcon sx={{ fontSize: 20 }} /> : null}

@@ -207,7 +207,8 @@ export default function AmbilList() {
 
   return (
     <>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, mr: 2.5 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, mr: 2.5, ...(role === "Kabag" && { mb: 6 }) }}>
+        {role !== "Kabag" && (
         <Button
           variant="contained"
           onClick={openExport}
@@ -230,6 +231,7 @@ export default function AmbilList() {
         >
           {exporting ? "Exporting..." : "Export"}
         </Button>
+        )}
 
         {role !== "Kabag" && (  
         <Button
@@ -390,8 +392,8 @@ export default function AmbilList() {
                       year:   'numeric',
                       month:  '2-digit',
                       day:    '2-digit',
-                      hour:   '2-digit',
-                      minute: '2-digit'
+                      // hour:   '2-digit',
+                      // minute: '2-digit'
                     }).replace(',', '')}
                   </TableCell>
                   <TableCell>{row.purpose}</TableCell>
@@ -514,8 +516,8 @@ export default function AmbilList() {
                   year:   'numeric',
                   month:  '2-digit',
                   day:    '2-digit',
-                  hour:   '2-digit',
-                  minute: '2-digit'
+                  // hour:   '2-digit',
+                  // minute: '2-digit'
                 }).replace(',', '')}              
               </Typography>
 
