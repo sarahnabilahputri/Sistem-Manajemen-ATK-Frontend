@@ -201,6 +201,7 @@ export default function CartModal() {
       }
     });
     if (!result.isConfirmed) return;
+    
     try {
       const payload = {
         reorder_date: formatDateForBackend(reorderDate),
@@ -468,7 +469,7 @@ export default function CartModal() {
             </Button>
             {cartItems.length > 0 && (
               <Button variant="contained" onClick={handleCheckout} sx={{ textTransform: 'capitalize' }}>
-                Ambil Barang
+                Pesan Barang
               </Button>
             )}
           </Box>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Typography, Box, Grid, TextField, Button, MenuItem } from "@mui/material";
 import Swal from "sweetalert2";
 import axios from "axios";
+import Autocomplete from "@mui/material/Autocomplete";
 
 const API_BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -22,25 +23,55 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
 
     const fetchCategories = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/api/categories`, {
-                headers: { "ngrok-skip-browser-warning": "true" },
-            });
-            setCategories(response.data.data.data);
+            const allCategories = [];
+            let currentPage = 1;
+            let lastPage = 1;
+
+            do {
+                const response = await axios.get(`${API_BASE_URL}/api/categories?page=${currentPage}`, {
+                    headers: { "ngrok-skip-browser-warning": "true" },
+                });
+
+                const pageData = response.data.data.data;
+                allCategories.push(...pageData);
+
+                lastPage = response.data.data.last_page;
+                currentPage++;
+            } while (currentPage <= lastPage);
+
+            console.log("✅ Semua kategori berhasil diambil:", allCategories.length);
+            setCategories(allCategories);
         } catch (error) {
-            console.error("Error fetching categories:", error);
+            console.error("❌ Gagal mengambil kategori:", error);
         }
     };
 
+
     const fetchUnits = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/api/units`, {
-                headers: { "ngrok-skip-browser-warning": "true" },
-            });
-            setUnits(response.data.data.data);
+            const allUnits = [];
+            let currentPage = 1;
+            let lastPage = 1;
+
+            do {
+                const response = await axios.get(`${API_BASE_URL}/api/units?page=${currentPage}`, {
+                    headers: { "ngrok-skip-browser-warning": "true" },
+                });
+
+                const pageData = response.data.data.data;
+                allUnits.push(...pageData);
+
+                lastPage = response.data.data.last_page;
+                currentPage++;
+            } while (currentPage <= lastPage);
+
+            console.log("✅ Semua satuan berhasil diambil:", allUnits.length);
+            setUnits(allUnits);
         } catch (error) {
-            console.error("Error fetching units:", error);
+            console.error("❌ Gagal mengambil satuan:", error);
         }
     };
+
 
     const handleFileChange = (event) => {
         setImage(event.target.files[0]);
@@ -126,37 +157,37 @@ export default function AddProduct({ CloseEvent, onSuccess }) {
                     </Grid>
     
                     <Grid size={{ xs: 12 }}>
-                        <Typography variant="body1" sx={{ mb: 1 }}>Kategori</Typography>
-                        <TextField
-                            select
-                            fullWidth
-                            size="small"
-                            value={selectedCategory}
-                            onChange={(e) => setSelectedCategory(e.target.value)}
-                        >
-                            {categories.map((cat) => (
-                                <MenuItem key={cat.id} value={cat.id}>
-                                    {cat.name}
-                                </MenuItem>
-                            ))}
-                        </TextField>
+                        <Typography variant="body1" sx={{ mb: 1 }}>kategori</Typography>
+
+                        <Autocomplete
+                            options={categories}
+                            getOptionLabel={(option) => option.name}
+                            value={categories.find((cat) => cat.id === selectedCategory) || null}
+                            onChange={(event, newValue) => {
+                                setSelectedCategory(newValue ? newValue.id : "");
+                            }}
+                            renderInput={(params) => (
+                                <TextField {...params} size="small" fullWidth  />
+                            )}
+                            />
+
                     </Grid>
     
                     <Grid size={{ xs: 12 }}>
                         <Typography variant="body1" sx={{ mb: 1 }}>Satuan</Typography>
-                        <TextField
-                            select
-                            fullWidth
-                            size="small"
-                            value={selectedUnit}
-                            onChange={(e) => setSelectedUnit(e.target.value)}
-                        >
-                            {units.map((unit) => (
-                                <MenuItem key={unit.id} value={unit.id}>
-                                    {unit.name}
-                                </MenuItem>
-                            ))}
-                        </TextField>
+                            <Autocomplete
+                                size="small"
+                                fullWidth
+                                options={units}
+                                getOptionLabel={(option) => option.name}
+                                value={units.find((u) => u.id === selectedUnit) || null}
+                                onChange={(event, newValue) => {
+                                    setSelectedUnit(newValue ? newValue.id : '');
+                                }}
+                                renderInput={(params) => (
+                                    <TextField {...params}  variant="outlined" />
+                                )}
+                            />
                     </Grid>
     
                     <Grid size={{ xs: 12 }}>

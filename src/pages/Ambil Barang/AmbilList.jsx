@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
@@ -33,7 +33,7 @@ export default function AmbilList() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [rows, setRows] = useState([]);
-  const [allRows, setAllRows] = useState([]);
+  // const [allRows, setAllRows] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [users, setUsers] = useState([]);
   const [purposes, setPurposes] = useState([]);
@@ -50,6 +50,9 @@ export default function AmbilList() {
     startDate: '', 
     endDate: ''     
   });
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef(null);
+
 
   const stored = localStorage.getItem("user");
   const user = stored ? JSON.parse(stored) : null;
@@ -63,7 +66,7 @@ export default function AmbilList() {
   };
   const handleAdd = newItem => {
     setRows(prev => [newItem, ...prev]);
-    setAllRows(prev => [newItem, ...prev]);
+    // setAllRows(prev => [newItem, ...prev]);
     setTotalItems(prev => prev + 1);
   };
 
@@ -73,7 +76,7 @@ export default function AmbilList() {
       const { type, data } = e.data || {};
       if (type === 'NEW_CHECKOUT') {
         setRows(prev => [data, ...prev]);
-        setAllRows(prev => [data, ...prev]);
+        // setAllRows(prev => [data, ...prev]);
         setTotalItems(prev => prev + 1);
       }
     };
@@ -98,43 +101,82 @@ export default function AmbilList() {
   }, []);
 
   useEffect(() => {
-    if (!users.length || !purposes.length) return;
-    axios.get(`${API_BASE_URL}/api/checkouts`, { headers: { 'ngrok-skip-browser-warning': 'true' } })
-      .then(res => {
-        const data = res.data.data;
-        const formatted = data.map(co => ({
-          id: co.id,
-          initial: users.find(u => u.id === co.user_id)?.initial || co.user_id,
-          name: users.find(u => u.id === co.user_id)?.name    || '—',
-          date: co.checkout_date,
-          purpose: purposes.find(p => p.id === co.purpose_id)?.name || co.purpose_id,
-          description: co.description,
-          items: co.items.map(it => ({ id: it.id, product: it.product, qty: it.checkout_quantity }))
-        }));
-        formatted.sort((a, b) =>
-          new Date(b.date).getTime() - new Date(a.date).getTime()
-        );
-        setRows(formatted);
-        setAllRows(formatted);
-        setTotalItems(formatted.length);
-      })
-      .catch(err => { console.error(err); setError(err); });
-  }, [users, purposes]);
+  // tunggu users & purposes sudah ter-load
+  if (!users.length || !purposes.length) return;
+
+  const pageIndex = page + 1;  // karena backend mulai dari halaman 1
+  axios.get(
+    `${API_BASE_URL}/api/checkouts`,
+    {
+      headers: { 'ngrok-skip-browser-warning': 'true' },
+      params: { page: pageIndex, limit: rowsPerPage }
+    }
+  )
+  .then(res => {
+    // sesuai Postman: res.data.data → { current_page, data: [...] }
+    const payload = res.data.data;
+    const items = Array.isArray(payload.data) ? payload.data : [];
+
+    // format setiap checkout
+    const formatted = items.map(co => ({
+      id: co.id,
+      initial: users.find(u => u.id === co.user_id)?.initial || co.user_id,
+      name:    users.find(u => u.id === co.user_id)?.name    || '—',
+      date:    co.checkout_date,
+      purpose: purposes.find(p => p.id === co.purpose_id)?.name || co.purpose_id,
+      description: co.description,
+      items: co.items.map(it => ({
+        id: it.id,
+        product: it.product,
+        qty: it.checkout_quantity
+      }))
+    }));
+
+    // sort terbaru → terlama
+    formatted.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    // set state
+    setRows(formatted);
+    setTotalItems(payload.total ?? items.length);  
+    // jika backend kirim total di payload.total, pakai itu; 
+    // kalau tidak, fallback ke items.length
+  })
+  .catch(err => {
+    console.error('Error fetching checkouts:', err);
+    setError(err);
+  });
+}, [users, purposes, page, rowsPerPage]);
+
+
 
   if (error) return <div>Error: {error.message}</div>;
 
-  const handleChangePage = (_, newPage) => setPage(newPage);
-  const handleChangeRowsPerPage = e => { setRowsPerPage(+e.target.value); setPage(0); };
+  const handleChangePage = (_, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = e => {
+    setRowsPerPage(+e.target.value);
+    setPage(0);
+  };
+  // const handleSearch = (_, initial) => {
+  //   if (initial) {
+  //     setRows(allRows.filter(r => r.initial === initial));
+  //   } else {
+  //     setRows(allRows);
+  //   }
+  // };
   const handleSearch = (_, initial) => {
+    setPage(0);
     if (initial) {
-      setRows(allRows.filter(r => r.initial === initial));
+      setRows(prev => prev.filter(r => r.initial === initial));
     } else {
-      setRows(allRows);
+      setPage(0);
     }
   };  
   const openDetail = row => { setDetailData(row); setDetailOpen(true); };
   const closeDetail = () => setDetailOpen(false);
-  const uniqueInitials = Array.from(new Set(allRows.map(r => r.initial)));
+  // const uniqueInitials = Array.from(new Set(allRows.map(r => r.initial)));
 
   const deleteItem = (id) => {
     Swal.fire({
@@ -161,6 +203,39 @@ export default function AmbilList() {
     } catch (err) {
       console.error('Error deleting item:', err);
       Swal.fire('Error', 'Gagal menghapus item.', 'error');
+    }
+  };
+
+  const handleClickImport = () => {
+  fileInputRef.current.click();
+};
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    setImporting(true);
+
+    try {
+      const response = await axios.post("/api/checkouts/import", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.status === 200) {
+        toast.success("Import berhasil!");
+        // Panggil ulang fetch data checkout jika ada
+        fetchCheckoutData(); 
+      }
+    } catch (error) {
+      console.error("Gagal import:", error);
+      toast.error("Terjadi kesalahan saat mengimpor data");
+    } finally {
+      setImporting(false);
     }
   };
 
@@ -205,32 +280,70 @@ export default function AmbilList() {
     }
   };
 
+  const uniqueInitials = React.useMemo(
+    () => Array.from(new Set(rows.map(r => r.initial))),
+    [rows]
+  );
+
   return (
     <>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, mr: 2.5, ...(role === "Kabag" && { mb: 6 }) }}>
         {role !== "Kabag" && (
-        <Button
-          variant="contained"
-          onClick={openExport}
-          disabled={exporting}
-          startIcon={
-            <Box
-              component="img"
-              src="/Icon/export.png"
-              alt="Export"
-              sx={{ width: 15, height: 15 }}
-            />
-          }
-          sx={{
-            mr: 1,
-            bgcolor: "#09C690",
-            color: "white",
-            textTransform: 'capitalize',
-            "&:hover": { bgcolor: "#07a574" },
-          }}
-        >
-          {exporting ? "Exporting..." : "Export"}
-        </Button>
+        <>
+          <Button
+            variant="contained"
+            onClick={handleClickImport}
+            disabled={importing}
+            startIcon={
+              <Box
+                component="img"
+                src="/Icon/import.png"
+                alt="Import"
+                sx={{ width: 15, height: 15 }}
+              />
+            }
+            sx={{
+              mr: 1,
+              bgcolor: "#09C690",
+              color: "white",
+              textTransform: 'capitalize',
+              "&:hover": { bgcolor: "#07a574" },
+            }}
+          >
+            {importing ? "Importing..." : "Import"}
+          </Button>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xlsx"
+            style={{ display: "none" }}
+            onChange={handleFileChange}
+          />
+
+          <Button
+            variant="contained"
+            onClick={openExport}
+            disabled={exporting}
+            startIcon={
+              <Box
+                component="img"
+                src="/Icon/export.png"
+                alt="Export"
+                sx={{ width: 15, height: 15 }}
+              />
+            }
+            sx={{
+              mr: 1,
+              bgcolor: "#068f6b",
+              color: "white",
+              textTransform: 'capitalize',
+              "&:hover": { bgcolor: "#056b51" },
+            }}
+          >
+            {exporting ? "Exporting..." : "Export"}
+          </Button>
+        </>
         )}
 
         {role !== "Kabag" && (  
@@ -380,7 +493,7 @@ export default function AmbilList() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.slice(page*rowsPerPage, page*rowsPerPage+rowsPerPage).map((row, idx) => (
+              {rows.map((row, idx) => (
                 <TableRow hover key={row.id}>
                   <TableCell>{page*rowsPerPage + idx + 1}</TableCell>
                   <TableCell>{row.initial}</TableCell>

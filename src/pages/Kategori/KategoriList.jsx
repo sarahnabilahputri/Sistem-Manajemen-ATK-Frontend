@@ -102,9 +102,7 @@ export default function KategoriList() {
     cancelButtonText: 'Tidak, pilih file'
   }).then(result => {
     if (result.isConfirmed) {
-      // 1) Download template
       const token = localStorage.getItem('access_token');
-      // Buka tab baru atau trigger download langsung
       const url = `${API_BASE_URL}/api/category-template`;
       const a = document.createElement('a');
       a.href = url;
@@ -114,7 +112,6 @@ export default function KategoriList() {
       a.click();
       document.body.removeChild(a);
     } else {
-      // 2) Buka file picker
       fileInputRef.current.click();
     }
   });

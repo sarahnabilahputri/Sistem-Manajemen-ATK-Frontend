@@ -60,7 +60,7 @@ export default function Home() {
     const headers = { 'ngrok-skip-browser-warning': 'true', Accept: 'application/json' };
     axios.get(`${API_BASE_URL}/api/checkouts`, { headers })
       .then(res => {
-        const data = res.data.data || [];
+        const data = res.data?.data?.data || [];
         const withInitial = data.map(co => ({
           ...co,
           initial: users.find(u => u.id === co.user_id)?.initial || '—'

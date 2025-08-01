@@ -150,7 +150,7 @@ export default function EditTerima({ CloseEvent, formData, onSuccess }) {
           [p.product_id]: unitPrice
         }));
       });
-      Swal.fire('Success', 'Jumlah penerimaan berhasil diperbarui.', 'success');
+      Swal.fire('Success', 'Data penerimaan berhasil diperbarui.', 'success');
       onSuccess();
     } catch (e) {
       console.error('Error updating:', e);

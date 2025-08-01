@@ -157,17 +157,17 @@ export default function EditProfil({ open, userId, onClose, onSuccess }) {
             </Typography>
             <TextField name="nip" value={formData.nip} onChange={handleChange} fullWidth size="small" />
           </Grid>
-          <Grid size={{ xs: 12 }}>
-            <Typography variant="body1" sx={{ mb: 1 }}>
+          {/* <Grid size={{ xs: 12 }}> */}
+            {/* <Typography variant="body1" sx={{ mb: 1 }}>
               Posisi
-            </Typography>
-            <TextField name="position" value={formData.position} onChange={handleChange} select fullWidth size="small">
+            </Typography> */}
+            {/* <TextField name="position" value={formData.position} onChange={handleChange} select fullWidth size="small">
               <MenuItem value="Dosen">Dosen</MenuItem>
               <MenuItem value="Rumah Tangga">Rumah Tangga</MenuItem>
               <MenuItem value="Tendik">Tendik</MenuItem>
               <MenuItem value="Kabag">Kabag</MenuItem>
-            </TextField>
-          </Grid>
+            </TextField> */}
+          {/* </Grid> */}
           <Grid size={{ xs: 12 }}>
             <Typography variant="body1" sx={{ mb: 1 }}>
               Inisial

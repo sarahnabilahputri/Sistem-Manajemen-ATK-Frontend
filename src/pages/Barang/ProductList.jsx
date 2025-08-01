@@ -85,9 +85,9 @@ export default function ProductList() {
   const handleClose = () => setOpen(false);
   const handleEditClose = () => setEditOpen(false);
 
-  const fetchProducts = (pageArg = 1, limitArg = rowsPerPage, search = "") => {
+  const fetchProducts = (search = "") => {
     axios.get(`${API_BASE_URL}/api/products`, {
-      params: { page: pageArg, limit: limitArg, search },
+      params: { page: 1, limit: 100000, search },
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json'
@@ -95,9 +95,8 @@ export default function ProductList() {
     })
     .then((response) => {
       const data = response.data.data;        
-      const items = data.data.sort((a, b) =>
-          new Date(b.created_at) - new Date(a.created_at)
-      );      
+      const items = data.data;
+
       const formattedRows = items.map(product => ({
         id: product.id,
         NamaProduk: product.name,
@@ -106,16 +105,22 @@ export default function ProductList() {
         ReorderPoint: product.reorder_point,
         SafetyStock: product.safety_stock,
         EOQ: product.economic_order_quantity,
+        created_at: product.created_at,
         _raw: product,
       }));
-      const sortedRows = formattedRows.sort((a, b) => {
-        const da = Math.abs(a.Stock - a.ReorderPoint);
-        const db = Math.abs(b.Stock - b.ReorderPoint);
-        return da - db;
-      });
-      setRows(sortedRows);
+
+      const ropItems = formattedRows
+        .filter(item => item.Stock <= item.ReorderPoint)
+        .sort((a, b) => a.Stock - b.Stock); // urutkan dari stok terkecil
+
+      const nonRopItems = formattedRows
+        .filter(item => item.Stock > item.ReorderPoint)
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // sisanya tetap berdasarkan created_at
+
+      const sortedRows = [...ropItems, ...nonRopItems];
+
       setAllRows(sortedRows);
-      setTotalItems(data.total); 
+      setTotalItems(sortedRows.length);
     })
     .catch((error) => {
       console.error('Error fetching products:', error);
@@ -124,8 +129,14 @@ export default function ProductList() {
   };
 
   useEffect(() => {
-    fetchProducts(1, rowsPerPage, searchTerm);
-  }, [searchTerm, rowsPerPage]);
+    const startIdx = page * rowsPerPage;
+    const endIdx = startIdx + rowsPerPage;
+    setRows(allRows.slice(startIdx, endIdx));
+  }, [page, rowsPerPage, allRows]);
+
+  useEffect(() => {
+    fetchProducts(searchTerm);
+  }, [searchTerm]);
 
   useEffect(() => {
     let active = true;
@@ -279,7 +290,7 @@ export default function ProductList() {
         }
       );
 
-      Swal.fire("Success", "Import product berhasil", "success");
+      Swal.fire("Success", "Import produk berhasil", "success");
       setPage(0);
       fetchFirstPageCombined();
     } catch (err) {
@@ -343,14 +354,12 @@ export default function ProductList() {
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
-    fetchProducts(newPage + 1, rowsPerPage, searchTerm);
   };
 
   const handleChangeRowsPerPage = (event) => {
-    const newLimit = +event.target.value;
+    const newLimit = parseInt(event.target.value, 10);
     setRowsPerPage(newLimit);
     setPage(0);
-    fetchProducts(1, newLimit, searchTerm);
   };
 
   const filterData = (v) => {

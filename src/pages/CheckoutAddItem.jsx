@@ -150,6 +150,9 @@ export default function CheckoutPage() {
   const handleAddCart = () => {
     let hasError = false;
     const newErrors = { product: "", quantity: "" };
+
+    const qtyNum = Number(quantity);
+
     if (!selectedProduct) {
       newErrors.product = "Silakan pilih nama barang yang diinginkan.";
       hasError = true;
@@ -158,13 +161,42 @@ export default function CheckoutPage() {
       newErrors.quantity = "Masukkan jumlah barang yang valid.";
       hasError = true;
     }
+
+    if (selectedProduct) {
+      if (selectedProduct.stock === 0) {
+        newErrors.quantity = `Stok "${selectedProduct.name}" habis.`;
+        hasError = true;
+      } else if (qtyNum > selectedProduct.stock) {
+        newErrors.quantity = `Maksimum stok ${selectedProduct.stock}.`;
+        hasError = true;
+      }
+    }
     setErrors(newErrors);
-    if (hasError) return;
+    if (hasError) {
+      if (selectedProduct && newErrors.quantity.includes("Stok")) {
+        Swal.fire({
+          title: selectedProduct.stock === 0 ? "Stok Habis!" : "Jumlah Melebihi Stok",
+          text: newErrors.quantity,
+          icon: "error",
+        });
+      }
+      return;
+    }
+
+    const exists = cartItems.some(item => item.product.id === selectedProduct.id);
+    if (exists) {
+      Swal.fire({
+        title: "Sudah di Keranjang!",
+        text: `Barang "${selectedProduct.name}" sudah ada di keranjang.`,
+        icon: "warning"
+      });
+      return;
+    }
 
     axios
       .post(
         `${API_BASE_URL}/api/checkout-carts`,
-        { product_id: selectedProduct.id, checkout_quantity: +quantity },
+        { product_id: selectedProduct.id, checkout_quantity: qtyNum  },
         { headers: { "ngrok-skip-browser-warning": "true" } }
       )
       .then(res => {
@@ -730,7 +762,36 @@ export default function CheckoutPage() {
                           sx: { '& input': { textAlign: 'center', padding: '4px' } }
                         }}
                       />             
-                      <IconButton onClick={() => handleDeleteCartItem(item.id)}>
+                      <IconButton onClick={() => {
+                        Swal.fire({
+                          title: 'Hapus Item',
+                          text: `Yakin ingin menghapus "${item.product.name}" dari keranjang?`,
+                          icon: 'warning',
+                          showCancelButton: true,
+                          confirmButtonText: 'Ya, Hapus',
+                          cancelButtonText: 'Batal',
+                          reverseButtons: true,
+                          willOpen: () => {
+                            const c = document.querySelector('.swal2-container');
+                            if (c) c.style.zIndex = '2000';
+                          }
+                        }).then(result => {
+                          if (result.isConfirmed) {
+                            handleDeleteCartItem(item.id);
+                            Swal.fire({
+                              title: 'Berhasil!',
+                              text: `"${item.product.name}" telah dihapus.`,
+                              icon: 'success',
+                              timer: 1500,
+                              showConfirmButton: false,
+                              willOpen: () => {
+                                const c = document.querySelector('.swal2-container');
+                                if (c) c.style.zIndex = '2000';
+                              }
+                            });
+                          }
+                        });
+                      }}>
                         <HighlightOffIcon sx={{ color: '#DC2626' }} />
                       </IconButton>
                     </Paper>
@@ -747,6 +808,7 @@ export default function CheckoutPage() {
                 required                          
                 InputLabelProps={{ shrink: true }}
                 value={tanggalButuh}
+                disabled 
                 onChange={e => {
                   setTanggalButuh(e.target.value);
                   if (checkoutErrors.checkout_date) setCheckoutErrors(prev => ({ ...prev, checkout_date: "" }));
