@@ -9,6 +9,10 @@ export default defineConfig({
     react(),   
     tailwindcss(),
   ],
-  
+  build: {
+    rollupOptions: {
+      maxParallelFileOps: 20
+    }
+  }
   
 })
