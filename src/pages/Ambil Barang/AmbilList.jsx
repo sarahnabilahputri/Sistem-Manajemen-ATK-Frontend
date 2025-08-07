@@ -350,7 +350,7 @@ export default function AmbilList() {
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => window.open('http://localhost:5173/checkout', '_blank')}
+          onClick={() => window.open('https://sistemmanajemenatk.vercel.app/checkout', '_blank')}
           sx={{ textTransform: 'capitalize' }}
         >
           Tambah Pengambilan
