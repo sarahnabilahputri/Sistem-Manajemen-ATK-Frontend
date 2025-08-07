@@ -35,48 +35,113 @@ export default function EditStaff({ fid, CloseEvent, onSuccess }) {
         }
     };
 
+    // --- REPLACE fetchStaffById function AND the useEffect below with this ---
 
+    // robust fetchStaffById: normalisasi response dan fallback ke prev state
     const fetchStaffById = async (id) => {
-        try {
-            const response = await axios.get(
-            `${API_BASE_URL}/api/users/${id}`,
-            {
-                headers: {
-                Accept: "application/json",
-                "ngrok-skip-browser-warning": "true"
-                }
-            }
-            );
-            console.log("Detail staff response:", response.data);
-            const payload = response.data.data;
-            const user = payload.id
-            ? payload
-            : Array.isArray(payload.data) && payload.data.length
-                ? payload.data[0]
-                : {};
-            setFormData({
-                name: user.name || "",
-                email: user.email || "",
-                nip: user.nip || "",
-                position: user.position || "",
-                initial: user.initial || "",
-                role: user.role || "Staff",
-                study_program_id: user.study_program_id || "",
-                phone_number: user.phone_number || "",
-            });
-        } catch (error) {
-            CloseEvent();
-            console.error("Error fetching staff:", error);
-            Swal.fire("Error!", "Gagal mengambil data staff.", "error");
+    try {
+        const response = await axios.get(`${API_BASE_URL}/api/users/${id}`, {
+        headers: { Accept: "application/json", "ngrok-skip-browser-warning": "true" }
+        });
+        console.log("Detail staff response (raw):", response.data);
+
+        // Normalize payload (support beberapa bentuk response)
+        const root = response.data ?? {};
+        const maybeData = root.data ?? root;
+        let user;
+        if (maybeData && maybeData.id) {
+        user = maybeData;
+        } else if (Array.isArray(maybeData?.data) && maybeData.data.length) {
+        user = maybeData.data[0];
+        } else if (Array.isArray(maybeData) && maybeData.length) {
+        user = maybeData[0];
+        } else {
+        user = maybeData || {};
         }
+
+        // Merge ke formData tanpa menimpa dengan `null` — pakai prev sebagai fallback
+        setFormData(prev => ({
+        name: user.name ?? prev.name ?? "",
+        email: user.email ?? prev.email ?? "",
+        nip: user.nip ?? prev.nip ?? "",
+        position: user.position ?? prev.position ?? "",
+        initial: user.initial ?? prev.initial ?? "",
+        role: user.role ?? prev.role ?? "Staff",
+        study_program_id: user.study_program_id ?? prev.study_program_id ?? "",
+        phone_number: user.phone_number ?? prev.phone_number ?? "",
+        }));
+    } catch (error) {
+        CloseEvent();
+        console.error("Error fetching staff:", error, error?.response?.data);
+        Swal.fire("Error!", "Gagal mengambil data staff.", "error");
+    }
     };
 
+    // segera isi form dari fid (optimistic) lalu fetch server untuk refresh
     useEffect(() => {
-        if (fid?.id) {
-            fetchStaffById(fid.id);
-        }
-        fetchStudyPrograms();
+    if (fid && typeof fid === "object" && fid.id) {
+        // isi cepat dari data yang dikirim parent supaya user langsung lihat
+        setFormData(prev => ({
+        ...prev,
+        name: fid.name ?? prev.name,
+        email: fid.email ?? prev.email,
+        nip: fid.nip ?? prev.nip,
+        position: fid.position ?? prev.position,
+        initial: fid.initial ?? prev.initial,
+        role: fid.role ?? prev.role,
+        study_program_id: fid.study_program_id ?? prev.study_program_id,
+        phone_number: fid.phone_number ?? prev.phone_number,
+        }));
+
+        // ambil versi server utk memastikan data paling baru
+        fetchStaffById(fid.id);
+    } else {
+        // jika fid kosong, tetap panggil study programs
+    }
+    fetchStudyPrograms();
     }, [fid]);
+
+    // const fetchStaffById = async (id) => {
+    //     try {
+    //         const response = await axios.get(
+    //         `${API_BASE_URL}/api/users/${id}`,
+    //         {
+    //             headers: {
+    //             Accept: "application/json",
+    //             "ngrok-skip-browser-warning": "true"
+    //             }
+    //         }
+    //         );
+    //         console.log("Detail staff response:", response.data);
+    //         const payload = response.data.data;
+    //         const user = payload.id
+    //         ? payload
+    //         : Array.isArray(payload.data) && payload.data.length
+    //             ? payload.data[0]
+    //             : {};
+    //         setFormData({
+    //             name: user.name || "",
+    //             email: user.email || "",
+    //             nip: user.nip || "",
+    //             position: user.position || "",
+    //             initial: user.initial || "",
+    //             role: user.role || "Staff",
+    //             study_program_id: user.study_program_id || "",
+    //             phone_number: user.phone_number || "",
+    //         });
+    //     } catch (error) {
+    //         CloseEvent();
+    //         console.error("Error fetching staff:", error);
+    //         Swal.fire("Error!", "Gagal mengambil data staff.", "error");
+    //     }
+    // };
+
+    // useEffect(() => {
+    //     if (fid?.id) {
+    //         fetchStaffById(fid.id);
+    //     }
+    //     fetchStudyPrograms();
+    // }, [fid]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;

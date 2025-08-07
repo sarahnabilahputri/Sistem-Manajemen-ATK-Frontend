@@ -240,6 +240,7 @@ export default function StafList() {
   };
 
   const editData = (user) => {
+    console.log('open edit with row:', user);
     setFormid(user);
     handleEditOpen();
   };
