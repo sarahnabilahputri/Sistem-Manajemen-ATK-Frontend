@@ -1,18 +1,24 @@
 import { useState, useEffect } from "react";
-import { Typography, Box, Grid, TextField, Button, MenuItem } from "@mui/material";
+import { Typography, Box, Grid, TextField, Button, MenuItem, styled } from "@mui/material";
 import Swal from "sweetalert2";
 import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_BASE_URL;
+
+const DisabledField = styled(TextField)(({ theme }) => ({
+  "& .MuiInputBase-root.Mui-disabled": {
+    backgroundColor: "#FFF",   
+  },
+}));
 
 export default function AddStaff({ CloseEvent, onSuccess }) {
     const [formData, setFormData] = useState({
         name: "",
         email: "",
         nip: "",
-        position: "",
+        position: "Rumah Tangga",
         initial: "",
-        role: "",
+        role: "Staff",
         study_program_id: "",
         phone_number: "",
     });
@@ -128,18 +134,13 @@ export default function AddStaff({ CloseEvent, onSuccess }) {
 
                     <Grid size={{ xs: 12 }}>
                         <Typography variant="body1" sx={{ mb: 1 }}>Posisi</Typography>
-                        <TextField
+                        <DisabledField
                             name="position"
-                            select
                             value={formData.position}
-                            onChange={handleChange}
                             size="small"
                             fullWidth
-                        >
-                            <MenuItem value="Dosen">Dosen</MenuItem>
-                            <MenuItem value="Rumah Tangga">Rumah Tangga</MenuItem>
-                            <MenuItem value="Tendik">Tendik</MenuItem>
-                        </TextField>
+                            disabled
+                        />
                     </Grid>
 
                     <Grid size={{ xs: 12 }}>

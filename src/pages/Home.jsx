@@ -159,8 +159,8 @@ export default function Home() {
                 </Card>
               </Stack>
             </Grid>
-            <Grid size={{ xs: 3 }}>
-              <Card sx={{ width: 341, height: 160, borderRadius: 2, boxShadow: 1 }}>
+            <Grid size={{ xs: 4 }}>
+              <Card sx={{ width: '100%', height: 160, borderRadius: 2, boxShadow: 1 }}>
                 <CardContent sx={{ 
                   height: '100%', 
                   display: 'flex', 

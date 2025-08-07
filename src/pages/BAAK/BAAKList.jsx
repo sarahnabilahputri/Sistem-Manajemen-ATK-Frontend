@@ -64,7 +64,7 @@ export default function BAAKList() {
 
   const fetchUsers = (pageArg = 1, limitArg = rowsPerPage, search = "") => {
     axios.get(`${API_BASE_URL}/api/users`, {
-      params: { page: pageArg, limit: limitArg, search },
+      params: { page: pageArg, limit: limitArg, role: 'BAAK', search },
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'Accept': 'application/json'
@@ -235,8 +235,13 @@ export default function BAAKList() {
       <Paper sx={{ width: '100%', overflow: 'hidden' }}>
         <Divider />
         <Box height={10} />
-        <Stack direction="row" spacing={2} className="my-2 mb-2" alignItems="center">
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, px: 2, mb: 1 }}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          sx={{ width: '100%', py: 1, px: 2 }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography variant="body2">Show</Typography>
             <TextField
               select
@@ -244,43 +249,51 @@ export default function BAAKList() {
               value={rowsPerPage}
               onChange={handleChangeRowsPerPage}
               SelectProps={{ native: true }}
-              sx={{ width: 64, ml: 1 }}
+              sx={{ width: { xs: 60, sm: 73 } }}
             >
-              {[10, 25, 100].map((option) => (
+              {[10, 25, 100].map(option => (
                 <option key={option} value={option}>
                   {option}
                 </option>
               ))}
             </TextField>
-            <Typography variant="body2" sx={{ ml: 1 }}>Entries</Typography>
+            <Typography variant="body2">Entries</Typography>
+          </Box>
 
-            <Typography variant="body1" sx={{ ml: 73 }}>Search:</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="body1">Search:</Typography>
             <Autocomplete
               freeSolo
               inputValue={searchTerm}
               onInputChange={(_, v) => {
-                setSearchTerm(v);    
+                setSearchTerm(v);
                 setPage(0);
               }}
-              options={autoOptions}             
-              filterOptions={(opts) => opts}     
-              onChange={(_, selectedName) => {
-                
-                if (selectedName) {
-                  setSearchTerm(selectedName);
+              options={autoOptions}
+              filterOptions={opts => opts}
+              onChange={(_, selected) => {
+                if (selected) {
+                  setSearchTerm(selected);
                   setPage(0);
                 }
               }}
-              renderInput={(params) => (
+              renderInput={params => (
                 <TextField
                   {...params}
                   size="small"
-                  sx={{ width: 187, ml: 2 }}
+                  sx={{
+                    width: {
+                      xs: 120,
+                      sm: 160,
+                      md: 200
+                    }
+                  }}
                 />
               )}
             />
           </Box>
         </Stack>
+
         <Box height={10} />
         <TableContainer sx={{ maxHeight: 440 }}>
           <Table stickyHeader aria-label="user table">

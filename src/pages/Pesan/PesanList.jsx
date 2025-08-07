@@ -120,12 +120,50 @@ export default function PesanList() {
   };
 
   useEffect(() => {
-    axios.get(`${API_BASE_URL}/api/users?page=1&limit=1000`, { headers: { 'ngrok-skip-browser-warning': 'true' } })
-      .then(res => {
-        const arr = res.data.data?.data || res.data.data || [];
-        setUsers(arr);
-      })
-      .catch(err => console.error('Error fetch users:', err));
+    axios.get(`${API_BASE_URL}/api/users`, {
+      params: { page: 1, per_page: 1000 },      // ambil semua user
+      headers: { 'ngrok-skip-browser-warning': 'true' }
+    })
+    .then(res => {
+      const payload = res.data.data;
+      const firstBatch = Array.isArray(payload.data) ? payload.data : [];
+      const lastPage    = payload.last_page;
+    })
+    .catch(err => console.error('Error fetch users:', err));
+  }, []);
+
+  useEffect(() => {
+    const fetchAllUsers = async () => {
+      try {
+        // halaman 1
+        const resp1 = await axios.get(`${API_BASE_URL}/api/users`, {
+          params: { page: 1 },
+          headers: { 'ngrok-skip-browser-warning': 'true' }
+        });
+        const { data: payload1 } = resp1.data;
+        let all = Array.isArray(payload1.data) ? [...payload1.data] : [];
+        const lastPage = payload1.last_page;
+
+        // halaman 2..lastPage
+        for (let p = 2; p <= lastPage; p++) {
+          const resp = await axios.get(`${API_BASE_URL}/api/users`, {
+            params: { page: p },
+            headers: { 'ngrok-skip-browser-warning': 'true' }
+          });
+          const batch = Array.isArray(resp.data.data.data)
+            ? resp.data.data.data
+            : [];
+          all = all.concat(batch);
+        }
+
+        console.log('total users fetched:', all.length);
+        setUsers(all);
+      } catch (err) {
+        console.error('Error fetch users:', err);
+      }
+    };
+
+    fetchAllUsers();
   }, []);
 
   const fetchReorders = async (pageArg = 1, limitArg = rowsPerPage) => {
@@ -242,6 +280,7 @@ export default function PesanList() {
   const eligibleUsers = users.filter(u =>
     String(u.position).toLowerCase() === 'rumah tangga' && String(u.role).toLowerCase() === 'staff'
   );
+  console.log('eligibleUsers:', eligibleUsers);
 
   const openSendModal = (row) => {
     setSelectedOrderForSend(row);
@@ -431,7 +470,7 @@ export default function PesanList() {
             value={rowsPerPage}
             onChange={handleChangeRowsPerPage}
             SelectProps={{ native: true }}
-            sx={{ width: 64 }}
+            sx={{ width: 73 }}
           >
             {[10,25,100].map(opt => <option key={opt} value={opt}>{opt}</option>)}
           </TextField>
@@ -609,7 +648,7 @@ export default function PesanList() {
                 <Typography color="text.secondary">Tidak ada barang</Typography>
               </Box>
             )}
-            <Box sx={{ mt: 2, p: 2, bgcolor: 'white', borderRadius: 1, boxShadow: 1 }}>
+            <Box sx={{ mt: 1, p: 2, bgcolor: 'white', borderRadius: 1, boxShadow: 1 }}>
               <Typography variant="subtitle2" sx={{ mb: 1, color: '#1976D2' }}>Tanggal Butuh</Typography>
               <Typography variant="subtitle2">{formatDateOnly(detailData?.reorder_date)}</Typography>
               <Typography variant="subtitle2" sx={{ mt: 2, mb: 1, color: '#1976D2' }}>Tanggal Pengiriman</Typography>

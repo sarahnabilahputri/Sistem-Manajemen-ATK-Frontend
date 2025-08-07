@@ -186,7 +186,7 @@ export default function DanaBAAK() {
     }
   };
 
-  const firstRowMonths = MONTH_NAMES.slice(0, 8);
+  const firstRowMonths = MONTH_NAMES.slice(0, 12);
   const secondRowMonths = MONTH_NAMES.slice(8);
   const formatDMY = isoDate => {
     const [year, month, day] = isoDate.split('-');
@@ -262,34 +262,38 @@ export default function DanaBAAK() {
           </FormControl>
         </Box>
         {/* Bulan baris pertama */}
-        <Box sx={{ display: "flex", flexWrap: "wrap", mb: 1 }}>
+        <Grid container spacing={1} sx={{ mb: 2 }}>
           {firstRowMonths.map((name, idx) => (
-            <Button
-              key={name}
-              onClick={() => handleMonthClick(idx)}
-              variant={idx === monthIndex ? "contained" : "outlined"}
-              sx={{ textTransform: "none", mr: 3.2, mb: 1, minWidth: 100 }}
-            >
-              {name}
-            </Button>
-          ))}
-        </Box>
-        {/* Bulan baris kedua */}
-        <Box sx={{ display: "flex", flexWrap: "wrap", mb: 2 }}>
-          {secondRowMonths.map((name, idx) => {
-            const realIdx = 8 + idx;
-            return (
+            <Grid size = {{xs: 3, sm : 2, md : 3, lg : 2, key : name}}>
               <Button
-                key={name}
-                onClick={() => handleMonthClick(realIdx)}
-                variant={realIdx === monthIndex ? "contained" : "outlined"}
-                sx={{ textTransform: "none", mr: 3.2, mb: 1, minWidth: 100 }}
+                fullWidth
+                onClick={() => handleMonthClick(idx)}
+                variant={idx === monthIndex ? "contained" : "outlined"}
+                sx={{ textTransform: "none" }}
               >
                 {name}
               </Button>
+            </Grid>
+          ))}
+        </Grid>
+        {/* Bulan baris kedua
+        <Grid container spacing={1} sx={{ mb: 2 }}>
+          {secondRowMonths.map((name, idx) => {
+            const realIdx = 8 + idx;
+            return (
+              <Grid item xs={6} sm={4} md={3} lg={2} key={name}>
+                <Button
+                  fullWidth
+                  onClick={() => handleMonthClick(realIdx)}
+                  variant={realIdx === monthIndex ? "contained" : "outlined"}
+                  sx={{ textTransform: "none" }}
+                >
+                  {name}
+                </Button>
+              </Grid>
             );
           })}
-        </Box>
+        </Grid> */}
         <Divider sx={{ mb: 2 }} />
         <Typography variant="subtitle1" sx={{ mb: 2 }}>
           Kelola Dana BAAK Bulan {MONTH_NAMES[monthIndex]} {year}
@@ -300,14 +304,15 @@ export default function DanaBAAK() {
             <Grid size={{ xs: 12, sm: 3 }}>
               <Typography>Tanggal</Typography>
             </Grid>
-            <Grid size={{ xs: 12, sm: 9 }}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
+                fullWidth
                 type="date"
                 value={getDefaultDate(year, monthIndex)}
                 disabled
                 size="small"
                 InputLabelProps={{ shrink: true }}
-                sx={{ width: 500 }}
+                // sx={{ width: 500 }}
               />
             </Grid>
           </Grid>
@@ -317,14 +322,15 @@ export default function DanaBAAK() {
             <Grid size={{ xs: 12, sm: 3 }}>
               <Typography>Dana Masuk</Typography>
             </Grid>
-            <Grid size={{ xs: 12, sm: 9 }}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               {role === "Kabag" ? (
                 <TextField
+                  fullWidth
                   value={ formatRupiah(danaMasukDefault) }
                   size="small"
                   InputProps={{ readOnly: true }}
                   variant="outlined"
-                  sx={{ width: 500 }}
+                  // sx={{ width: 500 }}
                 />
               ) : (
               <TextField
@@ -333,7 +339,7 @@ export default function DanaBAAK() {
                 placeholder="Masukkan Jumlah Dana Masuk"
                 size="small"
                 variant="outlined"
-                sx={{ width: 500 }}
+                fullWidth
               />
               )}
             </Grid>
@@ -344,14 +350,15 @@ export default function DanaBAAK() {
             <Grid size={{ xs: 12, sm: 3 }}>
               <Typography>Total Dana Masuk</Typography>
             </Grid>
-            <Grid size={{ xs: 12, sm: 9 }}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
+                fullWidth
                 value={ formatRupiah(danaMasukDefault) }
                 size="small"
                 disabled
                 InputProps={{ readOnly: true }}
                 variant="outlined"
-                sx={{ width: 500 }}
+                // sx={{ width: 500 }}
               />
             </Grid>
           </Grid>
@@ -361,14 +368,15 @@ export default function DanaBAAK() {
             <Grid size={{ xs: 12, sm: 3 }}>
               <Typography>Dana Keluar</Typography>
             </Grid>
-            <Grid size={{ xs: 12, sm: 9 }}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
+                fullWidth
                 value={danaKeluar != null ? formatRupiah(danaKeluar) : ""}
                 size="small"
                 disabled
                 InputProps={{ readOnly: true }}
                 variant="outlined"
-                sx={{ width: 500 }}
+                // sx={{ width: 500 }}
               />
             </Grid>
           </Grid>
@@ -378,14 +386,15 @@ export default function DanaBAAK() {
             <Grid size={{ xs: 12, sm: 3 }}>
               <Typography>Dana Sisa</Typography>
             </Grid>
-            <Grid size={{ xs: 12, sm: 9 }}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
+                fullWidth
                 value={danaSisa != null ? formatRupiah(danaSisa) : ""}
                 size="small"
                 disabled
                 InputProps={{ readOnly: true }}
                 variant="outlined"
-                sx={{ width: 500 }}
+                // sx={{ width: 500 }}
               />
             </Grid>
           </Grid>

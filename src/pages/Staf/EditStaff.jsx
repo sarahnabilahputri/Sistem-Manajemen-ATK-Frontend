@@ -154,7 +154,7 @@ export default function EditStaff({ fid, CloseEvent, onSuccess }) {
                     </Grid>
                     <Grid size={{ xs: 12 }}>
                         <Typography sx={{ mb:1 }}>Posisi</Typography>
-                        <TextField name="position" value={formData.position} onChange={handleChange} select fullWidth size="small">
+                        <TextField name="position" value={formData.position} onChange={handleChange} select fullWidth size="small" disabled>
                             <MenuItem value="Dosen">Dosen</MenuItem>
                             <MenuItem value="Rumah Tangga">Rumah Tangga</MenuItem>
                             <MenuItem value="Tendik">Tendik</MenuItem>

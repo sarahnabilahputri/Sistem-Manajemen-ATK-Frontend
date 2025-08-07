@@ -464,7 +464,7 @@ export default function AmbilList() {
             value={rowsPerPage}
             onChange={handleChangeRowsPerPage}
             SelectProps={{ native: true }}
-            sx={{ width: 64 }}
+            sx={{ width: 73 }}
           >
             {[10,25,100].map(opt => <option key={opt} value={opt}>{opt}</option>)}
           </TextField>
@@ -505,8 +505,6 @@ export default function AmbilList() {
                       year:   'numeric',
                       month:  '2-digit',
                       day:    '2-digit',
-                      // hour:   '2-digit',
-                      // minute: '2-digit'
                     }).replace(',', '')}
                   </TableCell>
                   <TableCell>{row.purpose}</TableCell>

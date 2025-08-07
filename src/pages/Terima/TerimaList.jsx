@@ -359,7 +359,7 @@ export default function TerimaList() {
             <Typography variant="body2">Show</Typography>
             <TextField
               select size="small" value={rowsPerPage} onChange={handleChangeRowsPerPage}
-              SelectProps={{ native:true }} sx={{ width:64 }}>
+              SelectProps={{ native:true }} sx={{ width: 73 }}>
               {[10,25,100].map(opt => <option key={opt} value={opt}>{opt}</option>)}
             </TextField>
             <Typography variant="body2">Entries</Typography>

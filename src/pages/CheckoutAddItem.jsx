@@ -473,11 +473,11 @@ export default function CheckoutPage() {
           sx={{
             bgcolor: '#C6E5FF',
             borderRadius: 2,
-            mx: 2,
-            my: 2,
-            p: 4,
-            position: 'relative',
-            maxHeight: '89vh',
+            mx: { xs: 0, md: 2 },
+            my: { xs: 1, md: 2 },
+            p: { xs: 2, md: 4 },
+            width: { xs: '100%', md: 'auto' },
+            boxSizing: 'border-box',
           }}
         >
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
@@ -500,9 +500,10 @@ export default function CheckoutPage() {
             sx={{
               bgcolor: 'white',
               borderRadius: 2,
-              p: 0.5,
-              mx: 8,
-              my: 7,
+              p: { xs: 1, sm: 2, md: 1 },
+              mx: { xs: 1, sm: 2, md: 8 },
+              my: { xs: 2, sm: 4, md: 7 },
+              width: { xs: '100%', sm: 'auto' }
             }}
             elevation={2}
           >

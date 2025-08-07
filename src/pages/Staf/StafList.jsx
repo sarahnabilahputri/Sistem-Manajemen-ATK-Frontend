@@ -66,11 +66,12 @@ export default function StafList() {
 
   const fetchUsers = async (pageArg = 1, limitArg = rowsPerPage, search = "") => {
     try {
-      const respAll = await axios.get(`${API_BASE_URL}/api/users`, {
+      const resp = await axios.get(`${API_BASE_URL}/api/users`, {
         params: {
-          page: 1,
-          limit: 1000,     
-          search
+          page: pageArg,   
+          limit: limitArg,  
+          search,
+          role: "Staff",    
         },
         headers: {
           'ngrok-skip-browser-warning': 'true',
@@ -78,28 +79,22 @@ export default function StafList() {
         }
       });
 
-      const allUsers = respAll.data.data.data;
+      const usersPage = resp.data.data.data;      
+      const totalItems = resp.data.data.total;    
+      setTotalItems(totalItems);
 
-      const staffOnly = allUsers.filter(user => user.role === 'Staff');
-
-      setTotalItems(staffOnly.length);
-
-      const startIdx = (pageArg - 1) * limitArg;
-      const pageOfStaff = staffOnly.slice(startIdx, startIdx + limitArg);
-
-      const formattedRows = pageOfStaff.map(user => ({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        nip: user.nip,
-        position: user.position,
-        initial: user.initial,
-        role: user.role,
-        study_program_id: user.study_program_id
+      const formatted = usersPage.map(u => ({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        nip: u.nip,
+        position: u.position,
+        initial: u.initial,
+        role: u.role,
+        study_program_id: u.study_program_id
       }));
 
-      setRows(formattedRows);
-      setAllRows(formattedRows);
+      setRows(formatted);
 
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -355,8 +350,13 @@ export default function StafList() {
       <Paper sx={{ width: '100%', overflow: 'hidden' }}>
         <Divider />
         <Box height={10} />
-        <Stack direction="row" spacing={2} className="my-2 mb-2" alignItems="center">
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, px: 2, mb: 1 }}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          sx={{ width: '100%', py: 1, px: 2 }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography variant="body2">Show</Typography>
             <TextField
               select
@@ -364,43 +364,51 @@ export default function StafList() {
               value={rowsPerPage}
               onChange={handleChangeRowsPerPage}
               SelectProps={{ native: true }}
-              sx={{ width: 64, ml: 1 }}
+              sx={{ width: { xs: 60, sm: 73 } }}
             >
-              {[10, 25, 100].map((option) => (
+              {[10, 25, 100].map(option => (
                 <option key={option} value={option}>
                   {option}
                 </option>
               ))}
             </TextField>
-            <Typography variant="body2" sx={{ ml: 1 }}>Entries</Typography>
+            <Typography variant="body2">Entries</Typography>
+          </Box>
 
-            <Typography variant="body1" sx={{ ml: 73 }}>Search:</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="body1">Search:</Typography>
             <Autocomplete
               freeSolo
               inputValue={searchTerm}
               onInputChange={(_, v) => {
-                setSearchTerm(v);    
+                setSearchTerm(v);
                 setPage(0);
               }}
-              options={autoOptions}             
-              filterOptions={(opts) => opts}     
-              onChange={(_, selectedName) => {
-                
-                if (selectedName) {
-                  setSearchTerm(selectedName);
+              options={autoOptions}
+              filterOptions={opts => opts}
+              onChange={(_, selected) => {
+                if (selected) {
+                  setSearchTerm(selected);
                   setPage(0);
                 }
               }}
-              renderInput={(params) => (
+              renderInput={params => (
                 <TextField
                   {...params}
                   size="small"
-                  sx={{ width: 187, ml: 2 }}
+                  sx={{
+                    width: {
+                      xs: 120,
+                      sm: 160,
+                      md: 200
+                    }
+                  }}
                 />
               )}
             />
           </Box>
         </Stack>
+
         <Box height={10} />
         <TableContainer sx={{ maxHeight: 440 }}>
           <Table stickyHeader aria-label="user table">
@@ -429,12 +437,31 @@ export default function StafList() {
                   <TableCell align="left">{row.initial}</TableCell>
                   <TableCell align="left">{row.role}</TableCell>
                   {role !== "Kabag" && (
-                  <TableCell align="left">
-                    <Stack direction="row" spacing={2}>
-                      <EditIcon sx={{ color: "blue", cursor: "pointer" }} onClick={() => editData(row)} />
-                      <DeleteIcon sx={{ color: "darkred", cursor: "pointer" }} onClick={() => deleteUser(row.id)} />
-                    </Stack>
-                  </TableCell>
+                    <TableCell align="left">
+                      <Stack direction="row" spacing={2}>
+                        {row.position === "Rumah Tangga" ? (
+                          <EditIcon
+                            sx={{ color: "blue", cursor: "pointer" }}
+                            onClick={() => editData(row)}
+                          />
+                        ) : (
+                          <EditIcon
+                            sx={{ color: "grey.500", cursor: "not-allowed" }}
+                          />
+                        )}
+
+                        {row.position === "Rumah Tangga" ? (
+                          <DeleteIcon
+                            sx={{ color: "darkred", cursor: "pointer" }}
+                            onClick={() => deleteUser(row.id)}
+                          />
+                        ) : (
+                          <DeleteIcon
+                            sx={{ color: "grey.500", cursor: "not-allowed" }}
+                          />
+                        )}
+                      </Stack>
+                    </TableCell>
                   )}
                 </TableRow>
               ))}

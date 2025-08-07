@@ -229,7 +229,7 @@ export default function EditPesan({ open, onClose, data, onSave, onDelete }) {
               </Paper>
             );
           })}
-          <Box sx={{ mt: 2, p: 2, bgcolor: 'white', borderRadius: 1, boxShadow: 1 }}>
+          <Box sx={{ mt: 1, p: 2, bgcolor: 'white', borderRadius: 1, boxShadow: 1 }}>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>Tanggal Pemesanan</Typography>
             <TextField
               type="date"
