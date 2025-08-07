@@ -84,17 +84,49 @@ export default function AmbilList() {
     return () => window.removeEventListener('message', handler);
   }, []);
 
-
   useEffect(() => {
     const onNew = e => handleAdd(e.detail);
     window.addEventListener('newCheckout', onNew);
     return () => window.removeEventListener('newCheckout', onNew);
   }, []);
 
+  async function fetchAllUsers() {
+    try {
+      // 1) panggil halaman 1
+      const resp1 = await axios.get(`${API_BASE_URL}/api/users`, {
+        params: { page: 1, limit: 100 },
+        headers: { 'ngrok-skip-browser-warning': 'true' }
+      });
+      const payload1 = resp1.data.data;
+      // ambil array data
+      let all = Array.isArray(payload1.data) ? [...payload1.data] : [];
+      // temukan total halaman
+      const lastPage = payload1.last_page || 1;
+
+      // 2) loop halaman 2..lastPage
+      for (let p = 2; p <= lastPage; p++) {
+        const resp = await axios.get(`${API_BASE_URL}/api/users`, {
+          params: { page: p, limit: 100 },
+          headers: { 'ngrok-skip-browser-warning': 'true' }
+        });
+        const batch = Array.isArray(resp.data.data.data)
+          ? resp.data.data.data
+          : [];
+        all = all.concat(batch);
+      }
+
+      console.log(`Fetched total users: ${all.length}`);
+      setUsers(all);
+    } catch (err) {
+      console.error('Error in fetchAllUsers():', err);
+    }
+  }
+
   useEffect(() => {
-    axios.get(`${API_BASE_URL}/api/users?page=1&limit=1000`, { headers: { 'ngrok-skip-browser-warning': 'true' } })
-      .then(res => setUsers(res.data.data.data))
-      .catch(console.error);
+    fetchAllUsers();
+    // axios.get(`${API_BASE_URL}/api/users?page=1&limit=1000`, { params: { page: 1, limit: 1000 }, headers: { 'ngrok-skip-browser-warning': 'true' } })
+    //   .then(res => setUsers(res.data.data.data))
+    //   .catch(console.error);
     axios.get(`${API_BASE_URL}/api/purposes?page=1&limit=1000`, { headers: { 'ngrok-skip-browser-warning': 'true' } })
       .then(res => setPurposes(res.data.data.data))
       .catch(console.error);
