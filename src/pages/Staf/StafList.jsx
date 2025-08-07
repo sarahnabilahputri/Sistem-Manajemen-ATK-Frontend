@@ -91,6 +91,7 @@ export default function StafList() {
         position: u.position,
         initial: u.initial,
         role: u.role,
+        phone_number: u.phone_number ?? "",
         study_program_id: u.study_program_id
       }));
 
