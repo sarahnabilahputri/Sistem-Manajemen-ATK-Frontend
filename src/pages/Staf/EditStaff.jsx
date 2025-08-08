@@ -46,13 +46,9 @@ export default function EditStaff({ fid, CloseEvent, onSuccess }) {
                 }
             }
             );
+            console.log("Full API response:", JSON.stringify(response.data, null, 2));
             console.log("Detail staff response:", response.data);
-            const payload = response.data.data;
-            const user = payload.id
-            ? payload
-            : Array.isArray(payload.data) && payload.data.length
-                ? payload.data[0]
-                : {};
+            const user = response.data.data;
             setFormData({
                 name: user.name || "",
                 email: user.email || "",

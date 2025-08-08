@@ -60,29 +60,33 @@ export default function AddStaff({ CloseEvent, onSuccess }) {
     };
 
     const createUser = async () => {
+        console.log("Payload createUser:", formData);
+
         const payload = {
             ...formData,
         };
 
         try {
+            const token = `${localStorage.getItem("token_type")} ${localStorage.getItem("access_token")}`;
+            console.log("Token di AddStaff:", token, "Payload:", payload);
             const response = await axios.post(
                 `${API_BASE_URL}/api/users`,
                 payload,
                 {
                     headers: {
-                        "Content-Type": "application/json",
-                        "ngrok-skip-browser-warning": "true",
+                    "Content-Type": "application/json",
+                    "ngrok-skip-browser-warning": "true",
+                    "Authorization": token
                     }
                 }
             );
-
             if (response.status === 201) {
                 CloseEvent();
                 if (onSuccess) onSuccess();
                 Swal.fire("Berhasil!", "Staff berhasil ditambahkan.", "success");
             }
         } catch (error) {
-    console.error("Error creating staff:", error);
+        console.error("Error creating staff:", error);
 
         if (error.response?.status === 422 && error.response?.data?.errors) {
             const errorMessages = Object.values(error.response.data.errors)
